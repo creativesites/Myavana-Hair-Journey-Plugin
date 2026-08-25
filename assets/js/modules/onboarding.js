@@ -1,6 +1,12 @@
 /**
  * Post-Signup Onboarding Wizard + Discovery texture-card preselection.
  *
+ * Welcome -> hair type -> porosity/density/length -> concerns/goals ->
+ * starting routine -> completion, matching the product roadmap's onboarding
+ * shape. "Skip for now" bails out from any step; every question step is
+ * itself optional (Continue always works), so this never turns into a long
+ * questionnaire.
+ *
  * @package Myavana\Next
  */
 
@@ -9,12 +15,21 @@ window.MyavanaNext = window.MyavanaNext || {};
 MyavanaNext.Onboarding = (function() {
     'use strict';
 
-    const TOTAL_STEPS = 3;
+    // The step machine: 'welcome' and 'complete' are bookend screens with
+    // no progress bar / step counter; '1'-'4' are the numbered questions.
+    const STEP_ORDER = ['welcome', '1', '2', '3', '4', 'complete'];
+    const LAST_QUESTION_STEP = '4';
     const PRESELECT_KEY = 'myavana_preselected_hair_family';
 
+    const ROUTINE_PRESETS = {
+        wash_day: { title: 'Wash Day Basics', category: 'Wash Day', frequency: 'Weekly', steps: ['Cleanse & clarify', 'Deep condition', 'Detangle gently', 'Style & seal ends'] },
+        daily_refresh: { title: 'Daily Moisture Refresh', category: 'Daily Care', frequency: 'Daily', steps: ['Mist with water or leave-in', 'Seal with a light oil', 'Refresh edges/style'] },
+        protective_style: { title: 'Protective Style Maintenance', category: 'Protective Style', frequency: 'Weekly', steps: ['Moisturize scalp', 'Refresh style edges', 'Check for tension or breakage'] },
+    };
+
     let modal = null;
-    let currentStep = 1;
-    const selections = { hairType: '', porosity: '', density: '', length: '', concerns: [], goals: [] };
+    let currentStep = 'welcome';
+    const selections = { hairType: '', porosity: '', density: '', length: '', concerns: [], goals: [], routine: '' };
 
     function init() {
         bindDiscoveryTypeCards();
@@ -25,6 +40,7 @@ MyavanaNext.Onboarding = (function() {
         bindTypeCards();
         bindSelects();
         bindChips();
+        bindRoutinePresets();
         bindNav();
 
         const settings = window.myavanaNextData || {};
@@ -127,52 +143,87 @@ MyavanaNext.Onboarding = (function() {
     }
 
     // =========================
+    // WIZARD: STEP 4 — STARTING ROUTINE (optional)
+    // =========================
+
+    function bindRoutinePresets() {
+        const container = modal.querySelector('#myavana-onboarding-routines');
+        if (!container) return;
+
+        container.querySelectorAll('[data-routine-preset]').forEach((card) => {
+            card.addEventListener('click', () => {
+                const value = card.dataset.routinePreset;
+                const alreadySelected = selections.routine === value;
+                container.querySelectorAll('[data-routine-preset]').forEach((c) => c.classList.remove('active'));
+                // Clicking the already-selected preset deselects it — picking
+                // a starting routine stays as optional as every other step.
+                selections.routine = alreadySelected ? '' : value;
+                if (!alreadySelected) card.classList.add('active');
+            });
+        });
+    }
+
+    // =========================
     // NAVIGATION
     // =========================
 
     function bindNav() {
         modal.querySelector('#myavana-onboarding-next')?.addEventListener('click', () => {
-            if (currentStep < TOTAL_STEPS) {
-                goToStep(currentStep + 1);
-            } else {
+            if (currentStep === LAST_QUESTION_STEP) {
                 finish();
+            } else {
+                goToStep(STEP_ORDER[STEP_ORDER.indexOf(currentStep) + 1]);
             }
         });
 
         modal.querySelector('#myavana-onboarding-back')?.addEventListener('click', () => {
-            if (currentStep > 1) goToStep(currentStep - 1);
+            const prev = STEP_ORDER[STEP_ORDER.indexOf(currentStep) - 1];
+            if (prev && prev !== 'welcome') goToStep(prev);
         });
 
         modal.querySelector('#myavana-onboarding-skip')?.addEventListener('click', () => skip());
+        modal.querySelector('#myavana-onboarding-go-to-today')?.addEventListener('click', () => close());
     }
 
     function goToStep(step) {
         currentStep = step;
+        const isQuestionStep = step !== 'welcome' && step !== 'complete';
+        const stepNum = isQuestionStep ? Number(step) : 0;
 
         modal.querySelectorAll('[data-onboarding-step]').forEach((el) => {
-            el.classList.toggle('active', Number(el.dataset.onboardingStep) === step);
+            el.classList.toggle('active', el.dataset.onboardingStep === step);
         });
         modal.querySelectorAll('[data-onboarding-bar]').forEach((el) => {
             const barStep = Number(el.dataset.onboardingBar);
-            el.classList.toggle('done', barStep < step);
-            el.classList.toggle('active', barStep <= step);
+            el.classList.toggle('done', barStep < stepNum);
+            el.classList.toggle('active', barStep <= stepNum);
         });
 
+        const header = modal.querySelector('.myavana-onboarding-header');
+        if (header) header.style.display = isQuestionStep ? 'block' : 'none';
+
+        const footer = modal.querySelector('.myavana-onboarding-footer');
+        if (footer) footer.style.display = step === 'complete' ? 'none' : 'flex';
+
+        const skipBtn = modal.querySelector('#myavana-onboarding-skip');
+        if (skipBtn) skipBtn.style.display = step === 'complete' ? 'none' : 'block';
+
         const label = modal.querySelector('#onboarding-step-label');
-        if (label) label.textContent = 'Step ' + step + ' of ' + TOTAL_STEPS;
+        if (label && isQuestionStep) label.textContent = 'Step ' + stepNum + ' of ' + LAST_QUESTION_STEP;
 
         const backBtn = modal.querySelector('#myavana-onboarding-back');
-        if (backBtn) backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+        if (backBtn) backBtn.style.visibility = (step === 'welcome' || step === '1') ? 'hidden' : 'visible';
 
         const nextBtn = modal.querySelector('#myavana-onboarding-next');
-        if (nextBtn) nextBtn.textContent = step === TOTAL_STEPS ? 'Finish Setup' : 'Continue';
+        if (nextBtn) {
+            nextBtn.textContent = step === 'welcome' ? "Let's get started" : (step === LAST_QUESTION_STEP ? 'Finish Setup' : 'Continue');
+        }
     }
 
     function open() {
         modal.style.display = 'flex';
         modal.classList.add('active');
-        currentStep = 1;
-        goToStep(1);
+        goToStep('welcome');
     }
 
     function close() {
@@ -193,13 +244,17 @@ MyavanaNext.Onboarding = (function() {
                 concerns: selections.concerns,
                 goals: selections.goals,
             });
+
+            if (selections.routine && ROUTINE_PRESETS[selections.routine]) {
+                await MyavanaNext.API.post('routine', ROUTINE_PRESETS[selections.routine]);
+            }
+
             await MyavanaNext.API.post('profile/onboarding', { status: 'completed' });
-            MyavanaNext.API?.showToast?.("You're all set — welcome to your hair journey!", 'success');
         } catch (err) {
             MyavanaNext.API?.showToast?.('Saved what we could — you can finish this anytime from your profile.', 'info');
         } finally {
             if (nextBtn) nextBtn.disabled = false;
-            close();
+            goToStep('complete');
         }
     }
 

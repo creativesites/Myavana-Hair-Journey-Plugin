@@ -74,6 +74,65 @@
 .myavana-onboarding-footer { align-items: center; display: flex; gap: var(--space-md); justify-content: space-between; margin-top: var(--space-xl); }
 .myavana-onboarding-footer .myavana-btn { flex: 1; }
 
+/* Welcome & Completion — bookend screens, no progress bar or step count */
+.myavana-onboarding-welcome, .myavana-onboarding-complete { text-align: center; padding: var(--space-md) 0; }
+.myavana-onboarding-welcome h2, .myavana-onboarding-complete h2 { font-size: 23px; margin: 0 0 10px; }
+.myavana-onboarding-welcome .myavana-onboarding-subtitle,
+.myavana-onboarding-complete .myavana-onboarding-subtitle { margin-left: auto; margin-right: auto; }
+.myavana-onboarding-welcome-mark, .myavana-onboarding-complete-mark {
+    align-items: center;
+    background: var(--myavana-light-coral);
+    border-radius: 50%;
+    color: var(--myavana-coral-dark);
+    display: flex;
+    font-size: 24px;
+    height: 52px;
+    justify-content: center;
+    margin: 0 auto var(--space-md);
+    width: 52px;
+}
+.myavana-onboarding-welcome-list {
+    display: grid;
+    gap: 8px;
+    list-style: none;
+    margin: var(--space-lg) 0 0;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    text-align: left;
+}
+.myavana-onboarding-welcome-list li {
+    background: var(--myavana-stone);
+    border-radius: var(--radius-md);
+    color: var(--myavana-onyx);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+}
+.myavana-onboarding-complete .myavana-btn { margin-top: var(--space-lg); }
+
+/* Step 4 — starting routine presets */
+.myavana-onboarding-routine-list { display: grid; gap: 8px; margin-top: var(--space-sm); }
+.myavana-onboarding-routine-card {
+    align-items: center;
+    background: var(--myavana-white);
+    border: 1.5px solid var(--myavana-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-align: left;
+    transition: var(--transition-fast);
+    width: 100%;
+}
+.myavana-onboarding-routine-card:hover { border-color: var(--myavana-border-hover); }
+.myavana-onboarding-routine-card.active { background: var(--myavana-light-coral); border-color: var(--myavana-coral); }
+.myavana-onboarding-routine-title { color: var(--myavana-onyx); font-size: 13.5px; font-weight: 700; }
+.myavana-onboarding-routine-meta { color: var(--myavana-muted); font-size: 12px; }
+.myavana-onboarding-routine-card.active .myavana-onboarding-routine-meta { color: var(--myavana-coral-dark); }
+
 @media (max-width: 480px) {
     .myavana-onboarding-type-grid { grid-template-columns: repeat(2, 1fr); }
 }
