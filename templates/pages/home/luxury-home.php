@@ -209,8 +209,8 @@ function myavana_luxury_home_view() {
 
     
     // Enqueue Luxury Home assets
-    $css_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.0.2';
-    $js_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.0.2';
+    $css_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.1.0';
+    $js_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.1.0';
     $next_url = defined('MYAVANA_NEXT_URL') ? MYAVANA_NEXT_URL : plugin_dir_url(dirname(dirname(dirname(__FILE__))));
 
     wp_enqueue_style('myavana-luxury-home', $next_url . 'assets/css/luxury-home.css', [], $css_version);

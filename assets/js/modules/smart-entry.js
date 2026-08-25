@@ -277,14 +277,33 @@ MyavanaNext.SmartEntry = (function() {
         `).join('');
     }
 
+    const MAX_PHOTO_BYTES = 15 * 1024 * 1024;
+
     async function uploadPhoto(file) {
+        if (!file.type || !file.type.startsWith('image/')) {
+            MyavanaNext.API.showToast(`"${file.name}" isn't an image file.`, 'error');
+            return;
+        }
+        if (file.size > MAX_PHOTO_BYTES) {
+            MyavanaNext.API.showToast(`"${file.name}" is over the 15MB limit.`, 'error');
+            return;
+        }
+
         try {
             MyavanaNext.API.showToast('Uploading photo...', 'info');
             const result = await MyavanaNext.API.upload(file);
+            if (!result || !result.url) {
+                throw new Error('Upload returned no image URL.');
+            }
             state.photos.push(result);
             renderPhotoGrid();
         } catch (err) {
             console.error('[SmartEntry] Photo upload failed', err);
+            // MyavanaNext.API already toasts most failures (a rejected mime
+            // type, a server-side error message); this covers the cases it
+            // can't — a network drop or a non-JSON response — so a failed
+            // upload is never just silence with no preview appearing.
+            MyavanaNext.API.showToast(err.message && err.message !== 'Upload returned no image URL.' ? err.message : `Couldn't upload "${file.name}". Please try again.`, 'error');
         }
     }
 
