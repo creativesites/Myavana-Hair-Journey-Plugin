@@ -44,7 +44,13 @@ if (!defined('ABSPATH')) {
                         <label class="myavana-label" for="myavana-auth-signin-password"><?php esc_html_e('Password', 'myavana-hair-journey-next'); ?></label>
                         <a href="#" class="myavana-auth-inline-link" id="myavana-auth-forgot-link"><?php esc_html_e('Forgot password?', 'myavana-hair-journey-next'); ?></a>
                     </div>
-                    <input type="password" class="myavana-input" id="myavana-auth-signin-password" name="password" autocomplete="current-password" required>
+                    <div class="myavana-password-field">
+                        <input type="password" class="myavana-input" id="myavana-auth-signin-password" name="password" autocomplete="current-password" required>
+                        <button type="button" class="myavana-password-toggle" data-password-toggle="myavana-auth-signin-password" aria-label="<?php esc_attr_e('Show password', 'myavana-hair-journey-next'); ?>" aria-pressed="false">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.36 18.36 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <label class="myavana-auth-checkbox">
@@ -76,7 +82,13 @@ if (!defined('ABSPATH')) {
 
                 <div class="myavana-form-group">
                     <label class="myavana-label" for="myavana-auth-signup-password"><?php esc_html_e('Create Password', 'myavana-hair-journey-next'); ?></label>
-                    <input type="password" class="myavana-input" id="myavana-auth-signup-password" name="password" autocomplete="new-password" minlength="8" required>
+                    <div class="myavana-password-field">
+                        <input type="password" class="myavana-input" id="myavana-auth-signup-password" name="password" autocomplete="new-password" minlength="8" required>
+                        <button type="button" class="myavana-password-toggle" data-password-toggle="myavana-auth-signup-password" aria-label="<?php esc_attr_e('Show password', 'myavana-hair-journey-next'); ?>" aria-pressed="false">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.36 18.36 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
+                    </div>
                     <div class="myavana-password-meter" id="myavana-password-meter" aria-live="polite">
                         <div class="myavana-password-meter-bar"><span id="myavana-password-meter-fill"></span></div>
                         <ul class="myavana-password-meter-rules">
@@ -131,7 +143,13 @@ if (!defined('ABSPATH')) {
 
                 <div class="myavana-form-group">
                     <label class="myavana-label" for="myavana-auth-reset-password"><?php esc_html_e('New Password', 'myavana-hair-journey-next'); ?></label>
-                    <input type="password" class="myavana-input" id="myavana-auth-reset-password" name="password" autocomplete="new-password" minlength="8" required>
+                    <div class="myavana-password-field">
+                        <input type="password" class="myavana-input" id="myavana-auth-reset-password" name="password" autocomplete="new-password" minlength="8" required>
+                        <button type="button" class="myavana-password-toggle" data-password-toggle="myavana-auth-reset-password" aria-label="<?php esc_attr_e('Show password', 'myavana-hair-journey-next'); ?>" aria-pressed="false">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.36 18.36 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        </button>
+                    </div>
                     <div class="myavana-password-meter" id="myavana-reset-password-meter" aria-live="polite">
                         <div class="myavana-password-meter-bar"><span id="myavana-reset-password-meter-fill"></span></div>
                         <ul class="myavana-password-meter-rules">

@@ -24,6 +24,31 @@
 .myavana-auth-link-btn { background: none; border: 0; color: var(--myavana-muted); cursor: pointer; display: block; font-size: 13px; font-weight: 600; margin: var(--space-md) auto 0; padding: 4px; text-align: center; width: 100%; }
 .myavana-auth-link-btn:hover { color: var(--myavana-onyx); }
 
+.myavana-password-field { position: relative; }
+.myavana-password-field .myavana-input { padding-right: 44px; }
+.myavana-password-toggle {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--myavana-muted);
+    cursor: pointer;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+}
+.myavana-password-toggle:hover { color: var(--myavana-onyx); }
+.myavana-password-toggle:focus-visible { outline: 2px solid var(--myavana-coral); outline-offset: 1px; }
+.myavana-password-toggle svg { height: 19px; width: 19px; }
+.myavana-password-toggle .icon-eye-off { display: none; }
+.myavana-password-toggle.is-visible .icon-eye { display: none; }
+.myavana-password-toggle.is-visible .icon-eye-off { display: block; }
+
 .myavana-password-meter { margin-top: 8px; max-height: 0; opacity: 0; overflow: hidden; transition: var(--transition-fast); }
 .myavana-password-meter.is-visible { max-height: 160px; opacity: 1; margin-top: 10px; }
 .myavana-password-meter-bar { background: var(--myavana-stone-alt); border-radius: var(--radius-pill); height: 4px; overflow: hidden; }

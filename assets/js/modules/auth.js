@@ -28,6 +28,7 @@ MyavanaNext.Auth = (function() {
         bindForgotPasswordFlow();
         initPasswordMeter('myavana-auth-signup-password', 'myavana-password-meter');
         initPasswordMeter('myavana-auth-reset-password', 'myavana-reset-password-meter');
+        bindPasswordToggles();
         initGoogle();
         showVerificationStatusFromUrl();
         openResetPanelFromUrl();
@@ -126,15 +127,27 @@ MyavanaNext.Auth = (function() {
     }
 
     function appendForgotPasswordPrompt() {
+        appendMessageAction('Reset your password →', () => switchTab('forgot'));
+    }
+
+    function appendSigninPrompt(email) {
+        appendMessageAction('Sign in instead →', () => {
+            switchTab('signin');
+            const loginInput = document.querySelector('#myavana-auth-signin-login');
+            if (loginInput && email) loginInput.value = email;
+        });
+    }
+
+    function appendMessageAction(label, onClick) {
         const el = document.querySelector('#myavana-auth-message');
         if (!el) return;
         const link = document.createElement('a');
         link.href = '#';
         link.className = 'myavana-auth-message-action';
-        link.textContent = 'Reset your password →';
+        link.textContent = label;
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            switchTab('forgot');
+            onClick();
         });
         el.appendChild(link);
     }
@@ -144,16 +157,19 @@ MyavanaNext.Auth = (function() {
         const btn = form.querySelector('button[type="submit"]');
         setLoading(btn, true);
 
+        const email = form.querySelector('#myavana-auth-signup-email').value.trim();
+
         try {
             const data = await MyavanaNext.API.post('auth/register', {
                 name: form.querySelector('#myavana-auth-signup-name').value.trim(),
-                email: form.querySelector('#myavana-auth-signup-email').value.trim(),
+                email,
                 password: form.querySelector('#myavana-auth-signup-password').value,
                 terms: form.querySelector('#myavana-auth-terms').checked,
             });
             onAuthSuccess(data.message);
         } catch (err) {
             showMessage(err.message || 'Unable to create your account. Please try again.', 'error');
+            if (err.showSignin) appendSigninPrompt(email);
         } finally {
             setLoading(btn, false);
         }
@@ -289,6 +305,25 @@ MyavanaNext.Auth = (function() {
             meter.classList.toggle('is-visible', value.length > 0);
             meter.dataset.strength = value ? String(passed) : '0';
             if (fill) fill.style.width = (value ? Math.max(20, (passed / PASSWORD_RULES.length) * 100) : 0) + '%';
+        });
+    }
+
+    // =========================
+    // PASSWORD VISIBILITY TOGGLE
+    // =========================
+
+    function bindPasswordToggles() {
+        document.querySelectorAll('[data-password-toggle]').forEach((btn) => {
+            const input = document.querySelector('#' + btn.getAttribute('data-password-toggle'));
+            if (!input) return;
+
+            btn.addEventListener('click', () => {
+                const showing = input.type === 'text';
+                input.type = showing ? 'password' : 'text';
+                btn.classList.toggle('is-visible', !showing);
+                btn.setAttribute('aria-pressed', String(!showing));
+                btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+            });
         });
     }
 
