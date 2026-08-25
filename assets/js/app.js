@@ -31,7 +31,11 @@ MyavanaNext.App = (function() {
         // would hide every .myavana-next-view (discovery, auth) looking for
         // a tab that doesn't exist, leaving a blank page. Auth.js owns
         // switching between discovery/auth for logged-out visitors instead.
-        if (!document.querySelector('.myavana-next-view')) {
+        // (Checking for *any* .myavana-next-view is not enough — home,
+        // discovery, and auth all carry that class and are always in the
+        // DOM regardless of login state, so that check never actually
+        // caught the logged-out case it was written for.)
+        if (!(window.myavanaNextData && window.myavanaNextData.isLoggedIn)) {
             return;
         }
 
@@ -46,6 +50,17 @@ MyavanaNext.App = (function() {
     function navigate(tabName, updateHistory = true) {
         if (!validTabs.includes(tabName)) {
             tabName = 'today';
+        }
+
+        // The authenticated tabs only exist in the DOM when logged in. The
+        // header/mobile nav render their links unconditionally though, so a
+        // logged-out visitor can still click "Today" or land on #journey —
+        // without this check, the loop below would hide every view (home,
+        // discovery, auth) looking for a #view-today that was never
+        // rendered, leaving a blank page instead of just not navigating.
+        if (!document.querySelector(`#view-${tabName}`)) {
+            if (MyavanaNext.Auth) MyavanaNext.Auth.open('signin');
+            return;
         }
 
         // Update Store

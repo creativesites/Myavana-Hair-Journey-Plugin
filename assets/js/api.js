@@ -9,6 +9,33 @@ window.MyavanaNext = window.MyavanaNext || {};
 MyavanaNext.API = (function() {
     'use strict';
 
+    // The only endpoints a logged-out visitor is expected to call. A 401/403
+    // from any of these is a normal domain error (wrong password, weak
+    // password, ...) — every other endpoint requires an existing session, so
+    // a 401/403 there specifically means that session is gone.
+    const PUBLIC_ENDPOINTS = ['auth/login', 'auth/register', 'auth/google', 'auth/forgot-password', 'auth/reset-password'];
+    let sessionExpiredHandled = false;
+
+    function isPublicEndpoint(endpoint) {
+        return PUBLIC_ENDPOINTS.some((p) => endpoint === p || endpoint.startsWith(p + '?'));
+    }
+
+    /**
+     * A WordPress session can go stale mid-visit — the REST nonce expires,
+     * or the login cookie itself does — while this already-rendered page
+     * keeps looking fully logged in. Without this, every action just fails
+     * with a generic "An error occurred" toast, repeatedly, with no way
+     * back short of a manual refresh nobody's told to do. Reloading is the
+     * simplest fix in this architecture: the server re-renders the actual
+     * (logged-out) state and the visitor lands on sign-in naturally.
+     */
+    function handleSessionExpired() {
+        if (sessionExpiredHandled) return;
+        sessionExpiredHandled = true;
+        showToast('Your session has expired — please sign in again.', 'error');
+        window.setTimeout(() => window.location.reload(), 1600);
+    }
+
     function getBaseUrl() {
         return (window.myavanaNextData && window.myavanaNextData.restUrl) || '/wp-json/myavana/v1/';
     }
@@ -49,6 +76,13 @@ MyavanaNext.API = (function() {
             const json = await res.json();
 
             if (!res.ok || json.success === false) {
+                if ((res.status === 401 || res.status === 403) && !isPublicEndpoint(endpoint)) {
+                    handleSessionExpired();
+                    const expiredErr = new Error('Your session has expired — please sign in again.');
+                    Object.assign(expiredErr, json, { sessionExpired: true });
+                    throw expiredErr;
+                }
+
                 const msg = json.message || 'An error occurred while processing your request.';
                 showToast(msg, 'error');
                 // Carry the rest of the error payload (field, showForgot,
