@@ -58,6 +58,16 @@
     color: var(--myavana-onyx) !important;
 }
 
+.myavana-btn-danger-outline {
+    color: #b3402c !important;
+}
+
+.myavana-btn-danger-outline:hover {
+    background: #fbe6e1;
+    border-color: #b3402c;
+    color: #b3402c !important;
+}
+
 .myavana-btn-sm {
     padding: 8px 16px;
     font-size: 13px;

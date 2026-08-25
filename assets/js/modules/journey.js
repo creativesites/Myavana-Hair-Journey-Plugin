@@ -41,7 +41,19 @@ MyavanaNext.Journey = (function() {
             renderAll();
         } catch (err) {
             console.error('[Journey] refresh failed', err);
+            if (!err.sessionExpired) renderLoadError();
         }
+    }
+
+    function renderLoadError() {
+        const rail = container.querySelector('#journey-timeline-rail');
+        if (!rail) return;
+        rail.innerHTML = `
+            <div class="myavana-calm-empty">
+                <p>We couldn't load your timeline. Your entries are still safe.</p>
+                <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" id="journey-retry-btn">Try again</button>
+            </div>`;
+        rail.querySelector('#journey-retry-btn')?.addEventListener('click', refresh);
     }
 
     function renderAll() {
@@ -181,6 +193,7 @@ MyavanaNext.Journey = (function() {
                 <div class="myavana-timeline-card-actions">
                     <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-action="edit">Edit</button>
                     <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-action="share">Share</button>
+                    <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm myavana-btn-danger-outline" data-action="delete">Delete</button>
                 </div>
             </div>
         </div>`;
@@ -207,7 +220,21 @@ MyavanaNext.Journey = (function() {
 
             card.querySelector('[data-action="edit"]')?.addEventListener('click', () => toggleInlineEdit(card, entry));
             card.querySelector('[data-action="share"]')?.addEventListener('click', () => openShareModal(entry));
+            card.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteEntry(entry));
         });
+    }
+
+    async function deleteEntry(entry) {
+        const label = entry.title || TYPE_LABELS[entry.entryType] || 'this entry';
+        if (!window.confirm(`Delete "${label}"? This can't be undone.`)) return;
+
+        try {
+            await MyavanaNext.API.delete(`journal/entries/${entry.id}`);
+            MyavanaNext.API.showToast('Entry deleted', 'success');
+            refresh();
+        } catch (err) {
+            console.error('[Journey] Delete failed', err);
+        }
     }
 
     function toggleInlineEdit(card, entry) {
