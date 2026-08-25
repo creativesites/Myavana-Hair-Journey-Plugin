@@ -188,6 +188,11 @@ class Assets {
                 'name' => $user ? ($user->display_name ?: $user->user_login) : '',
                 'email' => $user ? $user->user_email : '',
                 'avatar' => $avatarUrl,
+                // Only Next-plugin signups ever get this meta explicitly set
+                // to 'no' pending verification; legacy/admin-created accounts
+                // have no meta at all and should never see the banner, so
+                // "verified" is the default and 'no' is the sole opt-in.
+                'emailVerified' => get_user_meta($currentUserId, 'myavana_email_verified', true) !== 'no',
             ];
         }
 

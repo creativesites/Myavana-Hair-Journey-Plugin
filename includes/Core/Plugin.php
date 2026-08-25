@@ -60,6 +60,12 @@ class Plugin {
         // email, not a REST call — needs a real browser redirect).
         add_action('template_redirect', [$this, 'handleVerifyEmailLink']);
 
+        // Password reset link handler (visited from the reset email) —
+        // forwards uid/token onto the app page so the JS can open the
+        // "set a new password" panel; the token itself is only consumed by
+        // the REST /auth/reset-password call once the user submits it.
+        add_action('template_redirect', [$this, 'handleResetPasswordLink']);
+
         // Router & Shortcode initialization
         Router::init();
 
@@ -183,6 +189,36 @@ class Plugin {
         $verified = (new AuthService())->verifyEmailToken($userId, $token);
 
         wp_safe_redirect(add_query_arg('myavana_email_verified', $verified ? '1' : '0', $this->findAppPageUrl()));
+        exit;
+    }
+
+    /**
+     * Handle a click on the "Reset My Password" link from the reset email.
+     * The email link points at home_url() so it works regardless of where
+     * the app shell page lives; this just forwards uid/token onto that page.
+     */
+    public function handleResetPasswordLink(): void {
+        if (empty($_GET['myavana_next_reset_password'])) {
+            return;
+        }
+
+        $userId = absint($_GET['uid'] ?? 0);
+        $token = sanitize_text_field(wp_unslash($_GET['token'] ?? ''));
+        $appPageUrl = $this->findAppPageUrl();
+
+        // Already on the app page (or no dedicated page was found, so the
+        // "app page" IS the home URL) — redirecting to the same path with
+        // the same trigger query arg would loop forever. Nothing to do;
+        // the frontend reads uid/token straight off the current URL.
+        if (wp_parse_url($appPageUrl, PHP_URL_PATH) === wp_parse_url(home_url($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH)) {
+            return;
+        }
+
+        wp_safe_redirect(add_query_arg([
+            'myavana_next_reset_password' => '1',
+            'uid' => $userId,
+            'token' => $token,
+        ], $appPageUrl));
         exit;
     }
 

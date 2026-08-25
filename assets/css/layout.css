@@ -69,6 +69,57 @@ body.myavana-next-app-page #wpadminbar {
     transition: var(--transition-fast);
 }
 
+.myavana-verify-banner {
+    background: var(--myavana-light-coral);
+    border-bottom: 1px solid var(--myavana-border);
+}
+
+.myavana-verify-banner-inner {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.myavana-verify-banner-text {
+    color: var(--myavana-onyx);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.myavana-verify-banner-actions {
+    align-items: center;
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.myavana-verify-banner-resend {
+    background: var(--myavana-onyx);
+    border: 0;
+    border-radius: var(--radius-pill);
+    color: var(--myavana-white);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 16px;
+    white-space: nowrap;
+}
+
+.myavana-verify-banner-dismiss {
+    background: none;
+    border: 0;
+    color: var(--myavana-onyx);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.6;
+    padding: 4px;
+}
+
+.myavana-verify-banner-dismiss:hover { opacity: 1; }
+
 .myavana-next-header-inner {
     display: flex;
     align-items: center;

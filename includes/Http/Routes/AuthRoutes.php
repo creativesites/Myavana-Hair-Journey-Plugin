@@ -41,6 +41,18 @@ class AuthRoutes extends RestController {
             'callback' => [$this, 'resendVerification'],
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/auth/forgot-password', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'forgotPassword'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/auth/reset-password', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'resetPassword'],
+            'permission_callback' => '__return_true',
+        ]);
     }
 
     public function register(\WP_REST_Request $request): \WP_REST_Response {
@@ -84,6 +96,30 @@ class AuthRoutes extends RestController {
     public function resendVerification(\WP_REST_Request $request): \WP_REST_Response {
         $service = new AuthService();
         $result = $service->resendVerification($this->getUserId());
+
+        if (is_wp_error($result)) {
+            return $this->fromWpError($result);
+        }
+
+        return $this->respondSuccess($result);
+    }
+
+    public function forgotPassword(\WP_REST_Request $request): \WP_REST_Response {
+        $data = $request->get_json_params() ?: $request->get_params();
+        $service = new AuthService();
+        $result = $service->requestPasswordReset((string) ($data['email'] ?? ''));
+
+        if (is_wp_error($result)) {
+            return $this->fromWpError($result);
+        }
+
+        return $this->respondSuccess($result);
+    }
+
+    public function resetPassword(\WP_REST_Request $request): \WP_REST_Response {
+        $data = $request->get_json_params() ?: $request->get_params();
+        $service = new AuthService();
+        $result = $service->resetPassword($data);
 
         if (is_wp_error($result)) {
             return $this->fromWpError($result);

@@ -51,7 +51,12 @@ MyavanaNext.API = (function() {
             if (!res.ok || json.success === false) {
                 const msg = json.message || 'An error occurred while processing your request.';
                 showToast(msg, 'error');
-                throw new Error(msg);
+                // Carry the rest of the error payload (field, showForgot,
+                // attemptsRemaining, code, ...) onto the thrown Error so
+                // callers can react to it without re-parsing the response.
+                const err = new Error(msg);
+                Object.assign(err, json);
+                throw err;
             }
 
             return json.data;

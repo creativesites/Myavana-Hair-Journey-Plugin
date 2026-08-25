@@ -15,6 +15,8 @@ MyavanaNext.Auth = (function() {
     let googleInitialized = false;
 
     function init() {
+        initVerifyBanner();
+
         authView = document.querySelector('#view-auth');
         if (!authView) return;
 
@@ -23,8 +25,12 @@ MyavanaNext.Auth = (function() {
         bindOpenTriggers();
         bindTabToggle();
         bindForms();
+        bindForgotPasswordFlow();
+        initPasswordMeter('myavana-auth-signup-password', 'myavana-password-meter');
+        initPasswordMeter('myavana-auth-reset-password', 'myavana-reset-password-meter');
         initGoogle();
         showVerificationStatusFromUrl();
+        openResetPanelFromUrl();
     }
 
     function bindOpenTriggers() {
@@ -43,7 +49,7 @@ MyavanaNext.Auth = (function() {
         }
         authView.style.display = 'block';
         authView.classList.add('active');
-        switchTab(mode === 'signup' ? 'signup' : 'signin');
+        switchTab(ALL_PANEL_IDS.includes(mode) ? mode : 'signin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -55,24 +61,27 @@ MyavanaNext.Auth = (function() {
         if (signupTab) signupTab.addEventListener('click', () => switchTab('signup'));
     }
 
+    const ALL_PANEL_IDS = ['signin', 'signup', 'forgot', 'reset'];
+
     function switchTab(mode) {
         const isSignup = mode === 'signup';
+        const isTabbedMode = mode === 'signin' || mode === 'signup';
+
+        const toggle = document.querySelector('.myavana-auth-toggle');
+        if (toggle) toggle.style.display = isTabbedMode ? 'flex' : 'none';
 
         document.querySelector('#myavana-auth-tab-signin')?.classList.toggle('active', !isSignup);
         document.querySelector('#myavana-auth-tab-signup')?.classList.toggle('active', isSignup);
         document.querySelector('#myavana-auth-tab-signin')?.setAttribute('aria-selected', String(!isSignup));
         document.querySelector('#myavana-auth-tab-signup')?.setAttribute('aria-selected', String(isSignup));
 
-        const signinPanel = document.querySelector('#myavana-auth-signin-panel');
-        const signupPanel = document.querySelector('#myavana-auth-signup-panel');
-        if (signinPanel) {
-            signinPanel.style.display = isSignup ? 'none' : 'block';
-            signinPanel.classList.toggle('active', !isSignup);
-        }
-        if (signupPanel) {
-            signupPanel.style.display = isSignup ? 'block' : 'none';
-            signupPanel.classList.toggle('active', isSignup);
-        }
+        ALL_PANEL_IDS.forEach((id) => {
+            const panel = document.querySelector('#myavana-auth-' + id + '-panel');
+            if (!panel) return;
+            const show = id === mode;
+            panel.style.display = show ? 'block' : 'none';
+            panel.classList.toggle('active', show);
+        });
 
         clearMessage();
     }
@@ -110,9 +119,24 @@ MyavanaNext.Auth = (function() {
             onAuthSuccess(data.message);
         } catch (err) {
             showMessage(err.message || 'Unable to sign in. Please try again.', 'error');
+            if (err.showForgot) appendForgotPasswordPrompt();
         } finally {
             setLoading(btn, false);
         }
+    }
+
+    function appendForgotPasswordPrompt() {
+        const el = document.querySelector('#myavana-auth-message');
+        if (!el) return;
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'myavana-auth-message-action';
+        link.textContent = 'Reset your password →';
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab('forgot');
+        });
+        el.appendChild(link);
     }
 
     async function submitSignup(form) {
@@ -133,6 +157,139 @@ MyavanaNext.Auth = (function() {
         } finally {
             setLoading(btn, false);
         }
+    }
+
+    // =========================
+    // FORGOT / RESET PASSWORD
+    // =========================
+
+    function bindForgotPasswordFlow() {
+        document.querySelector('#myavana-auth-forgot-link')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab('forgot');
+        });
+
+        document.querySelector('#myavana-auth-back-to-signin')?.addEventListener('click', () => {
+            switchTab('signin');
+        });
+
+        const forgotForm = document.querySelector('#myavana-auth-forgot-panel');
+        if (forgotForm) {
+            forgotForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForgotPassword(forgotForm);
+            });
+        }
+
+        const resetForm = document.querySelector('#myavana-auth-reset-panel');
+        if (resetForm) {
+            resetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitResetPassword(resetForm);
+            });
+        }
+    }
+
+    async function submitForgotPassword(form) {
+        clearMessage();
+        const btn = form.querySelector('button[type="submit"]');
+        setLoading(btn, true);
+
+        try {
+            const data = await MyavanaNext.API.post('auth/forgot-password', {
+                email: form.querySelector('#myavana-auth-forgot-email').value.trim(),
+            });
+            showMessage(data.message || "If an account exists for that email, we've sent a reset link.", 'success');
+            form.reset();
+        } catch (err) {
+            showMessage(err.message || 'Unable to send a reset link right now. Please try again.', 'error');
+        } finally {
+            setLoading(btn, false);
+        }
+    }
+
+    async function submitResetPassword(form) {
+        clearMessage();
+        const btn = form.querySelector('button[type="submit"]');
+        setLoading(btn, true);
+
+        try {
+            const data = await MyavanaNext.API.post('auth/reset-password', {
+                userId: form.querySelector('#myavana-auth-reset-uid').value,
+                token: form.querySelector('#myavana-auth-reset-token').value,
+                password: form.querySelector('#myavana-auth-reset-password').value,
+            });
+            onAuthSuccess(data.message);
+        } catch (err) {
+            showMessage(err.message || 'Unable to reset your password. The link may have expired — request a new one.', 'error');
+        } finally {
+            setLoading(btn, false);
+        }
+    }
+
+    /**
+     * A reset-password email link lands here as
+     * ?myavana_next_reset_password=1&uid=X&token=Y (see
+     * Plugin::handleResetPasswordLink). Open straight into the reset panel
+     * instead of the default sign-in tab when those params are present.
+     */
+    function openResetPanelFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('myavana_next_reset_password') !== '1') return;
+
+        const uid = params.get('uid') || '';
+        const token = params.get('token') || '';
+        const uidInput = document.querySelector('#myavana-auth-reset-uid');
+        const tokenInput = document.querySelector('#myavana-auth-reset-token');
+        if (uidInput) uidInput.value = uid;
+        if (tokenInput) tokenInput.value = token;
+
+        open('reset');
+
+        params.delete('myavana_next_reset_password');
+        params.delete('uid');
+        params.delete('token');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+        window.history.replaceState(null, '', newUrl);
+    }
+
+    // =========================
+    // PASSWORD STRENGTH METER
+    // =========================
+
+    const PASSWORD_RULES = [
+        ['length', (v) => v.length >= 8],
+        ['upper', (v) => /[A-Z]/.test(v)],
+        ['lower', (v) => /[a-z]/.test(v)],
+        ['number', (v) => /[0-9]/.test(v)],
+        ['special', (v) => /[!@#$%^&*(),.?":{}|<>]/.test(v)],
+    ];
+
+    /**
+     * Mirrors AuthService::validatePasswordStrength() rule-for-rule so the
+     * live checklist never disagrees with what the server will accept.
+     */
+    function initPasswordMeter(inputId, meterId) {
+        const input = document.querySelector('#' + inputId);
+        const meter = document.querySelector('#' + meterId);
+        if (!input || !meter) return;
+
+        const fill = meter.querySelector('.myavana-password-meter-bar span');
+
+        input.addEventListener('input', () => {
+            const value = input.value;
+            let passed = 0;
+
+            PASSWORD_RULES.forEach(([key, test]) => {
+                const ok = test(value);
+                if (ok) passed++;
+                meter.querySelector('[data-rule="' + key + '"]')?.classList.toggle('is-met', ok);
+            });
+
+            meter.classList.toggle('is-visible', value.length > 0);
+            meter.dataset.strength = value ? String(passed) : '0';
+            if (fill) fill.style.width = (value ? Math.max(20, (passed / PASSWORD_RULES.length) * 100) : 0) + '%';
+        });
     }
 
     function onAuthSuccess(message) {
@@ -279,6 +436,45 @@ MyavanaNext.Auth = (function() {
         } catch (err) {
             showMessage(err.message || 'Google sign-in failed. Please try again.', 'error');
         }
+    }
+
+    // =========================
+    // UNVERIFIED EMAIL BANNER
+    // =========================
+
+    const VERIFY_BANNER_DISMISS_KEY = 'myavana_verify_banner_dismissed';
+
+    function initVerifyBanner() {
+        const settings = window.myavanaNextData || {};
+        const banner = document.querySelector('#myavana-verify-banner');
+        if (!banner || !settings.isLoggedIn || !settings.currentUser) return;
+        if (settings.currentUser.emailVerified !== false) return;
+
+        let dismissed = false;
+        try {
+            dismissed = sessionStorage.getItem(VERIFY_BANNER_DISMISS_KEY) === '1';
+        } catch (e) { /* storage unavailable (private mode, etc.) — just don't remember the dismissal */ }
+        if (dismissed) return;
+
+        banner.style.display = 'block';
+
+        document.querySelector('#myavana-verify-banner-dismiss')?.addEventListener('click', () => {
+            banner.style.display = 'none';
+            try { sessionStorage.setItem(VERIFY_BANNER_DISMISS_KEY, '1'); } catch (e) { /* no-op */ }
+        });
+
+        document.querySelector('#myavana-verify-banner-resend')?.addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            setLoading(btn, true);
+            try {
+                const data = await MyavanaNext.API.post('auth/resend-verification', {});
+                MyavanaNext.API?.showToast?.(data.message || 'Verification email sent!', 'success');
+            } catch (err) {
+                // MyavanaNext.API already surfaces a toast for the failure.
+            } finally {
+                setLoading(btn, false);
+            }
+        });
     }
 
     // =========================

@@ -15,6 +15,11 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
     <!-- Top Navigation Bar -->
     <?php include MYAVANA_NEXT_PATH . 'templates/components/nav-header.php'; ?>
 
+    <?php if ($isLoggedIn) : ?>
+        <!-- Unverified Email Reminder -->
+        <?php include MYAVANA_NEXT_PATH . 'templates/components/verify-email-banner.php'; ?>
+    <?php endif; ?>
+
     <!-- Main Views Container -->
     <main class="myavana-next-main" id="myavana-main-content">
         <div class="myavana-next-container">
