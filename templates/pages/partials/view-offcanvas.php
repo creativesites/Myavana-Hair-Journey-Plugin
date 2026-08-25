@@ -9,147 +9,11 @@
 <!-- View Offcanvas Overlay -->
 <div class="offcanvas-overlay-hjn" id="viewOffcanvasOverlay" onclick="closeTimelineViewOffcanvas()"></div>
 
-<!-- Hair Analysis Offcanvas -->
-<div class="offcanvas-hjn view-offcanvas-hjn" id="analysisViewOffcanvas" data-type="analysis">
-    <div class="offcanvas-header-hjn">
-        <div class="offcanvas-header-content">
-            <h2 class="offcanvas-title-hjn">Hair Analysis Details</h2>
-            <div class="analysis-date" id="analysis-date"></div>
-        </div>
-        <button class="offcanvas-close-hjn" onclick="closeTimelineViewOffcanvas()" aria-label="Close">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-            </svg>
-        </button>
-    </div>
-
-    <div class="offcanvas-content-hjn">
-        <div class="analysis-view-content">
-            <!-- Analysis Image -->
-            <div class="analysis-image-section">
-                <div class="analysis-image-wrapper">
-                    <img src="" alt="Hair Analysis" id="analysis-image" class="analysis-image">
-                </div>
-            </div>
-
-            <!-- Analysis Metrics -->
-            <div class="analysis-metrics-section">
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon">💪</div>
-                        <h4>Health Score</h4>
-                        <div class="metric-value" id="health-score"></div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="health-progress"></div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">💧</div>
-                        <h4>Hydration</h4>
-                        <div class="metric-value" id="hydration-score"></div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="hydration-progress"></div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">🔄</div>
-                        <h4>Elasticity</h4>
-                        <div class="metric-value" id="elasticity-score"></div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="elasticity-progress"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analysis Details -->
-            <div class="analysis-details-section">
-                <div class="details-card">
-                    <h4>Hair Type</h4>
-                    <div class="detail-content" id="hair-type">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Curl Pattern</h4>
-                    <div class="detail-content" id="curl-pattern">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Porosity</h4>
-                    <div class="detail-content" id="porosity">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Length</h4>
-                    <div class="detail-content" id="detail-length">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Texture</h4>
-                    <div class="detail-content" id="detail-texture">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Density</h4>
-                    <div class="detail-content" id="detail-density">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Hairstyle</h4>
-                    <div class="detail-content" id="detail-hairstyle">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Hair Color</h4>
-                    <div class="detail-content" id="detail-hair-color">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Scalp Health</h4>
-                    <div class="detail-content" id="detail-scalp-health">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Damage</h4>
-                    <div class="detail-content" id="detail-damage">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Strand Thickness</h4>
-                    <div class="detail-content" id="detail-strand-thickness">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Growth Pattern</h4>
-                    <div class="detail-content" id="detail-growth-pattern">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Mood</h4>
-                    <div class="detail-content" id="detail-mood-demeanor">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Environment</h4>
-                    <div class="detail-content" id="detail-environment">--</div>
-                </div>
-                <div class="details-card">
-                    <h4>Confidence</h4>
-                    <div class="detail-content" id="detail-confidence-level">--</div>
-                </div>
-            </div>
-
-            <!-- Analysis Summary -->
-            <div class="analysis-summary-section">
-                <h3>Analysis Summary</h3>
-                <div class="summary-content" id="analysis-summary"></div>
-            </div>
-
-            <div class="analysis-summary-section">
-                <h3>AI Notes</h3>
-                <div class="summary-content" id="analysis-full-context"></div>
-            </div>
-
-            <!-- Recommendations -->
-            <div class="analysis-recommendations-section">
-                <h3>Recommendations</h3>
-                <div class="recommendations-list" id="analysis-recommendations"></div>
-            </div>
-
-            <div class="analysis-recommendations-section">
-                <h3>Suggested Products</h3>
-                <div class="recommendations-list" id="analysis-products"></div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- A "Hair Analysis Offcanvas" used to live here (health/hydration/elasticity
+     scores, curl pattern, AI notes, etc.) rendering results from a
+     photo-analysis feature this plugin never had — nothing anywhere ever set
+     data-type="analysis" to open it. Removed; Hair Journey doesn't do AI
+     hair analysis (see the separate MYAVANA Hair Analysis product). -->
 
 <!-- Entry View Offcanvas -->
 <div class="offcanvas-hjn view-offcanvas-hjn" id="entryViewOffcanvas" data-type="entry">
@@ -268,16 +132,6 @@
                 <div class="view-followup-stack-hjn" id="entryFollowUpStack"></div>
             </div>
 
-            <!-- Entry AI Analysis -->
-            <div class="view-section-hjn view-highlight-section-hjn" id="entryAISection" style="display: none;">
-                <div class="view-section-header-hjn">
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
-                    </svg>
-                    <h4>AI Analysis</h4>
-                </div>
-                <div class="view-text-content-hjn" id="entryAI"></div>
-            </div>
         </div>
     </div>
 

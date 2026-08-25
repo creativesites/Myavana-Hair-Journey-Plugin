@@ -216,30 +216,15 @@ function myavana_luxury_home_view() {
     wp_enqueue_style('myavana-luxury-home', $next_url . 'assets/css/luxury-home.css', [], $css_version);
     wp_enqueue_script('myavana-luxury-home', $next_url . 'assets/js/luxury-home.js', ['jquery'], $js_version, true);
 
-    if (file_exists(MYAVANA_NEXT_PATH . 'assets/css/free-hair-analysis.css')) {
-        wp_enqueue_style('myavana-free-analysis', $next_url . 'assets/css/free-hair-analysis.css', [], $css_version);
-    }
-    if (file_exists(MYAVANA_NEXT_PATH . 'assets/js/free-hair-analysis.js')) {
-        wp_enqueue_script('myavana-free-analysis', $next_url . 'assets/js/free-hair-analysis.js', ['jquery'], $js_version, true);
-    }
-
-    // Enqueue AI Analysis Modal for logged-in users
-    if (is_user_logged_in()) {
-        $ai_modal_version = defined('WP_DEBUG') && WP_DEBUG ? time() : '1.0.2';
-        if (file_exists(MYAVANA_NEXT_PATH . 'assets/js/ai-analysis-modal.js')) {
-            wp_enqueue_script('myavana-ai-analysis-modal', $next_url . 'assets/js/ai-analysis-modal.js', ['jquery'], $ai_modal_version, true);
-            wp_localize_script('myavana-ai-analysis-modal', 'myavanaAjax', [
-                'ajaxurl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('myavana_profile_nonce')
-            ]);
-        }
-    }
-
     // Localize script with AJAX data
     wp_localize_script('myavana-luxury-home', 'myavanaLuxuryData', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('myavana_nonce'),
-        'aiToolUrl' => 'https://www.myavana.com/pages/consumer',
+        // Hair Journey doesn't do photo/AI hair analysis itself — that's a
+        // separate MYAVANA product. Single configurable destination for
+        // every "explore hair analysis" link on this page, so this URL
+        // never has to be hunted down and changed in multiple templates.
+        'hairAnalysisUrl' => get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer'),
         'isLoggedIn' => $is_logged_in,
         'currentUserId' => $is_logged_in ? $current_user->ID : 0,
         'currentUserName' => $is_logged_in ? $current_user->display_name : '',
@@ -259,7 +244,7 @@ function myavana_luxury_home_view() {
                     <!-- Non-logged-in Hero -->
                     <div class="myavana-luxury-hero-content">
                         <div class="myavana-luxury-hero-badge">
-                            ✨ AI-Powered Hair Care Revolution
+                            ✨ Your Personalized Hair Care Journey
                         </div>
                         <h1 class="myavana-luxury-hero-title">
                             Transform Your<br>
@@ -269,8 +254,9 @@ function myavana_luxury_home_view() {
                             Professional Hair Care, Personalized for You
                         </h2>
                         <p class="myavana-luxury-hero-description">
-                            Join thousands of women who've transformed their hair health with our AI-powered platform.
-                            Get personalized recommendations, track your progress, and connect with a supportive community.
+                            Join thousands of women who've transformed their hair health with routines, tracking, and
+                            guidance built around their journey. Document your progress, follow a routine that fits
+                            your goals, and connect with a supportive community.
                         </p>
                         <div class="myavana-luxury-hero-actions">
                             <a href="#" data-open-auth="signup" class="myavana-luxury-btn-primary">
@@ -300,8 +286,8 @@ function myavana_luxury_home_view() {
                                 <span class="myavana-luxury-stat-label">Satisfaction Rate</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">1M+</span>
-                                <span class="myavana-luxury-stat-label">AI Analyses</span>
+                                <span class="myavana-luxury-stat-number">Daily</span>
+                                <span class="myavana-luxury-stat-label">Personalized Guidance</span>
                             </div>
                         </div>
                     </div>
@@ -318,7 +304,7 @@ function myavana_luxury_home_view() {
                                 <span class="gradient-text">Hair Journey</span>
                             </h1>
                             <h2 class="myavana-luxury-hero-subtitle">
-                                Ready to transform your hair with personalized AI insights?
+                                Ready to start your personalized hair journey?
                             </h2>
                             <p class="myavana-luxury-hero-description">
                                 Let's get you started with a quick setup to understand your hair goals and create your first entry.
@@ -568,7 +554,7 @@ function myavana_luxury_home_view() {
 
 
 
-            <!-- Features Section (Non-logged-in users only) -->
+            <!-- Features Section (rendered for both logged-in and logged-out visitors) -->
             <section class="myavana-luxury-features" id="features">
                 <div class="myavana-luxury-features-container">
                     <div class="myavana-luxury-section-header">
@@ -578,7 +564,7 @@ function myavana_luxury_home_view() {
                             <span class="gradient-text">Beautiful Hair</span>
                         </h2>
                         <p class="myavana-luxury-section-description">
-                            Our comprehensive platform combines cutting-edge AI technology with expert knowledge
+                            Our comprehensive platform combines thoughtful tracking with expert knowledge
                             to give you personalized hair care like never before.
                         </p>
                     </div>
@@ -586,15 +572,15 @@ function myavana_luxury_home_view() {
                     <div class="myavana-luxury-features-grid">
                         <div class="myavana-luxury-feature-card">
                             <div class="myavana-luxury-feature-icon">
-                                <i class="fas fa-magic"></i>
+                                <i class="fas fa-book-open"></i>
                             </div>
-                            <h3 class="myavana-luxury-feature-title">AI Hair Analysis</h3>
+                            <h3 class="myavana-luxury-feature-title">Daily Hair Journal</h3>
                             <p class="myavana-luxury-feature-description">
-                                Get instant, professional-grade analysis of your hair health, texture, and needs
-                                using our advanced AI vision technology.
+                                Log quick daily check-ins or detailed wash-day notes in seconds, with photos when you
+                                want them, so you always know what you actually tried.
                             </p>
                             <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
-                                Try Analysis <i class="fas fa-arrow-right"></i>
+                                Start Journaling <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
 
@@ -693,7 +679,7 @@ function myavana_luxury_home_view() {
                             <h3 class="myavana-luxury-step-title">Create Your Profile</h3>
                             <p class="myavana-luxury-step-description">
                                 Sign up and tell us about your hair type, goals, and current routine.
-                                This helps our AI understand your unique needs.
+                                This helps us personalize your experience from day one.
                             </p>
                         </div>
 
@@ -702,10 +688,10 @@ function myavana_luxury_home_view() {
                             <div class="myavana-luxury-step-icon">
                                 <i class="fas fa-camera"></i>
                             </div>
-                            <h3 class="myavana-luxury-step-title">Take Your First Photo</h3>
+                            <h3 class="myavana-luxury-step-title">Log Your First Entry</h3>
                             <p class="myavana-luxury-step-description">
-                                Upload a photo of your hair for instant AI analysis. Get detailed insights
-                                about your hair health and personalized recommendations.
+                                Snap a photo, note how your hair feels, and log what you used. That's it —
+                                one entry starts your timeline.
                             </p>
                         </div>
 
@@ -768,6 +754,13 @@ function myavana_luxury_home_view() {
                             <span>50K+ Happy Users</span>
                         </div>
                     </div>
+
+                    <p class="myavana-luxury-analysis-link">
+                        Want a deeper hair analysis?
+                        <a href="<?php echo esc_url(get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer')); ?>" target="_blank" rel="noopener noreferrer">
+                            Explore MYAVANA Hair Analysis <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </p>
                 </div>
             </section>
             <!-- Entry Form Modal -->

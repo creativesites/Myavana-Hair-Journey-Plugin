@@ -809,81 +809,10 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
 }
 
-/* Hair Analysis Preview Animation */
-.hair-analysis-preview {
-    width: 300px;
-    height: 400px;
-    background: linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
-                linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
-                linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-    border-radius: var(--border-radius);
-    position: relative;
-}
-
-.analysis-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(231, 166, 144, 0.1);
-}
-
-.scan-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--myavana-coral);
-    animation: scan 3s infinite ease-in-out;
-}
-
-@keyframes scan {
-    0%, 100% {
-        top: 0;
-        opacity: 1;
-    }
-    50% {
-        top: calc(100% - 2px);
-        opacity: 0.6;
-    }
-}
-
-.analysis-points {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-.point {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--myavana-coral);
-    animation: pulse 2s infinite;
-}
-
-.point-1 { top: 25%; left: 30%; animation-delay: 0s; }
-.point-2 { top: 60%; right: 25%; animation-delay: 0.7s; }
-.point-3 { bottom: 25%; left: 50%; animation-delay: 1.4s; }
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.5);
-        opacity: 0.7;
-    }
-}
+/* A "hair analysis preview" scanning animation used to live here — dead CSS
+   with no template ever referencing .hair-analysis-preview/.analysis-overlay/
+   .scan-line/.analysis-points/.point, left over from the same abandoned
+   photo-analysis feature as the removed offcanvas panel. Removed. */
 
 /* Stats Grid */
 .myavana-luxury-global-stats,
@@ -1717,6 +1646,23 @@ h1, h2, h3, h4, h5, h6 {
 .trust-item i {
     font-size: 16px;
     color: var(--myavana-coral);
+}
+
+.myavana-luxury-analysis-link {
+    margin: var(--space-xl) 0 0;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--myavana-white);
+    opacity: 0.75;
+}
+
+.myavana-luxury-analysis-link a {
+    color: var(--myavana-white);
+    font-weight: 700;
+    margin-left: 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    opacity: 1;
 }
 
 /* ================================================

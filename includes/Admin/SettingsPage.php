@@ -35,6 +35,7 @@ class SettingsPage {
         register_setting('myavana_next_options_group', 'myavana_next_feature_flags');
         register_setting('myavana_next_options_group', 'myavana_next_google_client_id');
         register_setting('myavana_next_options_group', 'myavana_next_google_auth_enabled');
+        register_setting('myavana_next_options_group', 'myavana_next_hair_analysis_url');
     }
 
     public static function renderPage(): void {
@@ -46,6 +47,7 @@ class SettingsPage {
         $apiKey = get_option('myavana_gemini_api_key', '');
         $googleClientId = get_option('myavana_next_google_client_id', '');
         $googleAuthEnabled = get_option('myavana_next_google_auth_enabled', true);
+        $hairAnalysisUrl = get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer');
 
         if (!$googleAuthEnabled) {
             $googleStatus = ['label' => __('Disabled', 'myavana-hair-journey-next'), 'color' => '#6e6e73', 'bg' => '#f5f5f7'];
@@ -85,6 +87,19 @@ class SettingsPage {
                             <td>
                                 <input type="password" name="myavana_gemini_api_key" id="myavana_gemini_api_key" value="<?php echo esc_attr($apiKey); ?>" class="regular-text" style="width:100%; max-width:480px;" />
                                 <p class="description"><?php esc_html_e('Used securely server-side for AI consultations and hair insights. Never exposed to browser JavaScript.', 'myavana-hair-journey-next'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
+                    <h2><?php esc_html_e('Hair Analysis Product Link', 'myavana-hair-journey-next'); ?></h2>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><label for="myavana_next_hair_analysis_url"><?php esc_html_e('Destination URL', 'myavana-hair-journey-next'); ?></label></th>
+                            <td>
+                                <input type="url" name="myavana_next_hair_analysis_url" id="myavana_next_hair_analysis_url" value="<?php echo esc_attr($hairAnalysisUrl); ?>" class="regular-text" style="width:100%; max-width:480px;" />
+                                <p class="description"><?php esc_html_e('Hair Journey tracks routines and progress — it does not perform AI hair analysis itself. This is the single place that URL is configured; every "Explore MYAVANA Hair Analysis" link on the site points here.', 'myavana-hair-journey-next'); ?></p>
                             </td>
                         </tr>
                     </table>

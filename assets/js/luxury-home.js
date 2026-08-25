@@ -482,17 +482,11 @@
 
             // Handle other specific modals
             switch (modalType) {
-                case 'ai-analysis':
-                    this.openAIAnalysisModal();
-                    break;
                 case 'timeline':
                     this.redirectToTimeline();
                     break;
                 case 'analytics':
                     this.redirectToAnalytics();
-                    break;
-                case 'ai-chat':
-                    this.openAIChatModal();
                     break;
                 default:
                     this.showModalFallback(modalType);
@@ -671,29 +665,6 @@
             }, 300);
         },
 
-        // Open AI Analysis Modal
-        openAIAnalysisModal: function() {
-            const aiToolUrl = (window.myavanaLuxuryData && window.myavanaLuxuryData.aiToolUrl)
-                ? window.myavanaLuxuryData.aiToolUrl
-                : 'https://www.myavana.com/pages/consumer';
-
-            if (typeof window.openAIAnalysisModal === 'function') {
-                window.openAIAnalysisModal();
-            } else {
-                window.location.href = aiToolUrl;
-            }
-        },
-
-        // Open AI Chat Modal
-        openAIChatModal: function() {
-            if (!this.isUserLoggedIn()) {
-                this.showNotification('Please log in to chat with AI.', 'warning');
-                return;
-            }
-            // Implement AI chat modal or redirect
-            this.showNotification('AI Chat coming soon!', 'info');
-        },
-
         // Redirect functions
         redirectToTimeline: function() {
             window.location.href = '/hair-journey/';
@@ -729,9 +700,6 @@
                     break;
                 case 'new-entry':
                     message = 'New entry modal would open here. Please ensure the MYAVANA entry system is loaded.';
-                    break;
-                case 'ai-analysis':
-                    message = 'AI analysis modal would open here. Please ensure the MYAVANA AI system is loaded.';
                     break;
                 default:
                     message = `${modalType} modal would open here.`;
@@ -971,7 +939,7 @@
                                 Welcome to MYAVANA
                             </h2>
                             <p>
-                                Ready to start your personalized hair journey with AI-powered insights?
+                                Ready to start your personalized hair journey?
                             </p>
                         </div>
 

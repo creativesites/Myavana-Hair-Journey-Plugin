@@ -137,7 +137,7 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
                     <label class="form-label-hjn">Entry Type</label>
                     <div class="tag-pills-hjn" id="entryTypePills">
                         <?php
-                        $types = ['Wash Day','Refresh Day','Protective Style','Treatment','Trim','Style Session','Scalp Care','AI Analysis'];
+                        $types = ['Wash Day','Refresh Day','Protective Style','Treatment','Trim','Style Session','Scalp Care','Length Check'];
                         foreach ($types as $t): ?>
                         <button type="button" class="tag-pill-hjn" data-value="<?php echo esc_attr($t); ?>"><?php echo esc_html($t); ?></button>
                         <?php endforeach; ?>
