@@ -54,14 +54,19 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                 <div id="today-checklist-items" class="myavana-today-checklist" aria-live="polite"></div>
             </section>
 
-            <!-- AI Insight (replaces the mockup's weather card with a real, rule-based insight) -->
+            <!-- MYAVANA Insight — AI-generated when a provider is configured (see
+                 IntelligenceOrchestrator/GeminiProvider), otherwise the
+                 rule-based InsightEngine fallback. Today never shows a raw
+                 provider error; an insight is always present once this is visible. -->
             <section class="myavana-today-insight-card" id="today-insight-card" style="display:none;">
-                <p class="myavana-today-insight-eyebrow" id="today-insight-title"></p>
+                <p class="myavana-today-insight-eyebrow"><?php esc_html_e('MYAVANA Insight', 'myavana-hair-journey-next'); ?></p>
+                <h3 class="myavana-today-insight-title" id="today-insight-title"></h3>
                 <p class="myavana-today-insight-observation" id="today-insight-observation"></p>
-                <div class="myavana-today-insight-footer">
-                    <span id="today-insight-confidence"></span>
-                    <span id="today-insight-action"></span>
-                </div>
+                <p class="myavana-today-insight-action" id="today-insight-action"></p>
+                <button type="button" class="myavana-today-insight-why" id="today-insight-why-toggle" aria-expanded="false">
+                    <?php esc_html_e('Why am I seeing this?', 'myavana-hair-journey-next'); ?>
+                </button>
+                <ul class="myavana-today-insight-signals" id="today-insight-signals" hidden></ul>
             </section>
 
             <!-- From your routines -->

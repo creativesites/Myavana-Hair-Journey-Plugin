@@ -31,10 +31,41 @@
 
 .myavana-today-insight-card { background: var(--myavana-onyx); border-radius: var(--radius-xl); color: #fff; padding: 22px 26px; }
 .myavana-today-insight-eyebrow { color: var(--myavana-coral); font-size: 11px; font-weight: 700; letter-spacing: .14em; margin: 0 0 8px; text-transform: uppercase; }
+.myavana-today-insight-title { color: #fff; font-size: 17px; margin: 0 0 6px; }
 .myavana-today-insight-observation { color: rgba(255,255,255,.88); font-size: 15px; line-height: 1.6; margin: 0; }
-.myavana-today-insight-footer { align-items: baseline; display: flex; gap: 14px; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; }
-.myavana-today-insight-footer span:first-child { color: rgba(255,255,255,.55); font-size: 11.5px; }
-.myavana-today-insight-footer span:last-child { background: rgba(231,166,144,.18); border-radius: var(--radius-pill); color: var(--myavana-coral); font-size: 12.5px; font-weight: 600; padding: 7px 14px; }
+.myavana-today-insight-action { color: rgba(255,255,255,.88); font-size: 14px; font-weight: 600; line-height: 1.5; margin: 10px 0 0; }
+.myavana-today-insight-action::before { content: "→ "; color: var(--myavana-coral); }
+
+.myavana-today-insight-why {
+    background: none;
+    border: 0;
+    color: rgba(255,255,255,.55);
+    cursor: pointer;
+    display: none;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 14px;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.myavana-today-insight-why:hover { color: rgba(255,255,255,.8); }
+
+.myavana-today-insight-signals {
+    background: rgba(255,255,255,.06);
+    border-radius: var(--radius-md);
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 12px 14px;
+}
+.myavana-today-insight-signals li {
+    color: rgba(255,255,255,.7);
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding-left: 14px;
+    position: relative;
+}
+.myavana-today-insight-signals li::before { content: "•"; color: var(--myavana-coral); left: 0; position: absolute; }
 
 .myavana-today-products-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 .myavana-today-product { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 12px 14px; }

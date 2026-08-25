@@ -74,13 +74,29 @@ MyavanaNext.Today = (function() {
     function renderInsight(insight) {
         const card = container.querySelector('#today-insight-card');
         if (!card) return;
-        if (!insight) { card.style.display = 'none'; return; }
+        if (!insight || !insight.title) { card.style.display = 'none'; return; }
 
         card.style.display = 'block';
         container.querySelector('#today-insight-title').textContent = insight.title || 'Today’s insight';
-        container.querySelector('#today-insight-observation').textContent = insight.observation || '';
-        container.querySelector('#today-insight-confidence').textContent = insight.confidence || '';
-        container.querySelector('#today-insight-action').textContent = insight.recommendedAction || '';
+        container.querySelector('#today-insight-observation').textContent = insight.summary || '';
+        container.querySelector('#today-insight-action').textContent = insight.recommendation || '';
+
+        const signals = Array.isArray(insight.supporting_signals) ? insight.supporting_signals : [];
+        const signalsList = container.querySelector('#today-insight-signals');
+        const whyToggle = container.querySelector('#today-insight-why-toggle');
+        if (signalsList) {
+            signalsList.innerHTML = signals.map(s => `<li>${escapeHtml(s)}</li>`).join('');
+            signalsList.hidden = true;
+        }
+        if (whyToggle) {
+            whyToggle.style.display = signals.length ? 'inline-flex' : 'none';
+            whyToggle.setAttribute('aria-expanded', 'false');
+            whyToggle.onclick = () => {
+                const expanded = whyToggle.getAttribute('aria-expanded') === 'true';
+                whyToggle.setAttribute('aria-expanded', String(!expanded));
+                if (signalsList) signalsList.hidden = expanded;
+            };
+        }
     }
 
     function renderProducts(products) {

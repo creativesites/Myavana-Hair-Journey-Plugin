@@ -36,6 +36,7 @@ class SettingsPage {
         register_setting('myavana_next_options_group', 'myavana_next_google_client_id');
         register_setting('myavana_next_options_group', 'myavana_next_google_auth_enabled');
         register_setting('myavana_next_options_group', 'myavana_next_hair_analysis_url');
+        register_setting('myavana_next_options_group', 'myavana_next_ai_provider');
     }
 
     public static function renderPage(): void {
@@ -48,6 +49,13 @@ class SettingsPage {
         $googleClientId = get_option('myavana_next_google_client_id', '');
         $googleAuthEnabled = get_option('myavana_next_google_auth_enabled', true);
         $hairAnalysisUrl = get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer');
+        $aiProvider = get_option('myavana_next_ai_provider', 'gemini');
+
+        if ($apiKey === '' && !defined('MYAVANA_GEMINI_API_KEY')) {
+            $intelligenceStatus = ['label' => __('Off — no Gemini API key configured, Today shows rule-based insights', 'myavana-hair-journey-next'), 'color' => '#6e6e73', 'bg' => '#f5f5f7'];
+        } else {
+            $intelligenceStatus = ['label' => __('Live — Today insights are AI-generated and cached', 'myavana-hair-journey-next'), 'color' => '#3f7d5c', 'bg' => '#e2efe8'];
+        }
 
         if (!$googleAuthEnabled) {
             $googleStatus = ['label' => __('Disabled', 'myavana-hair-journey-next'), 'color' => '#6e6e73', 'bg' => '#f5f5f7'];
@@ -80,13 +88,30 @@ class SettingsPage {
                 ?>
 
                 <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
-                    <h2><?php esc_html_e('Google Gemini AI Integration', 'myavana-hair-journey-next'); ?></h2>
+                    <h2><?php esc_html_e('MYAVANA Intelligence', 'myavana-hair-journey-next'); ?></h2>
+                    <p style="margin:0 0 16px;">
+                        <span style="display:inline-block; padding:4px 12px; border-radius:999px; font-size:12.5px; font-weight:600; color:<?php echo esc_attr($intelligenceStatus['color']); ?>; background:<?php echo esc_attr($intelligenceStatus['bg']); ?>;">
+                            <?php echo esc_html($intelligenceStatus['label']); ?>
+                        </span>
+                    </p>
                     <table class="form-table">
+                        <tr>
+                            <th scope="row"><label for="myavana_next_ai_provider"><?php esc_html_e('AI Provider', 'myavana-hair-journey-next'); ?></label></th>
+                            <td>
+                                <select name="myavana_next_ai_provider" id="myavana_next_ai_provider">
+                                    <option value="gemini" <?php selected($aiProvider, 'gemini'); ?>><?php esc_html_e('Google Gemini', 'myavana-hair-journey-next'); ?></option>
+                                    <option value="openai" disabled><?php esc_html_e('OpenAI (not yet available)', 'myavana-hair-journey-next'); ?></option>
+                                    <option value="claude" disabled><?php esc_html_e('Claude (not yet available)', 'myavana-hair-journey-next'); ?></option>
+                                    <option value="deepseek" disabled><?php esc_html_e('DeepSeek (not yet available)', 'myavana-hair-journey-next'); ?></option>
+                                </select>
+                                <p class="description"><?php esc_html_e('Gemini is the only provider implemented today. The others are reserved so switching providers later never requires touching Today or any other feature that requests an insight.', 'myavana-hair-journey-next'); ?></p>
+                            </td>
+                        </tr>
                         <tr>
                             <th scope="row"><label for="myavana_gemini_api_key"><?php esc_html_e('Gemini API Key', 'myavana-hair-journey-next'); ?></label></th>
                             <td>
                                 <input type="password" name="myavana_gemini_api_key" id="myavana_gemini_api_key" value="<?php echo esc_attr($apiKey); ?>" class="regular-text" style="width:100%; max-width:480px;" />
-                                <p class="description"><?php esc_html_e('Used securely server-side for AI consultations and hair insights. Never exposed to browser JavaScript.', 'myavana-hair-journey-next'); ?></p>
+                                <p class="description"><?php esc_html_e('Used securely server-side for AI consultations and Today insights. Never exposed to browser JavaScript. Leave blank to run Today on rule-based insights only.', 'myavana-hair-journey-next'); ?></p>
                             </td>
                         </tr>
                     </table>

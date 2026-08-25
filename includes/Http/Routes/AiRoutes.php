@@ -11,8 +11,14 @@ use Myavana\Next\Http\RestController;
 use Myavana\Next\Core\Permissions;
 use Myavana\Next\Domain\Profile\ProfileRepository;
 use Myavana\Next\Domain\Journal\JournalRepository;
+use Myavana\Next\Domain\Routine\RoutineService;
+use Myavana\Next\Domain\Goals\GoalRepository;
+use Myavana\Next\Domain\Rewards\GamificationRepository;
 use Myavana\Next\Domain\AI\AiProxyService;
 use Myavana\Next\Domain\AI\InsightEngine;
+use Myavana\Next\Domain\Intelligence\IntelligenceOrchestrator;
+use Myavana\Next\Domain\Intelligence\ContextBuilders\TodayInsightContextBuilder;
+use Myavana\Next\Domain\Intelligence\Tasks\TodayInsightTask;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -55,14 +61,20 @@ class AiRoutes extends RestController {
 
     public function getDailyInsight(\WP_REST_Request $request): \WP_REST_Response {
         $userId = $this->getUserId();
-        $profileRepo = new ProfileRepository();
-        $journalRepo = new JournalRepository();
+        $profile = (new ProfileRepository())->getByUserId($userId);
+        $entries = (new JournalRepository())->getEntries($userId, ['perPage' => 60])['items'];
+        $checklist = (new RoutineService())->getTodayChecklist($userId);
+        $goals = (new GoalRepository())->getGoals($userId);
+        $streakDays = (int) ((new GamificationRepository())->getStats($userId)['currentStreak'] ?? 0);
+        $firstEntry = !empty($entries) ? end($entries) : null;
+        $dayCount = $firstEntry ? max(1, (int) round((time() - strtotime($firstEntry['date'])) / DAY_IN_SECONDS) + 1) : 1;
 
-        $profile = $profileRepo->getByUserId($userId);
-        $recentLogs = $journalRepo->getEntries($userId, ['perPage' => 5])['items'];
+        $context = TodayInsightContextBuilder::build($profile, $entries, $checklist, $goals, $streakDays, $dayCount);
+        $insight = (new IntelligenceOrchestrator())->generate(TodayInsightTask::NAME, $userId, $context, TodayInsightTask::schema());
 
-        $engine = new InsightEngine();
-        $insight = $engine->generateDailyInsight($profile, $recentLogs);
+        if (empty($insight)) {
+            $insight = (new InsightEngine())->generateFallbackInsight($context);
+        }
 
         return $this->respondSuccess($insight);
     }

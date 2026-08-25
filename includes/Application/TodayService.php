@@ -11,7 +11,11 @@ use Myavana\Next\Domain\Profile\ProfileRepository;
 use Myavana\Next\Domain\Journal\JournalRepository;
 use Myavana\Next\Domain\Routine\RoutineService;
 use Myavana\Next\Domain\Goals\GoalRepository;
+use Myavana\Next\Domain\Rewards\GamificationRepository;
 use Myavana\Next\Domain\AI\InsightEngine;
+use Myavana\Next\Domain\Intelligence\IntelligenceOrchestrator;
+use Myavana\Next\Domain\Intelligence\ContextBuilders\TodayInsightContextBuilder;
+use Myavana\Next\Domain\Intelligence\Tasks\TodayInsightTask;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -22,20 +26,26 @@ class TodayService {
     private JournalRepository $journalRepo;
     private RoutineService $routineService;
     private GoalRepository $goalRepo;
+    private GamificationRepository $gamificationRepo;
     private InsightEngine $insightEngine;
+    private IntelligenceOrchestrator $intelligence;
 
     public function __construct(
         ?ProfileRepository $profileRepo = null,
         ?JournalRepository $journalRepo = null,
         ?RoutineService $routineService = null,
         ?GoalRepository $goalRepo = null,
-        ?InsightEngine $insightEngine = null
+        ?GamificationRepository $gamificationRepo = null,
+        ?InsightEngine $insightEngine = null,
+        ?IntelligenceOrchestrator $intelligence = null
     ) {
         $this->profileRepo = $profileRepo ?: new ProfileRepository();
         $this->journalRepo = $journalRepo ?: new JournalRepository();
         $this->routineService = $routineService ?: new RoutineService();
         $this->goalRepo = $goalRepo ?: new GoalRepository();
+        $this->gamificationRepo = $gamificationRepo ?: new GamificationRepository();
         $this->insightEngine = $insightEngine ?: new InsightEngine();
+        $this->intelligence = $intelligence ?: new IntelligenceOrchestrator();
     }
 
     /**
@@ -54,6 +64,8 @@ class TodayService {
         $hasRoutineSteps = !empty($checklist['items']) && count($checklist['items']) > 0;
         $firstEntry = !empty($entries) ? end($entries) : null;
         $dayCount = $firstEntry ? max(1, (int) round((time() - strtotime($firstEntry['date'])) / DAY_IN_SECONDS) + 1) : 1;
+        $goals = $this->goalRepo->getGoals($userId);
+        $streakDays = (int) ($this->gamificationRepo->getStats($userId)['currentStreak'] ?? 0);
 
         return [
             'greeting' => $this->getGreeting($profile->displayName),
@@ -63,11 +75,11 @@ class TodayService {
             'hasRoutineSteps' => $hasRoutineSteps,
             'checklist' => $checklist,
             'latestEntry' => $latestEntry,
-            'insight' => $this->insightEngine->generateDailyInsight($profile, array_slice($entries, 0, 5)),
+            'insight' => $this->getInsight($userId, $profile, $entries, $checklist, $goals, $streakDays, $dayCount),
             'routineProducts' => array_slice($this->routineService->getProductCabinet($userId), 0, 3),
             'week' => $this->buildWeekStrip($entries),
-            'goals' => array_slice($this->goalRepo->getGoals($userId), 0, 3),
-            'upcomingGoals' => $this->buildUpcomingGoals($userId),
+            'goals' => array_slice($goals, 0, 3),
+            'upcomingGoals' => $this->buildUpcomingGoals($goals),
             'memory' => $this->findMemory($userId, $entries),
         ];
     }
@@ -128,17 +140,46 @@ class TodayService {
      * Active goals with the nearest target dates, so "what's coming up" is
      * grounded in real goal data instead of a fabricated reminders feed.
      *
-     * @param int $userId
+     * @param array $goals Already-fetched GoalRepository::getGoals() result (avoids a second query).
      * @return array
      */
-    private function buildUpcomingGoals(int $userId): array {
-        $goals = array_filter($this->goalRepo->getGoals($userId), function ($g) {
+    private function buildUpcomingGoals(array $goals): array {
+        $goals = array_filter($goals, function ($g) {
             return !empty($g['target_date']) && ($g['status'] ?? 'active') !== 'completed';
         });
 
         usort($goals, fn($a, $b) => strtotime($a['target_date']) <=> strtotime($b['target_date']));
 
         return array_slice(array_values($goals), 0, 3);
+    }
+
+    /**
+     * "MYAVANA Insight" for Today — tries the configured AI provider first
+     * (cached; see IntelligenceOrchestrator), and falls back to the
+     * rule-based InsightEngine, grounded in the exact same facts, whenever
+     * AI is unavailable, unconfigured, or fails. Today never shows a raw
+     * error and never blocks on this — an insight is always returned.
+     *
+     * @param int $userId
+     * @param \Myavana\Next\Domain\Profile\ProfileEntity $profile
+     * @param array $entries   Newest-first journal entries.
+     * @param array $checklist RoutineService::getTodayChecklist() result.
+     * @param array $goals     GoalRepository::getGoals() result.
+     * @param int $streakDays
+     * @param int $dayCount
+     * @return array {title, summary, recommendation, confidence, supporting_signals}
+     */
+    private function getInsight(int $userId, $profile, array $entries, array $checklist, array $goals, int $streakDays, int $dayCount): array {
+        $context = TodayInsightContextBuilder::build($profile, $entries, $checklist, $goals, $streakDays, $dayCount);
+
+        $aiInsight = $this->intelligence->generate(
+            TodayInsightTask::NAME,
+            $userId,
+            $context,
+            TodayInsightTask::schema()
+        );
+
+        return !empty($aiInsight) ? $aiInsight : $this->insightEngine->generateFallbackInsight($context);
     }
 
     /**

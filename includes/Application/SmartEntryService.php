@@ -11,6 +11,8 @@ use Myavana\Next\Domain\Journal\JournalRepository;
 use Myavana\Next\Domain\Rewards\RewardService;
 use Myavana\Next\Domain\Routine\RoutineRepository;
 use Myavana\Next\Domain\Goals\GoalRepository;
+use Myavana\Next\Domain\Intelligence\IntelligenceOrchestrator;
+use Myavana\Next\Domain\Intelligence\Tasks\TodayInsightTask;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -21,17 +23,20 @@ class SmartEntryService {
     private RewardService $rewardService;
     private RoutineRepository $routineRepo;
     private GoalRepository $goalRepo;
+    private IntelligenceOrchestrator $intelligence;
 
     public function __construct(
         ?JournalRepository $journalRepo = null,
         ?RewardService $rewardService = null,
         ?RoutineRepository $routineRepo = null,
-        ?GoalRepository $goalRepo = null
+        ?GoalRepository $goalRepo = null,
+        ?IntelligenceOrchestrator $intelligence = null
     ) {
         $this->journalRepo = $journalRepo ?: new JournalRepository();
         $this->rewardService = $rewardService ?: new RewardService();
         $this->routineRepo = $routineRepo ?: new RoutineRepository();
         $this->goalRepo = $goalRepo ?: new GoalRepository();
+        $this->intelligence = $intelligence ?: new IntelligenceOrchestrator();
     }
 
     /**
@@ -63,6 +68,11 @@ class SmartEntryService {
         if ($goalId !== '') {
             $updatedGoal = $this->goalRepo->applyEntryProgress($userId, $goalId, $entry->hairLength);
         }
+
+        // A fresh entry changes the facts today_insight is built from —
+        // don't let the member see a stale AI insight for up to the rest
+        // of its cache window right after telling the app something new.
+        $this->intelligence->invalidate(TodayInsightTask::NAME, $userId);
 
         return [
             'entry' => $entry->toArray(),
