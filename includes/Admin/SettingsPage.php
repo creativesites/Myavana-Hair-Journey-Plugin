@@ -138,7 +138,8 @@ class SettingsPage {
                                     <label><input type="checkbox" name="myavana_next_feature_flags[routine_workspace]" value="1" <?php checked(!empty($flags['routine_workspace'])); ?> /> <?php esc_html_e('Routine & Goals Workspace', 'myavana-hair-journey-next'); ?></label><br>
                                     <label><input type="checkbox" name="myavana_next_feature_flags[community_feed]" value="1" <?php checked(!empty($flags['community_feed'])); ?> /> <?php esc_html_e('Community & Hair Twins Feed', 'myavana-hair-journey-next'); ?></label><br>
                                     <label><input type="checkbox" name="myavana_next_feature_flags[profile_privacy]" value="1" <?php checked(!empty($flags['profile_privacy'])); ?> /> <?php esc_html_e('Profile, Rewards & Privacy Center', 'myavana-hair-journey-next'); ?></label><br>
-                                    <label><input type="checkbox" name="myavana_next_feature_flags[ai_concierge]" value="1" <?php checked(!empty($flags['ai_concierge'])); ?> /> <?php esc_html_e('AI Hair Concierge Drawer', 'myavana-hair-journey-next'); ?></label>
+                                    <label><input type="checkbox" name="myavana_next_feature_flags[ai_concierge]" value="1" <?php checked(!empty($flags['ai_concierge'])); ?> /> <?php esc_html_e('AI Hair Concierge Drawer', 'myavana-hair-journey-next'); ?></label><br>
+                                    <label><input type="checkbox" name="myavana_next_feature_flags[onboarding_wizard]" value="1" <?php checked(!empty($flags['onboarding_wizard'])); ?> /> <?php esc_html_e('Post-Signup Onboarding Wizard (hair type, porosity, concerns & goals)', 'myavana-hair-journey-next'); ?></label>
                                 </fieldset>
                             </td>
                         </tr>

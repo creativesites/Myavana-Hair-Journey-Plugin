@@ -28,20 +28,21 @@ if (!defined('ABSPATH')) {
             <h3 style="font-size:20px; margin-bottom:8px; text-align:center;"><?php esc_html_e('Select Your Hair Texture', 'myavana-hair-journey-next'); ?></h3>
             <p style="text-align:center; font-size:13px; margin-bottom:24px; color:var(--myavana-muted);"><?php esc_html_e('Get started with care tips personalized for your curl pattern.', 'myavana-hair-journey-next'); ?></p>
 
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:24px;">
-                <div style="padding:16px; border:2px solid var(--myavana-border); border-radius:var(--radius-lg); text-align:center; cursor:pointer;" class="discovery-type-card">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:24px;" id="myavana-discovery-type-grid">
+                <button type="button" class="discovery-type-card" data-hair-family="2">
                     <span style="font-size:24px; display:block; margin-bottom:6px;">〰️</span>
                     <strong style="font-size:13px;">Type 2 (Wavy)</strong>
-                </div>
-                <div style="padding:16px; border:2px solid var(--myavana-border); border-radius:var(--radius-lg); text-align:center; cursor:pointer;" class="discovery-type-card">
+                </button>
+                <button type="button" class="discovery-type-card" data-hair-family="3">
                     <span style="font-size:24px; display:block; margin-bottom:6px;">➰</span>
                     <strong style="font-size:13px;">Type 3 (Curly)</strong>
-                </div>
-                <div style="padding:16px; border:2px solid var(--myavana-coral); background:var(--myavana-light-coral); border-radius:var(--radius-lg); text-align:center; cursor:pointer;" class="discovery-type-card selected">
+                </button>
+                <button type="button" class="discovery-type-card" data-hair-family="4">
                     <span style="font-size:24px; display:block; margin-bottom:6px;">🌀</span>
-                    <strong style="font-size:13px; color:#8c3f2d;">Type 4 (Coily)</strong>
-                </div>
+                    <strong style="font-size:13px;">Type 4 (Coily)</strong>
+                </button>
             </div>
+            <p class="myavana-onboarding-hint" style="margin:-12px 0 24px; text-align:center;"><?php esc_html_e("We'll use this to start your profile once you sign up.", 'myavana-hair-journey-next'); ?></p>
 
             <div style="text-align:center;">
                 <a href="#" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-btn-lg">

@@ -63,6 +63,9 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
     <?php if ($isLoggedIn) : ?>
         <!-- Two-Speed Smart Entry Modal -->
         <?php include MYAVANA_NEXT_PATH . 'templates/components/smart-entry-modal.php'; ?>
+
+        <!-- Post-Signup Onboarding Wizard (shown once; see Assets::enqueue()) -->
+        <?php include MYAVANA_NEXT_PATH . 'templates/components/onboarding-wizard.php'; ?>
     <?php endif; ?>
 
     <!-- Global Toast Notifications Container -->

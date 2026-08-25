@@ -1,0 +1,97 @@
+/**
+ * Post-Signup Onboarding Wizard
+ *
+ * @package Myavana\Next
+ */
+
+/* Matches the specificity of components.css's own
+   .myavana-modal-backdrop .myavana-modal rule so these overrides actually
+   win regardless of stylesheet load order. */
+.myavana-modal-backdrop .myavana-onboarding-modal {
+    max-width: 560px;
+    padding: var(--space-2xl) var(--space-xl) var(--space-xl);
+    position: relative;
+}
+
+.myavana-onboarding-skip {
+    background: none;
+    border: 0;
+    color: var(--myavana-muted);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    position: absolute;
+    right: var(--space-lg);
+    top: var(--space-lg);
+}
+.myavana-onboarding-skip:hover { color: var(--myavana-onyx); }
+
+.myavana-onboarding-header { margin-bottom: var(--space-lg); }
+.myavana-onboarding-step-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--myavana-coral-dark); margin: 0 0 6px; }
+.myavana-onboarding-header h2 { font-size: 22px; margin: 0 0 6px; }
+.myavana-onboarding-subtitle { color: var(--myavana-muted); font-size: 13.5px; line-height: 1.5; margin: 0 0 var(--space-md); max-width: 46ch; }
+.myavana-onboarding-progress { display: flex; gap: 6px; }
+.myavana-onboarding-progress-bar { flex: 1; height: 3px; border-radius: var(--radius-pill); background: var(--myavana-stone-alt); }
+.myavana-onboarding-progress-bar.active, .myavana-onboarding-progress-bar.done { background: var(--myavana-coral); }
+
+.myavana-onboarding-step { display: none; }
+.myavana-onboarding-step.active { display: block; }
+
+.myavana-onboarding-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: var(--space-sm); }
+.myavana-onboarding-type-card {
+    background: var(--myavana-white);
+    border: 1.5px solid var(--myavana-border);
+    border-radius: var(--radius-md);
+    color: var(--myavana-onyx);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 12px 8px;
+    text-align: center;
+    transition: var(--transition-fast);
+}
+.myavana-onboarding-type-card:hover { border-color: var(--myavana-border-hover); }
+.myavana-onboarding-type-card.active { background: var(--myavana-light-coral); border-color: var(--myavana-coral); color: var(--myavana-coral-dark); }
+.myavana-onboarding-hint { color: var(--myavana-muted); font-size: 12px; margin: var(--space-md) 0 0; }
+
+.myavana-onboarding-second-label { display: block; margin-top: var(--space-lg); }
+
+.myavana-onboarding-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--space-sm); }
+.myavana-onboarding-chip {
+    background: var(--myavana-white);
+    border: 1.5px solid var(--myavana-border);
+    border-radius: var(--radius-pill);
+    color: var(--myavana-onyx);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    transition: var(--transition-fast);
+}
+.myavana-onboarding-chip:hover { border-color: var(--myavana-border-hover); }
+.myavana-onboarding-chip.active { background: var(--myavana-onyx); border-color: var(--myavana-onyx); color: var(--myavana-white); }
+
+.myavana-onboarding-footer { align-items: center; display: flex; gap: var(--space-md); justify-content: space-between; margin-top: var(--space-xl); }
+.myavana-onboarding-footer .myavana-btn { flex: 1; }
+
+@media (max-width: 480px) {
+    .myavana-onboarding-type-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Logged-out Discovery screen's texture picker — visually and behaviorally
+   the same pattern as the wizard's own step-1 cards (see onboarding.js),
+   so a pre-signup pick carries a consistent look into the real wizard. */
+.discovery-type-card {
+    background: var(--myavana-white);
+    border: 2px solid var(--myavana-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-family: inherit;
+    padding: 16px;
+    text-align: center;
+    transition: var(--transition-fast);
+    width: 100%;
+}
+.discovery-type-card:hover { border-color: var(--myavana-border-hover); }
+.discovery-type-card.selected { background: var(--myavana-light-coral); border-color: var(--myavana-coral); }
+.discovery-type-card.selected strong { color: var(--myavana-coral-dark); }

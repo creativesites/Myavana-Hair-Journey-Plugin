@@ -29,6 +29,7 @@ class FeatureFlags {
         'smart_entry' => true,
         'ai_concierge' => true,
         'compare_slider' => true,
+        'onboarding_wizard' => true,
         'beta_cohort_only' => false,
     ];
 

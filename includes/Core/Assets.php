@@ -112,6 +112,8 @@ class Assets {
         wp_enqueue_style('myavana-entry-selector-css', MYAVANA_NEXT_URL . 'assets/css/entry-selector.css', ['myavana-social-feed-css'], self::ver('assets/css/entry-selector.css'));
         wp_enqueue_script('myavana-entry-selector-js', MYAVANA_NEXT_URL . 'assets/js/entry-selector.js', ['jquery', 'myavana-social-feed-js'], self::ver('assets/js/entry-selector.js'), true);
 
+        wp_enqueue_style('myavana-onboarding-wizard', MYAVANA_NEXT_URL . 'assets/css/onboarding-wizard.css', ['myavana-next-components'], self::ver('assets/css/onboarding-wizard.css'));
+
         // Complete ported Routine and Goals experiences. These assets are
         // deliberately loaded in the head so no legacy capability is lost
         // when rendered inside the Next app shell.
@@ -160,6 +162,7 @@ class Assets {
             'mod-community' => 'assets/js/modules/community.js',
             'mod-profile' => 'assets/js/modules/profile.js',
             'mod-auth' => 'assets/js/modules/auth.js',
+            'mod-onboarding' => 'assets/js/modules/onboarding.js',
             'app' => 'assets/js/app.js',
         ];
 
@@ -198,12 +201,27 @@ class Assets {
 
         $googleAuth = new \Myavana\Next\Domain\Auth\GoogleAuthService();
 
+        // Show the wizard once, to accounts that genuinely never gave us
+        // any hair data — not to legacy accounts whose profile was already
+        // filled in elsewhere, and never again once completed or skipped
+        // (myavana_onboarding_completed, the same key the legacy
+        // luxury-home banner reads).
+        $showOnboardingWizard = false;
+        if ($currentUserId > 0 && FeatureFlags::isEnabled('onboarding_wizard', $currentUserId)) {
+            $onboardingDone = get_user_meta($currentUserId, 'myavana_onboarding_completed', true);
+            if (empty($onboardingDone)) {
+                $profile = (new \Myavana\Next\Domain\Profile\ProfileRepository())->getByUserId($currentUserId);
+                $showOnboardingWizard = $profile->completionPercentage < 50;
+            }
+        }
+
         wp_localize_script('myavana-next-app', 'myavanaNextData', [
             'restUrl' => esc_url_raw(rest_url('myavana/v1/')),
             'nonce' => wp_create_nonce('wp_rest'),
             'isLoggedIn' => is_user_logged_in(),
             'currentUser' => $userData,
             'flags' => FeatureFlags::getAll(),
+            'showOnboardingWizard' => $showOnboardingWizard,
             'pluginUrl' => MYAVANA_NEXT_URL,
             'loginUrl' => wp_login_url(get_permalink()),
             'registerUrl' => wp_registration_url(),

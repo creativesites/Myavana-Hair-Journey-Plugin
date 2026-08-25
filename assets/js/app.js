@@ -20,6 +20,7 @@ MyavanaNext.App = (function() {
         if (MyavanaNext.Community) MyavanaNext.Community.init();
         if (MyavanaNext.Profile) MyavanaNext.Profile.init();
         if (MyavanaNext.Auth) MyavanaNext.Auth.init();
+        if (MyavanaNext.Onboarding) MyavanaNext.Onboarding.init();
 
         bindNavigation();
         bindGlobalActions();

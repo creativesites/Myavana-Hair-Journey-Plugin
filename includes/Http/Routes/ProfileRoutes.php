@@ -46,6 +46,12 @@ class ProfileRoutes extends RestController {
             'callback' => [$this, 'exportUserData'],
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/profile/onboarding', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'completeOnboarding'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
     }
 
     public function getProfile(\WP_REST_Request $request): \WP_REST_Response {
@@ -229,6 +235,26 @@ class ProfileRoutes extends RestController {
             'profile' => $updated->toArray(),
             'message' => __('Profile updated successfully.', 'myavana-hair-journey-next'),
         ]);
+    }
+
+    /**
+     * Record that the post-signup onboarding wizard was finished or
+     * explicitly skipped, so it never shows again for this user. Writes
+     * myavana_onboarding_completed — the same meta key the legacy
+     * luxury-home template already reads for its own "first entry" banner
+     * — so a Next-plugin signup is no longer invisible to that logic, and
+     * myavana_onboarding_status for parity with what AuthService/
+     * GoogleAuthService recorded at signup time.
+     */
+    public function completeOnboarding(\WP_REST_Request $request): \WP_REST_Response {
+        $userId = $this->getUserId();
+        $data = $request->get_json_params() ?: $request->get_params();
+        $status = ($data['status'] ?? '') === 'skipped' ? 'skipped' : 'completed';
+
+        update_user_meta($userId, 'myavana_onboarding_completed', $status);
+        update_user_meta($userId, 'myavana_onboarding_status', $status);
+
+        return $this->respondSuccess(['status' => $status]);
     }
 
     public function uploadAvatar(\WP_REST_Request $request): \WP_REST_Response {
