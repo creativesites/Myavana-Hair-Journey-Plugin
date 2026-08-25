@@ -12,6 +12,11 @@ if (!defined('ABSPATH')) {
 $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
 ?>
 <div class="myavana-next myavana-next-shell" id="myavana-next-root" data-default-tab="<?php echo esc_attr($defaultTab ?? 'today'); ?>">
+    <!-- Nav Progress Bar: the first visible response to tapping a nav item,
+         before that destination's own loading/empty state has a chance to
+         render. See app.js navigate(). -->
+    <div class="myavana-nav-progress" id="myavana-nav-progress" aria-hidden="true"></div>
+
     <!-- Top Navigation Bar -->
     <?php include MYAVANA_NEXT_PATH . 'templates/components/nav-header.php'; ?>
 

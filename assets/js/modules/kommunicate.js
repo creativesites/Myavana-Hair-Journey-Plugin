@@ -13,10 +13,22 @@ window.MyavanaNext = window.MyavanaNext || {};
 MyavanaNext.Kommunicate = (function() {
     'use strict';
 
+    const MAX_RETRIES = 6;
+    const RETRY_DELAY_MS = 500;
+
     /**
-     * Open the Kommunicate conversation widget
+     * Open the Kommunicate conversation widget.
+     *
+     * The SDK loads async and can genuinely still be mid-load on a slow
+     * mobile connection when someone taps "Ask an expert" — especially
+     * right after the page first renders. A single immediate attempt would
+     * fail every method below and fall straight to the toast, which reads
+     * as "the button doesn't work." Retry for a few seconds before giving
+     * up so a slow load isn't mistaken for a broken button.
      */
-    function open() {
+    function open(attempt) {
+        attempt = attempt || 0;
+
         // Method 1: Check window.Kommunicate official API
         if (window.Kommunicate && typeof window.Kommunicate.launchConversation === 'function') {
             try {
@@ -52,15 +64,25 @@ MyavanaNext.Kommunicate = (function() {
             return true;
         }
 
-        // Fallback message if Kommunicate is not loaded yet or blocked
-        if (MyavanaNext.API && typeof MyavanaNext.API.showToast === 'function') {
-            MyavanaNext.API.showToast('Connecting to MYAVANA Hair-Care Support...', 'info');
+        if (attempt < MAX_RETRIES) {
+            if (attempt === 0 && MyavanaNext.API?.showToast) {
+                MyavanaNext.API.showToast('Connecting to chat support…', 'info');
+            }
+            window.setTimeout(() => open(attempt + 1), RETRY_DELAY_MS);
+            return false;
+        }
+
+        // Genuinely unavailable after ~3s of retrying — say so plainly
+        // instead of leaving the first "Connecting…" toast as the last
+        // word with nothing actually happening.
+        if (MyavanaNext.API?.showToast) {
+            MyavanaNext.API.showToast("Chat support isn't available right now. Please try again shortly.", 'error');
         }
 
         return false;
     }
 
     return {
-        open,
+        open: () => open(0),
     };
 })();

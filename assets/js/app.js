@@ -100,14 +100,53 @@ MyavanaNext.App = (function() {
         }
 
         // Trigger view refresh if available
-        if (tabName === 'today' && MyavanaNext.Today) MyavanaNext.Today.refresh();
-        if (tabName === 'journey' && MyavanaNext.Journey) MyavanaNext.Journey.refresh();
-        if (tabName === 'routine' && MyavanaNext.Routine) MyavanaNext.Routine.refresh();
-        if (tabName === 'community' && MyavanaNext.Community) MyavanaNext.Community.refresh();
-        if (tabName === 'profile' && MyavanaNext.Profile) MyavanaNext.Profile.refresh();
+        const refreshers = {
+            today: () => MyavanaNext.Today?.refresh(),
+            journey: () => MyavanaNext.Journey?.refresh(),
+            routine: () => MyavanaNext.Routine?.refresh(),
+            community: () => MyavanaNext.Community?.refresh(),
+            profile: () => MyavanaNext.Profile?.refresh(),
+        };
+        const pending = refreshers[tabName] ? refreshers[tabName]() : undefined;
+        trackNavProgress(pending);
 
         // Smooth scroll to top of app
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * Tapping a nav item swaps views instantly, but the destination's data
+     * often hasn't loaded yet — with nothing marking that, a tap can read as
+     * "did that even register?" This is the first visible response: it
+     * starts the moment navigate() runs and completes when the view's own
+     * refresh() promise resolves, with a timeout safety net so it can never
+     * get stuck on screen if a module's refresh() doesn't settle.
+     */
+    function trackNavProgress(pending) {
+        const bar = document.querySelector('#myavana-nav-progress');
+        if (!bar) return;
+
+        bar.classList.remove('is-done');
+        // Reflow so re-triggering the animation on a rapid second tap restarts it.
+        void bar.offsetWidth;
+        bar.classList.add('is-active');
+
+        const finish = () => {
+            bar.classList.remove('is-active');
+            bar.classList.add('is-done');
+            window.setTimeout(() => bar.classList.remove('is-done'), 250);
+        };
+
+        const safety = window.setTimeout(finish, 1500);
+
+        if (pending && typeof pending.finally === 'function') {
+            pending.finally(() => { window.clearTimeout(safety); finish(); });
+        } else {
+            // No async work for this tab (e.g. Home) — still show the bar
+            // briefly so the tap reads as intentional, not a glitch.
+            window.clearTimeout(safety);
+            window.setTimeout(finish, 220);
+        }
     }
 
     function bindNavigation() {

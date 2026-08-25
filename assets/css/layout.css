@@ -10,7 +10,11 @@
     min-height: 100vh;
     background-color: var(--myavana-stone);
     position: relative;
-    padding-bottom: 90px; /* Space for mobile nav bar */
+    /* Space for the fixed mobile nav bar (72px) plus a margin, and the
+       iPhone home-indicator safe area on notched devices — env() safely
+       resolves to 0px wherever viewport-fit=cover isn't set, so this is a
+       no-op everywhere else. */
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
 }
 
 /* The app owns its page chrome just as the original MYAVANA plugin did.
@@ -54,6 +58,23 @@ body.myavana-next-app-page #wpadminbar {
         padding: 0 var(--space-xl);
     }
 }
+
+/* ==========================================================================
+   Nav Progress Bar
+   ========================================================================== */
+.myavana-nav-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--gradient-coral);
+    z-index: 200;
+    opacity: 0;
+    transition: width .35s ease, opacity .2s ease;
+}
+.myavana-nav-progress.is-active { width: 65%; opacity: 1; transition: width .5s ease, opacity .15s ease; }
+.myavana-nav-progress.is-done { width: 100%; opacity: 1; transition: width .2s ease; }
 
 /* ==========================================================================
    Header & Top Navigation Bar
@@ -405,11 +426,29 @@ body.myavana-next-app-page #wpadminbar {
     border-top: 1px solid var(--myavana-border);
     z-index: 99;
     padding: 0 var(--space-xs);
+    /* Grows the bar to clear the iPhone home-indicator gesture area on
+       notched devices instead of sitting the tap targets under it. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 992px) {
     .myavana-next-mobile-nav {
         display: none;
+    }
+}
+
+/* Our full-width bottom tab bar (72px + safe-area inset) can sit directly
+   on top of Kommunicate's own bottom-corner launcher bubble/iframe on
+   mobile, making it visually covered and effectively untappable. Push it
+   up above our nav using Kommunicate's documented selectors. Harmless if
+   any of these don't match the widget's actual current markup. */
+@media (max-width: 991px) {
+    body.myavana-next-app-page #kommunicate-widget-iframe,
+    body.myavana-next-app-page .km-chat-widget-button,
+    body.myavana-next-app-page #chat-popup-widget-container,
+    body.myavana-next-app-page .km-custom-widget-launcher {
+        bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
@@ -441,6 +480,12 @@ body.myavana-next-app-page #wpadminbar {
 .myavana-next-tab-item.active svg {
     transform: scale(1.1);
     stroke: var(--myavana-coral-dark);
+}
+
+.myavana-next-tab-item:active,
+.myavana-next-nav-link:active {
+    opacity: .55;
+    transition: opacity .05s ease;
 }
 
 /* Floating Check-in Action Button (FAB) */

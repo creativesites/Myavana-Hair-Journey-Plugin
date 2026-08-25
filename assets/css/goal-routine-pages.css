@@ -1,3 +1,32 @@
+.myavana-routine-subnav {
+    background: var(--myavana-stone);
+    border-radius: var(--radius-pill);
+    display: flex;
+    gap: 4px;
+    margin: 16px 16px 0;
+    padding: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.myavana-routine-subnav-btn {
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-pill);
+    color: var(--myavana-muted);
+    cursor: pointer;
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 14px;
+    transition: var(--transition-fast);
+}
+.myavana-routine-subnav-btn.active {
+    background: var(--myavana-white);
+    box-shadow: var(--shadow-soft);
+    color: var(--myavana-onyx);
+}
+
 .myavana-manage-shell-hjn {
     padding: 1rem 1.25rem 6rem;
 }
