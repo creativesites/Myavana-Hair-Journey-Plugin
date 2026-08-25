@@ -46,6 +46,14 @@ class SettingsPage {
         $apiKey = get_option('myavana_gemini_api_key', '');
         $googleClientId = get_option('myavana_next_google_client_id', '');
         $googleAuthEnabled = get_option('myavana_next_google_auth_enabled', true);
+
+        if (!$googleAuthEnabled) {
+            $googleStatus = ['label' => __('Disabled', 'myavana-hair-journey-next'), 'color' => '#6e6e73', 'bg' => '#f5f5f7'];
+        } elseif ($googleClientId === '') {
+            $googleStatus = ['label' => __('Enabled, but no Client ID set — the button will not appear to visitors', 'myavana-hair-journey-next'), 'color' => '#8a6414', 'bg' => '#f7ecd3'];
+        } else {
+            $googleStatus = ['label' => __('Live — button renders for logged-out visitors', 'myavana-hair-journey-next'), 'color' => '#3f7d5c', 'bg' => '#e2efe8'];
+        }
         ?>
         <div class="wrap" style="max-width: 840px;">
             <h1 style="display:flex; align-items:center; gap:10px;">
@@ -84,6 +92,11 @@ class SettingsPage {
 
                 <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
                     <h2><?php esc_html_e('Google Sign-In', 'myavana-hair-journey-next'); ?></h2>
+                    <p style="margin:0 0 16px;">
+                        <span style="display:inline-block; padding:4px 12px; border-radius:999px; font-size:12.5px; font-weight:600; color:<?php echo esc_attr($googleStatus['color']); ?>; background:<?php echo esc_attr($googleStatus['bg']); ?>;">
+                            <?php echo esc_html($googleStatus['label']); ?>
+                        </span>
+                    </p>
                     <table class="form-table">
                         <tr>
                             <th scope="row"><?php esc_html_e('Enable Google Sign-In', 'myavana-hair-journey-next'); ?></th>

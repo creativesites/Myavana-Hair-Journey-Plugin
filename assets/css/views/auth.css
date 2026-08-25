@@ -9,6 +9,7 @@
 .myavana-auth-panel.active { display: block; }
 .myavana-google-auth-wrap { display: flex; justify-content: center; margin-bottom: var(--space-md); min-height: 44px; }
 .myavana-google-auth-slot { width: 100%; }
+.myavana-google-auth-fallback { background: var(--myavana-stone); border: 1px dashed var(--myavana-border-hover); border-radius: var(--radius-md); color: var(--myavana-muted); font-size: 12.5px; padding: 12px 14px; text-align: center; }
 .myavana-auth-divider { align-items: center; color: var(--myavana-muted); display: flex; font-size: 12px; font-weight: 700; gap: 12px; letter-spacing: .06em; margin: var(--space-md) 0; text-transform: uppercase; }
 .myavana-auth-divider::before, .myavana-auth-divider::after { background: var(--myavana-border); content: ""; flex: 1; height: 1px; }
 .myavana-auth-checkbox { align-items: flex-start; color: var(--myavana-muted); display: flex; font-size: 12.5px; gap: 8px; line-height: 1.5; margin: var(--space-xs) 0 var(--space-lg); }

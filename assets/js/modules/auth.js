@@ -168,45 +168,92 @@ MyavanaNext.Auth = (function() {
     function initGoogle() {
         const settings = window.myavanaNextData || {};
         if (!settings.googleAuthEnabled || !settings.googleClientId) {
+            // Silent to end users by design (Google Sign-In is an optional
+            // extra, not a broken feature) but not to whoever's debugging
+            // "why is the button missing" — name the exact option that's unset.
+            if (!settings.googleAuthEnabled) {
+                console.warn('[MYAVANA] Google Sign-In is off — enable it under Settings → MYAVANA Next → Google Sign-In (myavana_next_google_auth_enabled).');
+            } else {
+                console.warn('[MYAVANA] Google Sign-In has no Client ID set — add one under Settings → MYAVANA Next → Google Sign-In (myavana_next_google_client_id).');
+            }
             return;
         }
 
-        loadGoogleScript(() => {
-            if (googleInitialized || !window.google?.accounts?.id) return;
-            googleInitialized = true;
+        loadGoogleScript(
+            () => {
+                if (googleInitialized || !window.google?.accounts?.id) {
+                    console.warn('[MYAVANA] Google Identity Services script loaded but window.google.accounts.id is unavailable.');
+                    showGoogleFallback();
+                    return;
+                }
+                googleInitialized = true;
 
-            window.google.accounts.id.initialize({
-                client_id: settings.googleClientId,
-                callback: handleGoogleCredential,
-            });
+                window.google.accounts.id.initialize({
+                    client_id: settings.googleClientId,
+                    callback: handleGoogleCredential,
+                });
 
-            renderGoogleButton('myavana-google-signin-slot', 'signin_with');
-            renderGoogleButton('myavana-google-signup-slot', 'signup_with');
-        });
+                renderGoogleButton('myavana-google-signin-slot', 'signin_with');
+                renderGoogleButton('myavana-google-signup-slot', 'signup_with');
+            },
+            () => {
+                console.warn('[MYAVANA] Failed to load https://accounts.google.com/gsi/client — check network access / content blockers.');
+                showGoogleFallback();
+            }
+        );
     }
 
     function renderGoogleButton(slotId, text) {
         const slot = document.getElementById(slotId);
         if (!slot || !window.google?.accounts?.id) return;
 
-        window.google.accounts.id.renderButton(slot, {
-            theme: 'outline',
-            size: 'large',
-            width: '100%',
-            text: text,
-            shape: 'pill',
+        try {
+            window.google.accounts.id.renderButton(slot, {
+                theme: 'outline',
+                size: 'large',
+                width: '100%',
+                text: text,
+                shape: 'pill',
+            });
+        } catch (err) {
+            console.warn('[MYAVANA] Google renderButton threw:', err);
+        }
+
+        // Google's script swallows most failures internally (e.g. an
+        // unauthorized JS origin) rather than throwing or rejecting, so the
+        // only reliable signal is whether it actually populated the slot.
+        window.setTimeout(() => {
+            if (!slot.hasChildNodes()) {
+                console.warn('[MYAVANA] Google did not render a button into #' + slotId + ' — likely an unauthorized JavaScript origin for this OAuth Client ID in Google Cloud Console.');
+                showGoogleFallback(slot);
+            }
+        }, 2500);
+    }
+
+    function showGoogleFallback(slot) {
+        const slots = slot ? [slot] : [
+            document.getElementById('myavana-google-signin-slot'),
+            document.getElementById('myavana-google-signup-slot'),
+        ].filter(Boolean);
+
+        slots.forEach((el) => {
+            if (el.hasChildNodes() || el.dataset.fallbackShown) return;
+            el.dataset.fallbackShown = '1';
+            el.classList.add('myavana-google-auth-fallback');
+            el.textContent = 'Google sign-in is temporarily unavailable — continue with email below.';
         });
     }
 
-    function loadGoogleScript(callback) {
+    function loadGoogleScript(onload, onerror) {
         if (window.google?.accounts?.id) {
-            callback();
+            onload();
             return;
         }
 
         const existing = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
         if (existing) {
-            existing.addEventListener('load', callback);
+            existing.addEventListener('load', onload);
+            existing.addEventListener('error', onerror);
             return;
         }
 
@@ -214,7 +261,8 @@ MyavanaNext.Auth = (function() {
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
         script.defer = true;
-        script.onload = callback;
+        script.onload = onload;
+        script.onerror = onerror;
         document.head.appendChild(script);
     }
 
