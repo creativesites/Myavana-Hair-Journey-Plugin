@@ -51,7 +51,13 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                     </div>
                     <span class="myavana-pill" id="today-checklist-percent" hidden></span>
                 </div>
-                <div id="today-checklist-items" class="myavana-today-checklist" aria-live="polite"></div>
+                <div id="today-checklist-items" class="myavana-today-checklist" aria-live="polite">
+                    <div class="myavana-today-skeleton" aria-hidden="true">
+                        <div class="myavana-today-skeleton-row"></div>
+                        <div class="myavana-today-skeleton-row"></div>
+                        <div class="myavana-today-skeleton-row"></div>
+                    </div>
+                </div>
             </section>
 
             <!-- MYAVANA Insight — AI-generated when a provider is configured (see

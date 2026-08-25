@@ -19,7 +19,19 @@ MyavanaNext.Today = (function() {
             render(data);
         } catch (error) {
             console.error('[Today Refresh Error]', error);
+            if (!error.sessionExpired) renderLoadError();
         }
+    }
+
+    function renderLoadError() {
+        const list = container.querySelector('#today-checklist-items');
+        if (!list) return;
+        list.innerHTML = `
+            <div class="myavana-today-error-state">
+                <p>We couldn't load today's view. Your journey data is still safe.</p>
+                <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" id="today-retry-btn">Try again</button>
+            </div>`;
+        list.querySelector('#today-retry-btn')?.addEventListener('click', refresh);
     }
 
     function render(data) {

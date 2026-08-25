@@ -315,10 +315,10 @@ function myavana_luxury_home_view() {
                                     <i class="fas fa-rocket"></i>
                                     Start My Journey
                                 </button> -->
-                                <a class="myavana-luxury-btn-primary" href="/hair-journey/">
+                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['timeline']); ?>">
                                     <i class="fas fa-rocket"></i>
                                     Start My Journey
-                                </a> 
+                                </a>
                                 <!-- <button class="myavana-luxury-btn-secondary" onclick="showMyavanaModal('new-entry')">
                                     <i class="fas fa-camera"></i>
                                     Quick Entry

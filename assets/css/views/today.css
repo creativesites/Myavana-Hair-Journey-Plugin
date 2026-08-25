@@ -13,6 +13,25 @@
 
 .myavana-today-quick-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: var(--space-xl); }
 
+.myavana-today-skeleton { display: grid; gap: 10px; }
+.myavana-today-skeleton-row {
+    background: linear-gradient(90deg, var(--myavana-stone) 25%, var(--myavana-stone-alt) 37%, var(--myavana-stone) 63%);
+    background-size: 400% 100%;
+    border-radius: var(--radius-md);
+    height: 52px;
+    animation: myavana-today-skeleton-pulse 1.6s ease infinite;
+}
+@keyframes myavana-today-skeleton-pulse {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .myavana-today-skeleton-row { animation: none; }
+}
+
+.myavana-today-error-state { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 20px; text-align: center; }
+.myavana-today-error-state p { color: var(--myavana-muted); font-size: 14px; margin: 0 0 12px; }
+
 .myavana-today-layout { display: flex; gap: var(--space-xl); align-items: flex-start; flex-wrap: wrap; }
 .myavana-today-main { display: flex; flex: 2; flex-direction: column; gap: var(--space-lg); min-width: 320px; }
 .myavana-today-sidebar { display: flex; flex: 1; flex-direction: column; gap: var(--space-lg); min-width: 280px; }
