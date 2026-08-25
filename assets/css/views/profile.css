@@ -1,0 +1,793 @@
+/* ==========================================================================
+   Profile — header, stats, HairID, milestones, sidebar, settings, drawer
+   ========================================================================== */
+
+/* 1. Header */
+#view-profile .myavana-profile-header {
+    margin-bottom: var(--space-lg);
+}
+
+#view-profile .myavana-profile-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+#view-profile .myavana-profile-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+#view-profile #profile-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--myavana-coral);
+}
+
+#view-profile .myavana-profile-avatar-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--myavana-onyx);
+    color: #fff;
+    border: 2px solid var(--myavana-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#view-profile .myavana-profile-header-text {
+    flex: 1;
+    min-width: 220px;
+}
+
+#view-profile .myavana-profile-header-text h1 {
+    font-size: 24px;
+    margin: 0 0 4px;
+}
+
+#view-profile .myavana-profile-meta-line {
+    color: var(--myavana-muted);
+    font-size: 13px;
+    margin: 0 0 10px;
+}
+
+#view-profile .myavana-profile-meta-dot {
+    margin: 0 6px;
+}
+
+#view-profile .myavana-profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+#view-profile .myavana-profile-tag {
+    background: var(--myavana-light-coral);
+    color: #9b5a49;
+    border-radius: var(--radius-pill);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+#view-profile .myavana-profile-tag.is-muted {
+    background: var(--myavana-stone);
+    color: var(--myavana-muted);
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: normal;
+}
+
+#view-profile .myavana-profile-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 2. Stat row */
+#view-profile .myavana-profile-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: var(--space-xl);
+}
+
+#view-profile .myavana-profile-stat-card {
+    background: var(--myavana-stone);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#view-profile .myavana-profile-stat-card .stat-label {
+    color: var(--myavana-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+#view-profile .myavana-profile-stat-card strong {
+    font-size: 22px;
+}
+
+/* 3. Layout */
+#view-profile .myavana-profile-layout {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+#view-profile .myavana-profile-main {
+    display: flex;
+    flex: 2;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 320px;
+}
+
+#view-profile .myavana-profile-sidebar {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 280px;
+}
+
+/* 4. HairID card */
+#view-profile .myavana-profile-hairid-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+#view-profile .myavana-profile-hairid-item {
+    background: var(--myavana-stone);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#view-profile .myavana-profile-hairid-item .spec-label {
+    color: var(--myavana-muted);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+#view-profile .myavana-profile-hairid-item .spec-value {
+    font-size: 14px;
+}
+
+#view-profile .myavana-profile-hairid-note {
+    color: var(--myavana-muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 5. Milestones */
+#view-profile .myavana-profile-milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+#view-profile .myavana-profile-milestone-tile {
+    position: relative;
+    border: 0;
+    padding: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 1;
+    cursor: pointer;
+    background: var(--myavana-stone);
+}
+
+#view-profile .myavana-profile-milestone-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#view-profile .myavana-profile-milestone-tile span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 6px 8px;
+    background: linear-gradient(to top, rgba(34,35,35,.85), transparent);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-align: left;
+}
+
+/* 6. Recent updates */
+#view-profile .myavana-profile-recent-item {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    min-height: 72px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--myavana-stone);
+}
+
+#view-profile .myavana-profile-recent-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+#view-profile .myavana-profile-recent-item img,
+#view-profile .myavana-profile-recent-placeholder {
+    background: var(--myavana-light-coral);
+    border-radius: var(--radius-md);
+    flex: 0 0 60px;
+    height: 60px;
+    object-fit: cover;
+    width: 60px;
+}
+
+#view-profile .myavana-profile-recent-placeholder {
+    align-items: center;
+    color: #9b5a49;
+    display: flex;
+    font-size: 20px;
+    justify-content: center;
+}
+
+#view-profile .myavana-profile-recent-item span,
+#view-profile .myavana-profile-recent-item strong {
+    display: block;
+}
+
+#view-profile .myavana-profile-recent-item span {
+    color: var(--myavana-muted);
+    font-size: 11.5px;
+}
+
+#view-profile .myavana-profile-recent-item strong {
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+#view-profile .myavana-profile-recent-item p {
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    font-size: 12.5px;
+    -webkit-line-clamp: 1;
+    margin: 3px 0 0;
+    overflow: hidden;
+    color: var(--myavana-muted);
+}
+
+/* 7. Sidebar: goals */
+#view-profile .myavana-profile-sidebar-label {
+    color: var(--myavana-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin: 12px 0 8px;
+}
+
+#view-profile .myavana-profile-sidebar-label:first-of-type {
+    margin-top: 0;
+}
+
+#view-profile .myavana-profile-goal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#view-profile .myavana-profile-goal-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#view-profile .myavana-profile-goal-row .goal-row-head {
+    display: flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    justify-content: space-between;
+}
+
+#view-profile .myavana-profile-goal-row .goal-row-head strong {
+    color: var(--myavana-muted);
+}
+
+#view-profile .myavana-profile-goal-bar {
+    background: var(--myavana-stone);
+    border-radius: var(--radius-pill);
+    height: 6px;
+    overflow: hidden;
+}
+
+#view-profile .myavana-profile-goal-bar > div {
+    background: var(--myavana-coral);
+    border-radius: var(--radius-pill);
+    height: 100%;
+}
+
+#view-profile .myavana-profile-achieved-row {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    font-size: 12.5px;
+    padding: 4px 0;
+}
+
+#view-profile .achieved-check {
+    align-items: center;
+    background: var(--myavana-coral);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    flex: 0 0 18px;
+    font-size: 10px;
+    height: 18px;
+    justify-content: center;
+    width: 18px;
+}
+
+#view-profile .myavana-profile-empty-note {
+    color: var(--myavana-muted);
+    font-size: 12.5px;
+    margin: 0;
+}
+
+/* 8. Community snapshot */
+#view-profile .myavana-profile-community-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
+}
+
+#view-profile .myavana-profile-community-stats strong {
+    display: block;
+    font-size: 17px;
+}
+
+#view-profile .myavana-profile-community-stats span {
+    color: var(--myavana-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* 9. Unit toggle */
+#view-profile .myavana-unit-toggle {
+    display: flex;
+    background: var(--myavana-stone);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+#view-profile .unit-toggle-btn {
+    border: 0;
+    background: none;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--myavana-muted);
+    cursor: pointer;
+}
+
+#view-profile .unit-toggle-btn.active {
+    background: var(--myavana-onyx);
+    color: #fff;
+}
+
+/* 10. Rewards (sidebar) */
+#view-profile .sidebar-card {
+    background: var(--myavana-white);
+}
+
+#view-profile .xp-level-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+#view-profile .xp-level-badge strong {
+    font-size: 14px;
+    color: var(--myavana-onyx);
+}
+
+#view-profile .xp-level-badge span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--myavana-coral-dark);
+}
+
+#view-profile .xp-progress-wrap {
+    height: 6px;
+    background: var(--myavana-stone);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+#view-profile .xp-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--myavana-coral), var(--myavana-coral-dark));
+}
+
+#view-profile .badges-mini-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#view-profile .badge-mini-item {
+    font-size: 20px;
+    background: var(--myavana-stone);
+    border-radius: var(--radius-sm);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 11. Preferences form */
+#view-profile .settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+#view-profile .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--myavana-border);
+    gap: var(--space-md);
+}
+
+#view-profile .setting-item:last-of-type {
+    border-bottom: none;
+}
+
+#view-profile .setting-text strong {
+    display: block;
+    font-size: 13.5px;
+    margin-bottom: 2px;
+    color: var(--myavana-onyx);
+}
+
+#view-profile .setting-text p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--myavana-muted);
+}
+
+#view-profile .setting-select {
+    width: auto;
+    min-width: 140px;
+}
+
+#view-profile .myavana-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+#view-profile .myavana-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+#view-profile .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--myavana-border);
+    transition: 0.3s;
+    border-radius: 26px;
+}
+
+#view-profile .switch-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+#view-profile .myavana-switch input:checked + .switch-slider {
+    background-color: var(--myavana-coral);
+}
+
+#view-profile .myavana-switch input:checked + .switch-slider::before {
+    transform: translateX(20px);
+}
+
+#view-profile .settings-actions-bar {
+    padding-top: var(--space-md);
+}
+
+/* 12. Data & account */
+#view-profile .data-center-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--myavana-stone);
+}
+
+#view-profile .data-center-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+#view-profile .data-center-text strong {
+    display: block;
+    font-size: 13.5px;
+    margin-bottom: 2px;
+    color: var(--myavana-onyx);
+}
+
+#view-profile .data-center-text p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--myavana-muted);
+}
+
+/* 13. Edit Profile Drawer */
+#view-profile .myavana-profile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#view-profile .myavana-profile-drawer.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+#view-profile .drawer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+#view-profile .drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 540px;
+    max-width: 100%;
+    height: 100%;
+    background: var(--myavana-white);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+#view-profile .myavana-profile-drawer.active .drawer-panel {
+    transform: translateX(0);
+}
+
+#view-profile .drawer-header {
+    background: linear-gradient(135deg, var(--myavana-coral) 0%, #fce5d7 100%);
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: var(--myavana-white);
+    flex-shrink: 0;
+}
+
+#view-profile .drawer-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--myavana-white);
+}
+
+#view-profile .drawer-header p {
+    font-size: 13px;
+    margin: 0;
+    opacity: 0.9;
+    color: var(--myavana-white);
+}
+
+#view-profile .btn-drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    color: var(--myavana-white);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+#view-profile .btn-drawer-close:hover {
+    background: rgba(255,255,255,0.5);
+    transform: rotate(90deg);
+}
+
+#view-profile .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+#view-profile .drawer-section {
+    border-bottom: 1px solid var(--myavana-border);
+    padding-bottom: 20px;
+}
+
+#view-profile .drawer-section:last-of-type {
+    border-bottom: none;
+}
+
+#view-profile .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--myavana-muted);
+    margin: 0 0 14px 0;
+}
+
+#view-profile .avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#view-profile .avatar-preview-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--myavana-coral);
+    flex-shrink: 0;
+}
+
+#view-profile .avatar-preview-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#view-profile .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+#view-profile .char-count {
+    font-size: 11px;
+    color: var(--myavana-muted);
+    text-align: right;
+    display: block;
+    margin-top: 4px;
+}
+
+#view-profile .concerns-chip-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#view-profile .concern-pill-check {
+    cursor: pointer;
+}
+
+#view-profile .concern-pill-check input {
+    display: none;
+}
+
+#view-profile .concern-pill-check span {
+    display: inline-block;
+    padding: 6px 12px;
+    background: var(--myavana-stone);
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--myavana-muted);
+    transition: var(--transition-fast);
+}
+
+#view-profile .concern-pill-check input:checked + span {
+    background: var(--myavana-coral);
+    border-color: var(--myavana-coral);
+    color: var(--myavana-white);
+}
+
+#view-profile .drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: var(--space-md);
+    position: sticky;
+    bottom: -24px;
+    background: var(--myavana-white);
+    margin: 0 -24px -24px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--myavana-border);
+}
+
+/* 14. Responsive */
+@media (max-width: 992px) {
+    #view-profile .myavana-profile-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #view-profile .myavana-profile-hairid-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    #view-profile .myavana-profile-header-main {
+        flex-direction: column;
+    }
+    #view-profile .myavana-profile-header-actions {
+        width: 100%;
+    }
+    #view-profile .form-row-2 {
+        grid-template-columns: 1fr;
+    }
+    #view-profile .drawer-panel {
+        width: 100%;
+    }
+}

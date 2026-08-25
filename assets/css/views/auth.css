@@ -1,0 +1,18 @@
+.myavana-auth-wrap { align-items: center; display: flex; justify-content: center; min-height: 60vh; padding: var(--space-xl) 0; }
+.myavana-auth-card { max-width: 420px; padding: var(--space-2xl) var(--space-xl); width: 100%; }
+.myavana-auth-toggle { background: var(--myavana-stone); border-radius: var(--radius-pill); display: flex; gap: 4px; margin-bottom: var(--space-xl); padding: 4px; }
+.myavana-auth-toggle-btn { background: transparent; border: 0; border-radius: var(--radius-pill); color: var(--myavana-muted); cursor: pointer; flex: 1; font-size: 13px; font-weight: 700; padding: 10px 14px; transition: var(--transition-fast); white-space: nowrap; }
+.myavana-auth-toggle-btn.active { background: var(--myavana-white); box-shadow: var(--shadow-soft); color: var(--myavana-onyx); }
+.myavana-auth-message { border-radius: var(--radius-md); font-size: 13px; margin-bottom: var(--space-md); padding: 12px 14px; }
+.myavana-auth-message.is-error { background: rgba(197, 63, 43, .08); color: #a5372c; }
+.myavana-auth-message.is-success { background: rgba(63, 122, 92, .1); color: #3f7a5c; }
+.myavana-auth-panel.active { display: block; }
+.myavana-google-auth-wrap { display: flex; justify-content: center; margin-bottom: var(--space-md); min-height: 44px; }
+.myavana-google-auth-slot { width: 100%; }
+.myavana-auth-divider { align-items: center; color: var(--myavana-muted); display: flex; font-size: 12px; font-weight: 700; gap: 12px; letter-spacing: .06em; margin: var(--space-md) 0; text-transform: uppercase; }
+.myavana-auth-divider::before, .myavana-auth-divider::after { background: var(--myavana-border); content: ""; flex: 1; height: 1px; }
+.myavana-auth-checkbox { align-items: flex-start; color: var(--myavana-muted); display: flex; font-size: 12.5px; gap: 8px; line-height: 1.5; margin: var(--space-xs) 0 var(--space-lg); }
+.myavana-auth-checkbox input { accent-color: var(--myavana-coral); margin-top: 2px; }
+.myavana-auth-checkbox a { color: var(--myavana-coral-dark); }
+.myavana-auth-hint { color: var(--myavana-muted); font-size: 11.5px; margin: 6px 0 0; }
+@media (max-width: 480px) { .myavana-auth-card { padding: var(--space-xl) var(--space-lg); } }

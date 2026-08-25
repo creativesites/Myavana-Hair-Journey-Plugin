@@ -1,0 +1,517 @@
+/**
+ * Components & Reusable UI Elements
+ *
+ * @package Myavana\Next
+ */
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.myavana-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.myavana-btn-primary {
+    background: var(--gradient-coral);
+    color: var(--myavana-white);
+    box-shadow: var(--shadow-coral);
+}
+
+.myavana-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(231, 166, 144, 0.4);
+}
+
+.myavana-btn-dark {
+    background: var(--myavana-onyx);
+    color: var(--myavana-white);
+}
+
+.myavana-btn-dark:hover {
+    background: #363737;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.myavana-btn-outline {
+    background: var(--myavana-white);
+    border: 1px solid var(--myavana-border-hover);
+    color: var(--myavana-onyx) !important;
+}
+
+.myavana-btn-outline:hover {
+    border-color: var(--myavana-onyx);
+    background: var(--myavana-stone);
+    color: var(--myavana-onyx) !important;
+}
+
+.myavana-btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+.myavana-btn-lg {
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.myavana-btn-block {
+    width: 100%;
+}
+
+/* ==========================================================================
+   Cards & Surfaces
+   ========================================================================== */
+.myavana-card {
+    background: var(--myavana-white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--myavana-border);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-lg);
+    transition: var(--transition-fast);
+}
+
+.myavana-card:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+.myavana-card-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.myavana-card-dark {
+    background: var(--gradient-onyx);
+    color: var(--myavana-white);
+    border: none;
+}
+
+.myavana-card-dark h1,
+.myavana-card-dark h2,
+.myavana-card-dark h3,
+.myavana-card-dark p {
+    color: var(--myavana-white);
+}
+
+.myavana-card-coral {
+    background: var(--gradient-coral-soft);
+    border-color: rgba(231, 166, 144, 0.3);
+}
+
+/* ==========================================================================
+   Pills & Badges
+   ========================================================================== */
+.myavana-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--myavana-stone);
+    color: var(--myavana-onyx);
+}
+
+.myavana-pill-coral {
+    background: var(--myavana-light-coral);
+    color: #934c38;
+}
+
+.myavana-pill-streak {
+    background: #fff3e0;
+    color: #d84315;
+    border: 1px solid #ffe0b2;
+}
+
+.myavana-pill-flame {
+    animation: flamePulse 1.8s infinite ease-in-out;
+}
+
+/* ==========================================================================
+   Form Controls
+   ========================================================================== */
+.myavana-form-group {
+    margin-bottom: var(--space-md);
+}
+
+.myavana-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--myavana-onyx);
+    margin-bottom: 6px;
+}
+
+.myavana-input,
+.myavana-textarea,
+.myavana-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--myavana-border);
+    background: var(--myavana-white);
+    color: var(--myavana-onyx);
+    font-size: 14px;
+    transition: var(--transition-fast);
+}
+
+.myavana-input:focus,
+.myavana-textarea:focus,
+.myavana-select:focus {
+    outline: none;
+    border-color: var(--myavana-coral);
+    box-shadow: 0 0 0 3px rgba(231, 166, 144, 0.2);
+}
+
+.myavana-range {
+    width: 100%;
+    accent-color: var(--myavana-coral);
+    cursor: pointer;
+}
+
+/* Custom Dropzone */
+.myavana-dropzone {
+    border: 2px dashed rgba(231, 166, 144, 0.5);
+    background: rgba(252, 229, 215, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-md);
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.myavana-dropzone:hover,
+.myavana-dropzone.dragover {
+    border-color: var(--myavana-coral);
+    background: rgba(252, 229, 215, 0.4);
+}
+
+.myavana-dropzone-icon {
+    font-size: 36px;
+    margin-bottom: var(--space-xs);
+}
+
+/* ==========================================================================
+   Modals
+   ========================================================================== */
+.myavana-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.myavana-modal-backdrop.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Scoped to .myavana-modal-backdrop (not a bare .myavana-modal selector) so
+   this doesn't collide with social-feed.css's own unrelated .myavana-modal
+   class (its "Create Post" modal) — that rule sets display:none/position:
+   fixed on the bare class name and, loading later, was silently winning over
+   this one for any element that only had .myavana-modal on it. */
+.myavana-modal-backdrop .myavana-modal {
+    display: block;
+    background: var(--myavana-white);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-strong);
+    position: relative;
+    z-index: auto;
+    padding: var(--space-xl);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s var(--ease-bounce);
+}
+
+.myavana-modal-backdrop.active .myavana-modal {
+    transform: scale(1) translateY(0);
+}
+
+.myavana-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--myavana-stone);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--myavana-onyx);
+    font-size: 18px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.myavana-modal-close:hover {
+    background: var(--myavana-stone-alt);
+    transform: scale(1.1);
+}
+
+/* ==========================================================================
+   AI Concierge Drawer
+   ========================================================================== */
+.myavana-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.myavana-drawer-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+.myavana-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 440px;
+    background: var(--myavana-white);
+    box-shadow: var(--shadow-strong);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.myavana-drawer-backdrop.active + .myavana-drawer,
+.myavana-drawer.active {
+    transform: translateX(0);
+}
+
+.myavana-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--myavana-border);
+}
+
+.myavana-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.myavana-drawer-footer {
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--myavana-border);
+    background: var(--myavana-stone);
+}
+
+/* Chat Bubbles */
+.myavana-chat-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.myavana-chat-msg.user {
+    align-self: flex-end;
+    background: var(--myavana-onyx);
+    color: var(--myavana-white);
+    border-bottom-right-radius: 4px;
+}
+
+.myavana-chat-msg.bot {
+    align-self: flex-start;
+    background: var(--myavana-stone);
+    color: var(--myavana-onyx);
+    border-bottom-left-radius: 4px;
+}
+
+/* ==========================================================================
+   Before/After Photo Comparison Slider
+   ========================================================================== */
+.myavana-compare-wrapper {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    user-select: none;
+    box-shadow: var(--shadow-medium);
+}
+
+.myavana-compare-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.myavana-compare-after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;
+    overflow: hidden;
+    z-index: 2;
+}
+
+.myavana-compare-after img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: auto;
+    min-width: 100%;
+    max-width: none;
+    object-fit: cover;
+}
+
+.myavana-compare-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: var(--myavana-white);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    z-index: 3;
+    cursor: ew-resize;
+    transform: translateX(-50%);
+}
+
+.myavana-compare-handle-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--myavana-white);
+    border: 3px solid var(--myavana-coral);
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--myavana-coral-dark);
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Toast Notification Container
+   ========================================================================== */
+.myavana-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.myavana-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--myavana-onyx);
+    color: var(--myavana-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-strong);
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: auto;
+    animation: toastSlideIn 0.3s var(--ease-bounce);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* ==========================================================================
+   Global Entry Composer
+   ========================================================================== */
+.myavana-entry-modal { max-width: 560px; }
+.myavana-entry-header { margin-bottom: var(--space-lg); }
+.myavana-entry-step-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--myavana-coral-dark); margin: 0 0 4px; }
+.myavana-entry-header h2 { font-size: 21px; margin: 0 0 14px; }
+.myavana-entry-progress { display: flex; gap: 6px; }
+.myavana-entry-progress-bar { flex: 1; height: 3px; border-radius: var(--radius-pill); background: var(--myavana-stone-alt); }
+.myavana-entry-progress-bar.active, .myavana-entry-progress-bar.done { background: var(--myavana-coral); }
+
+.myavana-entry-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.myavana-entry-type-card { text-align: left; border: 1.5px solid var(--myavana-border); background: var(--myavana-white); border-radius: var(--radius-md); padding: 14px 16px; cursor: pointer; transition: var(--transition-fast); display: flex; flex-direction: column; gap: 3px; }
+.myavana-entry-type-card strong { font-size: 14px; color: var(--myavana-onyx); }
+.myavana-entry-type-card span { font-size: 12px; color: var(--myavana-muted); }
+.myavana-entry-type-card:hover { border-color: var(--myavana-border-hover); }
+.myavana-entry-type-card.active { border-color: var(--myavana-coral); background: var(--myavana-light-coral); }
+
+.myavana-entry-field-header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.myavana-entry-photo-count { font-size: 12px; color: var(--myavana-muted); }
+.myavana-entry-photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.myavana-entry-photo-add, .myavana-entry-photo-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; background: var(--myavana-stone); cursor: pointer; border: 1.5px dashed var(--myavana-border-hover); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--myavana-muted); }
+.myavana-entry-photo-thumb { border: 2px solid var(--myavana-border); padding: 0; }
+.myavana-entry-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.myavana-entry-photo-remove { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(34,35,35,.7); color: #fff; border: 0; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.myavana-entry-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.myavana-entry-pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.myavana-entry-pill { font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: var(--radius-pill); cursor: pointer; background: var(--myavana-white); color: var(--myavana-muted); border: 1px solid var(--myavana-border); transition: var(--transition-fast); }
+.myavana-entry-pill:hover { border-color: var(--myavana-border-hover); }
+.myavana-entry-pill.active { background: var(--myavana-onyx); color: var(--myavana-white); border-color: var(--myavana-onyx); }
+.myavana-entry-hint { font-size: 12px; color: var(--myavana-muted); margin: 8px 0 0; }
+
+.myavana-entry-measure-box { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-md); }
+.myavana-entry-unit { font-size: 13px; color: var(--myavana-muted); }
+
+.myavana-entry-review { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: var(--space-lg); }
+.myavana-entry-review-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+.myavana-entry-review-row span:first-child { color: var(--myavana-muted); }
+.myavana-entry-review-row span:last-child { font-weight: 600; text-align: right; }
+
+.myavana-entry-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--myavana-border); }
+.myavana-entry-back { background: none; border: 0; font-size: 12.5px; font-weight: 600; color: var(--myavana-muted); cursor: pointer; padding: 9px 4px; }
+.myavana-entry-back:hover { color: var(--myavana-onyx); }

@@ -1,0 +1,422 @@
+/**
+ * App Shell Layout & Navigation
+ *
+ * @package Myavana\Next
+ */
+
+.myavana-next-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--myavana-stone);
+    position: relative;
+    padding-bottom: 90px; /* Space for mobile nav bar */
+}
+
+/* The app owns its page chrome just as the original MYAVANA plugin did.
+   This deliberately targets only pages carrying the Next shortcode. */
+body.myavana-next-app-page .menu_wrap,
+body.myavana-next-app-page .mobile_menu_wrap,
+body.myavana-next-app-page header#masthead,
+body.myavana-next-app-page .site-header,
+body.myavana-next-app-page .header_wrap {
+    display: none !important;
+}
+
+#content {
+    padding-top: 0 !important;
+    margin: 0;
+
+}
+html {
+    margin-top: 0 !important;
+}
+
+body.myavana-next-app-page #wpadminbar {
+    display: none !important;
+}
+
+@media (min-width: 992px) {
+    .myavana-next-shell {
+        padding-bottom: 40px;
+    }
+}
+
+.myavana-next-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+@media (min-width: 768px) {
+    .myavana-next-container {
+        padding: 0 var(--space-xl);
+    }
+}
+
+/* ==========================================================================
+   Header & Top Navigation Bar
+   ========================================================================== */
+.myavana-next-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(34, 35, 35, 0.08);
+    transition: var(--transition-fast);
+}
+
+.myavana-next-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+}
+
+.myavana-next-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.myavana-next-logo {
+    height: 24px !important;
+    max-height: 24px !important;
+    width: auto !important;
+    max-width: 140px !important;
+    object-fit: contain;
+    display: block;
+}
+
+/* Desktop Nav Links */
+.myavana-next-nav-desktop {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(34, 35, 35, 0.04);
+}
+
+@media (min-width: 992px) {
+    .myavana-next-nav-desktop {
+        display: flex;
+    }
+}
+
+.myavana-next-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--myavana-muted) !important;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.myavana-next-nav-link:hover {
+    color: var(--myavana-onyx) !important;
+    background-color: var(--myavana-stone-alt);
+}
+
+.myavana-next-nav-link.active {
+    color: var(--myavana-onyx) !important;
+    background-color: var(--myavana-white);
+    box-shadow: 0 2px 8px rgba(34, 35, 35, 0.08);
+}
+
+/* Header Utilities */
+.myavana-next-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.myavana-next-concierge-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--myavana-white);
+    border: 1px solid var(--myavana-border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--myavana-onyx) !important;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.myavana-next-concierge-btn span {
+    color: var(--myavana-onyx) !important;
+}
+
+.myavana-next-concierge-btn:hover {
+    border-color: var(--myavana-coral);
+    box-shadow: var(--shadow-coral);
+    transform: translateY(-1px);
+}
+
+.myavana-next-concierge-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--myavana-coral);
+    box-shadow: 0 0 8px var(--myavana-coral);
+}
+
+.myavana-next-shell #desktop-quick-entry-btn {
+    background: var(--myavana-onyx) !important;
+    color: var(--myavana-white) !important;
+    border: 1px solid var(--myavana-onyx) !important;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.myavana-next-shell #desktop-quick-entry-btn span {
+    color: var(--myavana-white) !important;
+}
+
+.myavana-next-shell #desktop-quick-entry-btn:hover {
+    background: #363737 !important;
+    color: var(--myavana-white) !important;
+}
+
+/* User Avatar Dropdown Button */
+.myavana-next-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--radius-pill);
+    background: var(--myavana-white);
+    border: 1px solid var(--myavana-border);
+    box-shadow: var(--shadow-soft);
+    text-decoration: none;
+    color: var(--myavana-onyx) !important;
+    transition: var(--transition-fast);
+}
+
+.myavana-next-avatar-btn:hover {
+    border-color: var(--myavana-border-hover);
+    background: var(--myavana-stone);
+}
+
+.myavana-next-avatar-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--myavana-onyx) !important;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.myavana-next-avatar-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Account Dropdown */
+.myavana-next-account-menu {
+    position: relative;
+}
+
+.myavana-next-avatar-btn[aria-expanded="true"] {
+    border-color: var(--myavana-border-hover);
+    background: var(--myavana-stone);
+}
+
+.myavana-account-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 260px;
+    background: var(--myavana-white);
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-strong);
+    padding: 8px;
+    z-index: 60;
+}
+
+.myavana-account-dropdown[hidden] {
+    display: none;
+}
+
+.myavana-account-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--myavana-border);
+}
+
+.myavana-account-dropdown-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 36px;
+}
+
+.myavana-account-dropdown-identity {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.myavana-account-dropdown-identity strong {
+    font-size: 13.5px;
+    color: var(--myavana-onyx);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.myavana-account-dropdown-identity span {
+    font-size: 12px;
+    color: var(--myavana-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.myavana-account-dropdown-item {
+    display: block;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--myavana-onyx) !important;
+    transition: var(--transition-fast);
+}
+
+.myavana-account-dropdown-item:hover {
+    background: var(--myavana-stone);
+}
+
+.myavana-account-dropdown-item-danger {
+    color: #a5372c !important;
+}
+
+.myavana-account-dropdown-item-danger:hover {
+    background: rgba(197, 63, 43, .08);
+}
+
+/* ==========================================================================
+   Main Content Area
+   ========================================================================== */
+.myavana-next-main {
+    flex: 1;
+    padding: var(--space-xl) 0;
+}
+
+.myavana-next-view {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.myavana-next-view.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Mobile Bottom Navigation Bar
+   ========================================================================== */
+.myavana-next-mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: var(--gradient-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--myavana-border);
+    z-index: 99;
+    padding: 0 var(--space-xs);
+}
+
+@media (min-width: 992px) {
+    .myavana-next-mobile-nav {
+        display: none;
+    }
+}
+
+.myavana-next-tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 54px;
+    height: 100%;
+    color: var(--myavana-muted);
+    font-size: 11px;
+    font-weight: 600;
+    transition: var(--transition-fast);
+}
+
+.myavana-next-tab-item svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
+    transition: transform var(--transition-fast);
+}
+
+.myavana-next-tab-item.active {
+    color: var(--myavana-onyx);
+}
+
+.myavana-next-tab-item.active svg {
+    transform: scale(1.1);
+    stroke: var(--myavana-coral-dark);
+}
+
+/* Floating Check-in Action Button (FAB) */
+.myavana-next-tab-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--gradient-coral);
+    color: var(--myavana-white);
+    box-shadow: var(--shadow-fab);
+    margin-top: -24px;
+    border: 3px solid var(--myavana-white);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.myavana-next-tab-fab svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--myavana-white);
+    stroke-width: 2.5;
+}
+
+.myavana-next-tab-fab:hover,
+.myavana-next-tab-fab:active {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 14px 34px rgba(231, 166, 144, 0.6);
+}

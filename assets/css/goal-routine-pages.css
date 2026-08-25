@@ -1,0 +1,202 @@
+.myavana-manage-shell-hjn {
+    padding: 1rem 1.25rem 6rem;
+}
+
+.myavana-manage-header-hjn {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.myavana-manage-title-wrap-hjn h2 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 1.375rem;
+    letter-spacing: 0.01em;
+    color: var(--myavana-onyx);
+}
+
+.myavana-manage-title-wrap-hjn p {
+    margin: 0.25rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.myavana-manage-actions-hjn {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.myavana-manage-btn-hjn {
+    border: 1px solid transparent;
+    background: var(--myavana-coral);
+    color: var(--myavana-white);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    border-radius: 999px;
+    padding: 0.55rem 0.95rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.myavana-manage-btn-hjn.is-secondary {
+    background: transparent;
+    border-color: var(--myavana-blueberry);
+    color: var(--myavana-blueberry);
+}
+
+.myavana-manage-search-hjn {
+    margin-bottom: 1rem;
+}
+
+.myavana-manage-search-hjn input {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.7rem 0.875rem;
+    font-size: 0.875rem;
+    background: var(--myavana-white);
+}
+
+.myavana-manage-grid-hjn {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 0.875rem;
+}
+
+.myavana-manage-card-hjn {
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 0.875rem;
+    background: var(--myavana-white);
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.myavana-manage-card-hjn.is-completed-hjn {
+    border-color: rgba(47, 164, 87, 0.42);
+    box-shadow: 0 0 0 1px rgba(47, 164, 87, 0.16);
+}
+
+.myavana-manage-card-head-hjn {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.myavana-manage-card-title-hjn {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: var(--myavana-onyx);
+}
+
+.myavana-manage-badge-hjn {
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.45rem;
+    font-weight: 700;
+    background: rgba(74, 77, 104, 0.12);
+    color: var(--myavana-blueberry);
+    white-space: nowrap;
+}
+
+.myavana-manage-text-hjn {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.myavana-manage-meta-hjn {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.myavana-manage-chip-hjn {
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    padding: 0.22rem 0.45rem;
+    background: rgba(231, 166, 144, 0.14);
+    color: #8d4f3e;
+}
+
+.myavana-manage-progress-hjn {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(34, 35, 35, 0.08);
+    overflow: hidden;
+}
+
+.myavana-manage-progress-hjn span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--myavana-coral), #f9bb9e);
+}
+
+.myavana-manage-actions-row-hjn {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: auto;
+}
+
+.myavana-manage-action-hjn {
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--myavana-white);
+    color: var(--myavana-onyx);
+    padding: 0.38rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.myavana-manage-action-hjn.is-primary {
+    border-color: var(--myavana-coral);
+    background: var(--myavana-coral);
+    color: #fff;
+}
+
+.myavana-manage-action-hjn.is-danger {
+    border-color: #f2b3b6;
+    color: #b24248;
+}
+
+.myavana-manage-empty-hjn {
+    border: 2px dashed var(--border-color);
+    border-radius: 14px;
+    background: #fff;
+    padding: 1.25rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .myavana-manage-shell-hjn {
+        padding: 0.875rem 0.875rem 7.25rem;
+    }
+
+    .myavana-manage-grid-hjn {
+        grid-template-columns: 1fr;
+    }
+
+    .myavana-manage-title-wrap-hjn h2 {
+        font-size: 1.2rem;
+    }
+}
+/* Context placed beneath optional form fields without competing with the label. */
+.form-help-hjn {
+    display: block;
+    margin-top: 7px;
+    color: #6b6b6b;
+    font-size: 12px;
+    line-height: 1.4;
+}

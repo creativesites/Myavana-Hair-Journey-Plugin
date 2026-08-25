@@ -1,0 +1,1814 @@
+.myavana-routines-v2-page {
+    --rv2-onyx: #222323;
+    --rv2-stone: #f5f5f7;
+    --rv2-white: #ffffff;
+    --rv2-sand: #eeece1;
+    --rv2-coral: #e7a690;
+    --rv2-lc: #fce5d7;
+    --rv2-blueberry: #4a4d68;
+    --rv2-bb-light: rgba(74, 77, 104, 0.1);
+    --rv2-bb-mid: rgba(74, 77, 104, 0.18);
+    --rv2-coral-deep: #d4856e;
+    --rv2-green: #6a9e7f;
+    --rv2-green-bg: rgba(106, 158, 127, 0.1);
+    --rv2-text: #222323;
+    --rv2-text-muted: #6b6b6b;
+    --rv2-text-dim: #aaaaaa;
+    --rv2-border: #e8e8e8;
+    --rv2-border2: #d8d8d8;
+    --rv2-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.07);
+    --rv2-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --rv2-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --rv2-r: 14px;
+    --rv2-rsm: 9px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+.myavana-routines-v2-page .myavana-rv2 {
+    background: var(--rv2-stone);
+    color: var(--rv2-text);
+    min-height: calc(100vh - 120px);
+    padding: 20px;
+    border-radius: 18px;
+    border: 1px solid var(--rv2-border);
+    max-width: 1560px;
+    margin: 0 auto;
+    width: 100%;
+    overflow-x: clip;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Care comes first: today’s plan, then the routines a member owns, then optional inspiration. */
+.myavana-routines-v2-page .myavana-rv2-hero-stats { order: 1; }
+.myavana-routines-v2-page .myavana-rv2-today { order: 2; }
+.myavana-routines-v2-page .myavana-rv2-library { order: 3; }
+.myavana-routines-v2-page .myavana-rv2-template-hub { order: 4; }
+
+.myavana-routines-v2-page .myavana-rv2 *,
+.myavana-routines-v2-page .myavana-rv2 *::before,
+.myavana-routines-v2-page .myavana-rv2 *::after {
+    box-sizing: border-box;
+}
+
+.myavana-routines-v2-page .myavana-rv2-lucide {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-lucide.is-stat { width: 18px; height: 18px; }
+.myavana-routines-v2-page .myavana-rv2-lucide.is-create { width: 20px; height: 20px; }
+.myavana-routines-v2-page .myavana-rv2-lucide.is-fab { width: 22px; height: 22px; }
+.myavana-routines-v2-page .myavana-rv2-lucide.is-close { width: 15px; height: 15px; }
+.myavana-routines-v2-page .myavana-rv2-lucide.is-xs { width: 14px; height: 14px; }
+.myavana-routines-v2-page .myavana-rv2-lucide.is-xxs { width: 13px; height: 13px; }
+
+.myavana-routines-v2-page .myavana-rv2-hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-stat-card {
+    background: var(--rv2-white);
+    border: 1px solid var(--rv2-border);
+    border-radius: var(--rv2-r);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--rv2-shadow-sm);
+}
+
+.myavana-routines-v2-page .myavana-rv2-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-stat-icon.coral { background: var(--rv2-lc); }
+.myavana-routines-v2-page .myavana-rv2-stat-icon.sand { background: var(--rv2-sand); }
+.myavana-routines-v2-page .myavana-rv2-stat-icon.green { background: var(--rv2-green-bg); }
+.myavana-routines-v2-page .myavana-rv2-stat-icon.bb { background: var(--rv2-bb-light); }
+
+.myavana-routines-v2-page .myavana-rv2-stat-value {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--rv2-onyx);
+}
+
+.myavana-routines-v2-page .myavana-rv2-stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--rv2-text-muted);
+    margin-top: 2px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today {
+    margin-top: 20px;
+    background: linear-gradient(135deg, #fffaf6 0%, var(--rv2-lc) 58%, #f7dfd4 100%);
+    border: 1px solid rgba(231, 166, 144, 0.35);
+    border-radius: var(--rv2-r);
+    overflow: hidden;
+    width: min(860px, 100%);
+    box-shadow: 0 12px 30px rgba(231, 166, 144, .13);
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-head {
+    padding: 22px 22px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid rgba(231, 166, 144, 0.25);
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-kicker {
+    margin: 0 0 5px;
+    color: var(--rv2-coral-deep);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-title {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 21px;
+    letter-spacing: -0.01em;
+    color: var(--rv2-onyx);
+}
+
+.myavana-routines-v2-page .myavana-rv2-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--rv2-coral);
+    color: #fff;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.myavana-routines-v2-page .myavana-rv2-live-badge .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #fff;
+    animation: rv2-pulse 1.5s infinite;
+}
+
+@keyframes rv2-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-progress-label {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.75);
+    font-size: 11px;
+    color: var(--rv2-blueberry);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-progress-wrap {
+    padding: 0 22px 15px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-progress-track {
+    height: 5px;
+    background: rgba(231, 166, 144, 0.25);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 10px 0 4px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rv2-coral), #f0b89a);
+    border-radius: 3px;
+    transition: width 0.25s ease;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-sub {
+    font-size: 12px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-list {
+    margin: 0 10px 10px;
+    padding: 4px 0;
+    border-radius: 12px;
+    background: rgba(255,255,255,.67);
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-check {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid rgba(231, 166, 144, 0.5);
+    background: transparent;
+    color: transparent;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.myavana-routines-v2-page .myavana-rv2-check.done {
+    background: var(--rv2-coral);
+    border-color: var(--rv2-coral);
+    color: #fff;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rv2-onyx);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-name.is-done {
+    text-decoration: line-through;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-today-meta {
+    margin-top: 1px;
+    font-size: 10px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-start-btn,
+.myavana-routines-v2-page .myavana-rv2-done-badge {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+    flex-shrink: 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-start-btn {
+    background: var(--rv2-coral);
+    color: #fff;
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-done-badge {
+    background: var(--rv2-green-bg);
+    color: var(--rv2-green);
+    border-color: rgba(106, 158, 127, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-divider {
+    height: 1px;
+    margin: 0 16px;
+    background: rgba(231, 166, 144, 0.2);
+}
+
+.myavana-routines-v2-page .myavana-rv2-library {
+    margin-top: 18px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-hub {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: var(--rv2-r);
+    border: 1px solid rgba(74, 77, 104, 0.12);
+    background:
+        radial-gradient(circle at top right, rgba(231, 166, 144, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 248, 245, 0.96));
+    box-shadow: var(--rv2-shadow-sm);
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-card {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(216, 216, 216, 0.92);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-card__top,
+.myavana-routines-v2-page .myavana-rv2-template-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--rv2-lc);
+    color: var(--rv2-coral-deep);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-meta,
+.myavana-routines-v2-page .myavana-rv2-template-products {
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-card h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    line-height: 1.15;
+    color: var(--rv2-onyx);
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-card p {
+    margin: 0;
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-tags span {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: var(--rv2-stone);
+    border: 1px solid var(--rv2-border);
+    color: var(--rv2-blueberry);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-steps {
+    display: grid;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-step strong {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rv2-bb-light);
+    color: var(--rv2-blueberry);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-callout-lite {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--rv2-stone);
+    border: 1px solid var(--rv2-border);
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-library-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-library-title {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 17px;
+    color: var(--rv2-onyx);
+    letter-spacing: -0.01em;
+}
+
+.myavana-routines-v2-page .myavana-rv2-library-sub {
+    margin: 5px 0 0;
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-ghost-btn,
+.myavana-routines-v2-page .myavana-rv2-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid var(--rv2-border);
+}
+
+.myavana-routines-v2-page .myavana-rv2-ghost-btn {
+    background: #fff;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-ghost-btn:hover {
+    background: var(--rv2-lc);
+    border-color: var(--rv2-coral);
+    color: var(--rv2-coral-deep);
+}
+
+.myavana-routines-v2-page .myavana-rv2-search-wrap {
+    margin-bottom: 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-search {
+    width: 100%;
+    border: 1px solid var(--rv2-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--rv2-text);
+    padding: 11px 14px;
+    font-size: 13px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-filters {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    border: 1px solid var(--rv2-border);
+    border-radius: 999px;
+    padding: 3px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    scrollbar-width: none;
+}
+
+.myavana-routines-v2-page .myavana-rv2-filters::-webkit-scrollbar {
+    display: none;
+}
+
+.myavana-routines-v2-page .myavana-rv2-filter {
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--rv2-text-muted);
+    font-size: 11px;
+    padding: 7px 14px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-filter.is-active {
+    background: var(--rv2-onyx);
+    color: #fff;
+}
+
+.myavana-routines-v2-page .myavana-rv2-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card {
+    background: #fff;
+    border: 1px solid var(--rv2-border);
+    border-radius: var(--rv2-r);
+    box-shadow: var(--rv2-shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 248px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card.is-completed {
+    border-color: rgba(106, 158, 127, 0.45);
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-top {
+    padding: 14px;
+    border-bottom: 1px solid var(--rv2-border);
+    cursor: pointer;
+    flex: 1;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-badges {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.myavana-routines-v2-page .myavana-rv2-type-badge.daily {
+    background: var(--rv2-lc);
+    color: var(--rv2-coral-deep);
+}
+
+.myavana-routines-v2-page .myavana-rv2-type-badge.weekly {
+    background: var(--rv2-bb-light);
+    color: var(--rv2-blueberry);
+}
+
+.myavana-routines-v2-page .myavana-rv2-type-badge.monthly {
+    background: var(--rv2-sand);
+    color: #7a7150;
+}
+
+.myavana-routines-v2-page .myavana-rv2-type-badge.asneeded {
+    background: var(--rv2-green-bg);
+    color: var(--rv2-green);
+}
+
+.myavana-routines-v2-page .myavana-rv2-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rv2-coral);
+}
+
+.myavana-routines-v2-page .myavana-rv2-status-dot.done { background: var(--rv2-green); }
+.myavana-routines-v2-page .myavana-rv2-status-dot.active { background: var(--rv2-coral); }
+.myavana-routines-v2-page .myavana-rv2-status-dot.paused { background: var(--rv2-text-dim); }
+
+.myavana-routines-v2-page .myavana-rv2-card-title {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    line-height: 1.25;
+    color: var(--rv2-onyx);
+    overflow-wrap: anywhere;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-sub {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-stats {
+    margin-top: 10px;
+    border-radius: var(--rv2-rsm);
+    background: var(--rv2-stone);
+    display: flex;
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-stats .item {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-right: 1px solid var(--rv2-border);
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-stats .item:last-child { border-right: 0; }
+
+.myavana-routines-v2-page .myavana-rv2-card-stats .val {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    color: var(--rv2-blueberry);
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-stats .lbl {
+    margin-top: 1px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--rv2-text-dim);
+}
+
+.myavana-routines-v2-page .myavana-rv2-goal-chip {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    border-radius: 999px;
+    padding: 4px 9px;
+    background: var(--rv2-bb-light);
+    border: 1px solid var(--rv2-bb-mid);
+    color: var(--rv2-blueberry);
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-bottom {
+    padding: 9px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--rv2-stone);
+}
+
+.myavana-routines-v2-page .myavana-rv2-last {
+    font-size: 10px;
+    color: var(--rv2-text-dim);
+}
+
+.myavana-routines-v2-page .myavana-rv2-streak {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--rv2-coral-deep);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-inline-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--rv2-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--rv2-text-muted);
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-inline-btn.primary {
+    background: var(--rv2-coral);
+    border-color: var(--rv2-coral);
+    color: #fff;
+}
+
+.myavana-routines-v2-page .myavana-rv2-create-card,
+.myavana-routines-v2-page .myavana-rv2-empty-card {
+    border-radius: var(--rv2-r);
+    border: 2px dashed var(--rv2-border2);
+    background: #fff;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-create-card {
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-create-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--rv2-lc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myavana-routines-v2-page .myavana-rv2-create-card h3,
+.myavana-routines-v2-page .myavana-rv2-empty-card h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-create-card p,
+.myavana-routines-v2-page .myavana-rv2-empty-card p,
+.myavana-routines-v2-page .myavana-rv2-empty-inline p {
+    margin: 0;
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.myavana-routines-v2-page .myavana-rv2-empty-inline {
+    padding: 14px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.myavana-routines-v2-page .myavana-rv2-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 92px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--rv2-coral);
+    color: #fff;
+    border: 0;
+    box-shadow: 0 4px 20px rgba(231, 166, 144, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+}
+
+.myavana-routines-v2-page .myavana-rv2-overlay,
+.myavana-routines-v2-page .myavana-rv2-session,
+.myavana-routines-v2-page .myavana-rv2-picker,
+.myavana-routines-v2-page .myavana-rv2-template-preview {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.myavana-routines-v2-page .myavana-rv2-overlay.is-open,
+.myavana-routines-v2-page .myavana-rv2-session.is-open,
+.myavana-routines-v2-page .myavana-rv2-picker.is-open,
+.myavana-routines-v2-page .myavana-rv2-template-preview.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.myavana-routines-v2-page .myavana-rv2-overlay {
+    background: rgba(34, 35, 35, 0.35);
+    backdrop-filter: blur(3px);
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 100vw;
+    height: 100%;
+    background: #fff;
+    border-left: 1px solid var(--rv2-border);
+    box-shadow: var(--rv2-shadow-lg);
+    transition: right 0.28s;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer.is-open { right: 0; }
+
+.myavana-rv2-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.myavana-rv2-confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 35, 35, .48);
+    backdrop-filter: blur(3px);
+}
+
+.myavana-rv2-confirm-card {
+    position: relative;
+    width: min(100%, 420px);
+    padding: 28px;
+    border: 1px solid var(--rv2-border);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: var(--rv2-shadow-lg);
+}
+
+.myavana-rv2-confirm-card h3 { margin: 0 0 8px; font-family: 'Archivo Black', sans-serif; font-size: 20px; }
+.myavana-rv2-confirm-card p { margin: 0; color: var(--rv2-text-muted); line-height: 1.55; }
+.myavana-rv2-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.myavana-rv2-confirm .myavana-rv2-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1px solid #e7a690;
+    border-radius: 999px;
+    background: #e7a690;
+    color: #fff;
+    font: 700 13px/1 'Archivo', sans-serif;
+    cursor: pointer;
+}
+.myavana-rv2-confirm .myavana-rv2-pill-btn.ghost { border-color: #d8d8d8; background: #fff; color: #4a4d68; }
+.myavana-rv2-confirm .myavana-rv2-pill-btn.danger { border-color: #b74242; background: #b74242; color: #fff; }
+.myavana-rv2-confirm .myavana-rv2-pill-btn:hover { filter: brightness(.96); transform: translateY(-1px); }
+.myavana-rv2-confirm .myavana-rv2-pill-btn:focus-visible { outline: 3px solid rgba(74,77,104,.28); outline-offset: 2px; }
+
+.myavana-routines-v2-page .myavana-rv2-drawer-head {
+    padding: 17px 22px;
+    border-bottom: 1px solid var(--rv2-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-head h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-tabs {
+    background: var(--rv2-stone);
+    border: 1px solid var(--rv2-border);
+    border-radius: 999px;
+    padding: 3px;
+    display: flex;
+    gap: 2px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-tabs .tab {
+    border: 0;
+    background: transparent;
+    color: var(--rv2-text-muted);
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-tabs .tab.is-active {
+    background: #fff;
+    color: var(--rv2-onyx);
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--rv2-border);
+    background: var(--rv2-stone);
+    color: var(--rv2-text-muted);
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.myavana-routines-v2-page .myavana-rv2-pane { display: none; }
+.myavana-routines-v2-page .myavana-rv2-pane.is-active { display: block; }
+
+.myavana-routines-v2-page .myavana-rv2-hero-block {
+    padding: 22px;
+    background: linear-gradient(135deg, var(--rv2-lc), #fdf8f4);
+    border-bottom: 1px solid var(--rv2-border);
+}
+
+.myavana-routines-v2-page .myavana-rv2-hero-badge-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-hero-block h4 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 24px;
+    line-height: 1.15;
+}
+
+.myavana-routines-v2-page .myavana-rv2-hero-block p {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-meta-pills {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-meta-pills .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    border: 1px solid var(--rv2-border);
+    background: #fff;
+    color: var(--rv2-text-muted);
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.myavana-routines-v2-page .myavana-rv2-pane-content {
+    padding: 22px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-pane-content .label,
+.myavana-routines-v2-page .myavana-rv2-sec .label {
+    margin-bottom: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--rv2-text-dim);
+}
+
+.myavana-routines-v2-page .myavana-rv2-sec { margin-bottom: 18px; }
+
+.myavana-routines-v2-page .myavana-rv2-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-tags .tag {
+    border-radius: 999px;
+    border: 1px solid var(--rv2-border);
+    background: var(--rv2-stone);
+    color: var(--rv2-text-muted);
+    font-size: 10px;
+    padding: 2px 9px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-mini-grid .mini {
+    background: var(--rv2-stone);
+    border-radius: var(--rv2-rsm);
+    padding: 12px 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-mini-grid .val {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 20px;
+    color: var(--rv2-blueberry);
+}
+
+.myavana-routines-v2-page .myavana-rv2-mini-grid .lbl {
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--rv2-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-list,
+.myavana-routines-v2-page .myavana-rv2-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-item,
+.myavana-routines-v2-page .myavana-rv2-history-item {
+    border: 1px solid var(--rv2-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-num,
+.myavana-routines-v2-page .myavana-rv2-history-ico {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--rv2-lc);
+    color: var(--rv2-coral-deep);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-content,
+.myavana-routines-v2-page .myavana-rv2-history-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-title,
+.myavana-routines-v2-page .myavana-rv2-history-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rv2-text);
+}
+
+.myavana-routines-v2-page .myavana-rv2-step-sub,
+.myavana-routines-v2-page .myavana-rv2-history-sub {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+}
+
+.myavana-routines-v2-page .myavana-rv2-drawer-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--rv2-border);
+    display: flex;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-pill-btn {
+    background: var(--rv2-coral);
+    color: #fff;
+    border-color: var(--rv2-coral);
+}
+
+.myavana-routines-v2-page .myavana-rv2-pill-btn.ghost {
+    background: var(--rv2-stone);
+    color: var(--rv2-text-muted);
+    border-color: var(--rv2-border);
+}
+
+.myavana-routines-v2-page .myavana-rv2-pill-btn.danger {
+    background: transparent;
+    border-color: rgba(200, 80, 60, 0.2);
+    color: #c8503c;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-sheet,
+.myavana-routines-v2-page .myavana-rv2-picker-sheet {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    bottom: 0;
+    width: min(560px, 100vw);
+    height: 92vh;
+    max-height: calc(100dvh - 10px);
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--rv2-shadow-lg);
+    transition: transform 0.28s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-sheet {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    bottom: 0;
+    width: min(720px, calc(100vw - 24px));
+    height: auto;
+    max-height: calc(100dvh - 12px);
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--rv2-shadow-lg);
+    transition: transform 0.28s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-picker-sheet {
+    width: min(480px, 100vw);
+    height: auto;
+    max-height: 82vh;
+    padding: 0 22px 30px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session.is-open .myavana-rv2-session-sheet,
+.myavana-routines-v2-page .myavana-rv2-picker.is-open .myavana-rv2-picker-sheet,
+.myavana-routines-v2-page .myavana-rv2-template-preview.is-open .myavana-rv2-template-preview-sheet {
+    transform: translateX(-50%) translateY(0);
+}
+
+.myavana-routines-v2-page .myavana-rv2-handle {
+    width: 38px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--rv2-border2);
+    margin: 14px auto 0;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-head {
+    padding: 16px 22px 14px;
+    border-bottom: 1px solid var(--rv2-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-head h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-head p {
+    margin: 2px 0 0;
+    color: var(--rv2-text-muted);
+    font-size: 11px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-timer {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    color: var(--rv2-coral);
+    background: var(--rv2-lc);
+    border-radius: 999px;
+    padding: 6px 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-progress {
+    padding: 10px 22px;
+    border-bottom: 1px solid var(--rv2-border);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-progress .track {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--rv2-stone);
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-progress .fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--rv2-coral), #f0b89a);
+    transition: width 0.2s;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-progress .label {
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+    font-weight: 700;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 16px 22px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step {
+    border: 1.5px solid var(--rv2-border);
+    border-radius: var(--rv2-r);
+    padding: 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 13px;
+    align-items: start;
+    margin-bottom: 10px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step.current {
+    border-color: var(--rv2-coral);
+    background: var(--rv2-lc);
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step.done {
+    background: var(--rv2-stone);
+    opacity: 0.75;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--rv2-lc);
+    color: var(--rv2-coral-deep);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    grid-column: 2;
+    justify-self: end;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step.current .num {
+    background: var(--rv2-coral);
+    color: #fff;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step.done .num {
+    background: var(--rv2-green);
+    color: #fff;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step .content {
+    min-width: 0;
+    width: 100%;
+    grid-column: 1;
+    overflow: hidden;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step .title {
+    display: block;
+    max-width: 100%;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-step .sub {
+    margin-top: 2px;
+    display: block;
+    max-width: 100%;
+    font-size: 11px;
+    color: var(--rv2-text-muted);
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.myavana-routines-v2-page .myavana-rv2-session-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--rv2-border);
+    display: flex;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-picker-sheet h3 {
+    margin: 12px 0 4px;
+    text-align: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-picker-sheet p {
+    margin: 0 0 20px;
+    text-align: center;
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-head {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--rv2-border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--rv2-lc);
+    color: var(--rv2-coral-deep);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-head h3 {
+    margin: 10px 0 4px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 24px;
+    line-height: 1.05;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-head p {
+    margin: 0;
+    text-align: left;
+    color: var(--rv2-text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-body {
+    padding: 18px 20px;
+    overflow-y: auto;
+    display: grid;
+    gap: 18px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-meta .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: var(--rv2-stone);
+    border: 1px solid var(--rv2-border);
+    color: var(--rv2-blueberry);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-section {
+    display: grid;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-copy {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--rv2-stone);
+    border: 1px solid var(--rv2-border);
+    color: var(--rv2-text-muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-preview-foot {
+    padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--rv2-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-grid button {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    justify-content: flex-start;
+    gap: 10px;
+    border: 1px solid var(--rv2-border);
+    border-radius: var(--rv2-r);
+    background: var(--rv2-stone);
+    color: var(--rv2-text);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 18px 14px;
+    cursor: pointer;
+}
+
+.myavana-routines-v2-page .myavana-rv2-template-grid button span {
+    line-height: 1.2;
+}
+
+@media (max-width: 1440px) {
+    .myavana-routines-v2-page .myavana-rv2-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .myavana-routines-v2-page .myavana-rv2 {
+        padding: 18px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-card {
+        min-height: 236px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today {
+        width: min(920px, 100%);
+    }
+}
+
+@media (max-width: 1100px) {
+    .myavana-routines-v2-page .myavana-rv2-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-library-head {
+        align-items: center;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .myavana-routines-v2-page.hair-journey-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2 {
+        padding: 14px;
+        border-radius: 12px;
+        min-height: auto;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-hero-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-stat-card {
+        padding: 12px 14px;
+        min-width: 0;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-stat-value {
+        font-size: 20px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today {
+        margin-top: 14px;
+        width: 100%;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-library {
+        margin-top: 16px;
+        padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px));
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-hub {
+        padding: 16px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-library-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-head,
+    .myavana-routines-v2-page .myavana-rv2-template-card__top,
+    .myavana-routines-v2-page .myavana-rv2-template-card__foot {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today-progress-label {
+        white-space: normal;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-today-item {
+        align-items: flex-start;
+        padding: 10px 14px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-start-btn,
+    .myavana-routines-v2-page .myavana-rv2-done-badge {
+        margin-top: 2px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-card-bottom {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 9px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-card-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-inline-btn {
+        justify-content: center;
+        min-height: 40px;
+        min-width: 0;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer {
+        top: auto;
+        right: 8px;
+        bottom: -100%;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: min(calc(100dvh - 16px), 780px);
+        border-left: 0;
+        border-top: 1px solid var(--rv2-border);
+        border-radius: 16px;
+        transition: bottom 0.28s;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer.is-open {
+        right: 8px;
+        bottom: 8px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-head {
+        padding: 14px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-head-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-tabs {
+        max-width: calc(100vw - 84px);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-pane-content,
+    .myavana-routines-v2-page .myavana-rv2-hero-block {
+        padding: 16px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-mini-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-foot,
+    .myavana-routines-v2-page .myavana-rv2-session-foot {
+        padding: 12px 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-foot .myavana-rv2-pill-btn:first-child,
+    .myavana-routines-v2-page .myavana-rv2-session-foot .myavana-rv2-pill-btn:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-drawer-foot .myavana-rv2-pill-btn,
+    .myavana-routines-v2-page .myavana-rv2-session-foot .myavana-rv2-pill-btn {
+        justify-content: center;
+        min-height: 42px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-sheet,
+    .myavana-routines-v2-page .myavana-rv2-picker-sheet,
+    .myavana-routines-v2-page .myavana-rv2-template-preview-sheet {
+        height: min(calc(100dvh - 16px), 94vh);
+        max-height: calc(100dvh - 16px);
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        bottom: 8px;
+        border-radius: 16px;
+        transform: translateX(-50%) translateY(105%);
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-picker-sheet {
+        height: auto;
+        max-height: 86vh;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        padding: 0 14px calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-preview-sheet {
+        height: auto;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-preview-head,
+    .myavana-routines-v2-page .myavana-rv2-template-preview-foot {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-preview-body {
+        padding: 14px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-head {
+        padding: 12px 14px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-progress {
+        padding: 8px 14px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-body {
+        padding: 14px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-step {
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 12px;
+        column-gap: 10px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-fab {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+    }
+}
+
+@media (max-width: 480px) {
+    .myavana-routines-v2-page .myavana-rv2 {
+        padding: 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-hero-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-stat-card {
+        padding: 11px 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-search {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-filter {
+        font-size: 10px;
+        padding: 7px 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-card-top {
+        padding: 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-card-title {
+        font-size: 14px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-grid button {
+        padding: 14px 12px;
+        font-size: 12px;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-preview-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-template-preview-foot {
+        flex-direction: column;
+    }
+}

@@ -1,0 +1,1570 @@
+.myavana-goals-v2-page {
+    --gv2-onyx: #222323;
+    --gv2-stone: #f5f5f7;
+    --gv2-white: #ffffff;
+    --gv2-sand: #eeece1;
+    --gv2-coral: #e7a690;
+    --gv2-lc: #fce5d7;
+    --gv2-blueberry: #4a4d68;
+    --gv2-bb-light: rgba(74, 77, 104, 0.1);
+    --gv2-bb-mid: rgba(74, 77, 104, 0.2);
+    --gv2-coral-deep: #d4856e;
+    --gv2-coral-bg: rgba(231, 166, 144, 0.12);
+    --gv2-green: #6a9e7f;
+    --gv2-green-bg: rgba(106, 158, 127, 0.1);
+    --gv2-green-mid: rgba(106, 158, 127, 0.25);
+    --gv2-amber: #c49a3c;
+    --gv2-amber-bg: rgba(196, 154, 60, 0.1);
+    --gv2-amber-mid: rgba(196, 154, 60, 0.25);
+    --gv2-text: #222323;
+    --gv2-muted: #6b6b6b;
+    --gv2-dim: #aaaaaa;
+    --gv2-border: #e8e8e8;
+    --gv2-border2: #d4d4d4;
+    --gv2-sh-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --gv2-sh-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --gv2-sh-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --gv2-glass: rgba(255, 255, 255, 0.58);
+    --gv2-glass-strong: rgba(255, 255, 255, 0.74);
+    --gv2-glass-line: rgba(255, 255, 255, 0.52);
+    --gv2-r: 14px;
+    --gv2-rsm: 9px;
+}
+
+.myavana-goals-v2-page .myavana-gv2 {
+    background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.52)),
+        radial-gradient(circle at 8% -8%, rgba(231, 166, 144, 0.18), transparent 36%),
+        radial-gradient(circle at 100% 0%, rgba(74, 77, 104, 0.14), transparent 38%),
+        rgba(245, 245, 247, 0.9);
+    color: var(--gv2-text);
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    border-radius: 18px;
+    padding: 20px;
+    max-width: 1560px;
+    margin: 0 auto;
+    box-shadow: 0 18px 48px rgba(34, 35, 35, 0.09);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-lucide {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .myavana-gv2-lucide.is-btn { width: 14px; height: 14px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-xs { width: 13px; height: 13px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-xxs { width: 12px; height: 12px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-md { width: 20px; height: 20px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-create { width: 20px; height: 20px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-fab { width: 22px; height: 22px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-close { width: 15px; height: 15px; }
+.myavana-goals-v2-page .myavana-gv2-lucide.is-star { width: 17px; height: 17px; }
+
+.myavana-gv2-confirm { position:fixed; inset:0; z-index:1300; display:grid; place-items:center; padding:20px; }
+.myavana-gv2-confirm-backdrop { position:absolute; inset:0; background:rgba(34,35,35,.5); backdrop-filter:blur(3px); }
+.myavana-gv2-confirm-card { position:relative; width:min(100%,420px); padding:28px; border:1px solid #e8e8e8; border-radius:20px; background:#fff; box-shadow:0 18px 48px rgba(34,35,35,.2); }
+.myavana-gv2-confirm-card h3 { margin:0 0 8px; color:#222323; font-family:'Archivo Black',sans-serif; font-size:20px; }
+.myavana-gv2-confirm-card p { margin:0; color:#6b6b6b; line-height:1.55; }
+.myavana-gv2-confirm-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+.myavana-gv2-confirm-actions button { min-height:42px; padding:10px 16px; border:1px solid #d8d8d8; border-radius:999px; background:#fff; color:#4a4d68; font:700 13px/1 'Archivo',sans-serif; cursor:pointer; }
+.myavana-gv2-confirm-actions [data-gv2-delete] { border-color:#b74242; background:#b74242; color:#fff; }
+.myavana-gv2-confirm-actions button:focus-visible { outline:3px solid rgba(74,77,104,.28); outline-offset:2px; }
+
+.myavana-goals-v2-page .myavana-gv2-overview {
+    background:
+        linear-gradient(135deg, rgba(74, 77, 104, 0.92) 0%, rgba(61, 64, 96, 0.88) 100%);
+    border-radius: var(--gv2-r);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 34px rgba(49, 51, 76, 0.24);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    right: 60px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(231, 166, 144, 0.12);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-left {
+    position: relative;
+    z-index: 1;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-left .eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 8px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-left h2 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 25px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-left h2 span { color: var(--gv2-coral); }
+
+.myavana-goals-v2-page .myavana-gv2-overview-left p {
+    margin: 8px 0 0;
+    max-width: 430px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-stats {
+    display: flex;
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-stats article {
+    padding: 13px 16px;
+    min-width: 92px;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-stats article:last-child { border-right: 0; }
+
+.myavana-goals-v2-page .myavana-gv2-overview-stats .val {
+    font-family: 'Archivo Black', sans-serif;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview-stats .lbl {
+    margin-top: 3px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert {
+    margin-top: 14px;
+    background: linear-gradient(135deg, rgba(253, 250, 243, 0.82), rgba(253, 246, 236, 0.72));
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    border-radius: var(--gv2-r);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 12px 28px rgba(196, 154, 60, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--gv2-amber-bg);
+    border: 1px solid var(--gv2-amber-mid);
+    color: var(--gv2-amber);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .info { flex: 1; min-width: 0; }
+
+.myavana-goals-v2-page .myavana-gv2-alert .info h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .info p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--gv2-muted);
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .cta {
+    border: 1px solid var(--gv2-amber-mid);
+    border-radius: 999px;
+    background: var(--gv2-amber-bg);
+    color: var(--gv2-amber);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .close {
+    border: 1px solid rgba(74, 77, 104, 0.2);
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--gv2-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    line-height: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myavana-goals-v2-page .myavana-gv2-goals-wrap {
+    margin-top: 18px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-controls .left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.myavana-goals-v2-page .myavana-gv2-controls h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-btn {
+    border-radius: 999px;
+    border: 1px solid var(--gv2-coral);
+    background: var(--gv2-coral);
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.myavana-goals-v2-page .myavana-gv2-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(231, 166, 144, 0.24);
+}
+
+.myavana-goals-v2-page .myavana-gv2-btn.ghost {
+    background: #fff;
+    color: var(--gv2-muted);
+    border-color: var(--gv2-border);
+}
+
+.myavana-goals-v2-page .myavana-gv2-btn.ghost:hover {
+    border-color: rgba(231, 166, 144, 0.5);
+    background: #fff8f3;
+    color: var(--gv2-onyx);
+}
+
+.myavana-goals-v2-page .myavana-gv2-btn.danger {
+    background: transparent;
+    color: #c8503c;
+    border-color: rgba(200, 80, 60, 0.2);
+}
+
+.myavana-goals-v2-page .status-tabs {
+    display: inline-flex;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 3px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.myavana-goals-v2-page .status-tabs .tab {
+    border: 0;
+    background: transparent;
+    color: var(--gv2-muted);
+    padding: 7px 14px;
+    font-size: 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.myavana-goals-v2-page .status-tabs .tab.is-active {
+    background: var(--gv2-onyx);
+    color: #fff;
+}
+
+.myavana-goals-v2-page .myavana-gv2-category-row {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 16px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-category-row::-webkit-scrollbar { display: none; }
+
+.myavana-goals-v2-page .myavana-gv2-category-row .chip {
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.76);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--gv2-blueberry);
+    padding: 6px 13px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 18px rgba(34, 35, 35, 0.05);
+}
+
+.myavana-goals-v2-page .myavana-gv2-category-row .chip.is-active {
+    background: var(--gv2-blueberry);
+    color: #fff;
+    border-color: var(--gv2-blueberry);
+}
+
+.myavana-goals-v2-page .myavana-gv2-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-card {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.66));
+    border: 1px solid rgba(255, 255, 255, 0.76);
+    border-radius: var(--gv2-r);
+    box-shadow: 0 12px 28px rgba(34, 35, 35, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card:hover {
+    box-shadow: 0 18px 34px rgba(34, 35, 35, 0.12);
+    transform: translateY(-3px);
+    border-color: rgba(231, 166, 144, 0.42);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-strip {
+    width: 100%;
+    height: 4px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-strip.strip-coral { background: linear-gradient(90deg, var(--gv2-coral), #f0b89a); }
+.myavana-goals-v2-page .myavana-gv2-card-strip.strip-bb { background: linear-gradient(90deg, var(--gv2-blueberry), #6b6f92); }
+.myavana-goals-v2-page .myavana-gv2-card-strip.strip-green { background: linear-gradient(90deg, var(--gv2-green), #8ec4a4); }
+.myavana-goals-v2-page .myavana-gv2-card-strip.strip-amber { background: linear-gradient(90deg, var(--gv2-amber), #dbb85c); }
+
+.myavana-goals-v2-page .myavana-gv2-card-body {
+    padding: 14px 14px 12px;
+    flex: 1;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-body .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-body .badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.myavana-goals-v2-page .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.myavana-goals-v2-page .badge.cb-coral { background: var(--gv2-lc); color: var(--gv2-coral-deep); }
+.myavana-goals-v2-page .badge.cb-bb { background: var(--gv2-bb-light); color: var(--gv2-blueberry); }
+.myavana-goals-v2-page .badge.cb-green { background: var(--gv2-green-bg); color: var(--gv2-green); }
+.myavana-goals-v2-page .badge.cb-amber { background: var(--gv2-amber-bg); color: var(--gv2-amber); }
+.myavana-goals-v2-page .badge.cb-sand { background: var(--gv2-sand); color: #7a7150; }
+
+.myavana-goals-v2-page .priority-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.myavana-goals-v2-page .priority-dot.pd-high { background: #e05252; }
+.myavana-goals-v2-page .priority-dot.pd-med { background: var(--gv2-amber); }
+.myavana-goals-v2-page .priority-dot.pd-low { background: var(--gv2-green); }
+
+.myavana-goals-v2-page .myavana-gv2-card .title {
+    margin: 0;
+    display: block;
+    min-width: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--gv2-onyx);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.myavana-goals-v2-page .myavana-gv2-card .desc {
+    margin: 5px 0 12px;
+    font-size: 11px;
+    line-height: 1.58;
+    color: var(--gv2-muted);
+}
+
+.myavana-goals-v2-page .progress-wrap { margin-bottom: 12px; }
+
+.myavana-goals-v2-page .progress-wrap .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .progress-wrap .label {
+    font-size: 11px;
+    color: var(--gv2-text);
+}
+
+.myavana-goals-v2-page .progress-wrap .pct {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 17px;
+}
+
+.myavana-goals-v2-page .progress-wrap .pct.prog-coral { color: var(--gv2-coral-deep); }
+.myavana-goals-v2-page .progress-wrap .pct.prog-bb { color: var(--gv2-blueberry); }
+.myavana-goals-v2-page .progress-wrap .pct.prog-green { color: var(--gv2-green); }
+.myavana-goals-v2-page .progress-wrap .pct.prog-amber { color: var(--gv2-amber); }
+
+.myavana-goals-v2-page .progress-wrap .track {
+    height: 7px;
+    border-radius: 4px;
+    background: var(--gv2-stone);
+    overflow: hidden;
+}
+
+.myavana-goals-v2-page .progress-wrap .fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+.myavana-goals-v2-page .fill.pf-coral { background: linear-gradient(90deg, var(--gv2-coral), #f0b89a); }
+.myavana-goals-v2-page .fill.pf-bb { background: linear-gradient(90deg, var(--gv2-blueberry), #6b6f92); }
+.myavana-goals-v2-page .fill.pf-green { background: linear-gradient(90deg, var(--gv2-green), #8ec4a4); }
+.myavana-goals-v2-page .fill.pf-amber { background: linear-gradient(90deg, var(--gv2-amber), #dbb85c); }
+
+.myavana-goals-v2-page .values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.myavana-goals-v2-page .values .item {
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--gv2-rsm);
+    padding: 8px 10px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.myavana-goals-v2-page .values .num {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    color: var(--gv2-blueberry);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.myavana-goals-v2-page .values .lbl {
+    margin-top: 1px;
+    font-size: 9px;
+    color: var(--gv2-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.myavana-goals-v2-page .milestones .m-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gv2-dim);
+    margin-bottom: 7px;
+}
+
+.myavana-goals-v2-page .milestones .m-track {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.myavana-goals-v2-page .milestones .m-node {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--gv2-border);
+    background: #fff;
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .milestones .m-node.hit {
+    background: var(--gv2-coral);
+    border-color: var(--gv2-coral);
+    color: #fff;
+}
+
+.myavana-goals-v2-page .milestones .m-node.next {
+    border-color: var(--gv2-coral);
+    border-style: dashed;
+}
+
+.myavana-goals-v2-page .milestones .m-line {
+    flex: 1;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--gv2-border);
+}
+
+.myavana-goals-v2-page .milestones .m-line.hit { background: var(--gv2-coral); }
+
+.myavana-goals-v2-page .milestones .m-caption {
+    margin-top: 5px;
+    font-size: 10px;
+    color: var(--gv2-muted);
+}
+
+.myavana-goals-v2-page .meta {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.myavana-goals-v2-page .meta .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.66);
+    background: rgba(255, 255, 255, 0.52);
+    color: var(--gv2-muted);
+    font-size: 10px;
+    padding: 4px 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-foot {
+    background: rgba(255, 255, 255, 0.44);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-foot .left-meta {
+    font-size: 10px;
+    color: var(--gv2-dim);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-foot .left-streak {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--gv2-coral-deep);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.myavana-goals-v2-page .checkin-btn {
+    border: 1px solid var(--gv2-coral);
+    background: var(--gv2-coral);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.myavana-goals-v2-page .checkin-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(231, 166, 144, 0.26);
+    background: var(--gv2-coral-deep);
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card {
+    border: 1px dashed rgba(74, 77, 104, 0.22);
+    border-radius: var(--gv2-r);
+    min-height: 232px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.56));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(231, 166, 144, 0.56);
+    background: #fff9f4;
+    box-shadow: 0 12px 24px rgba(34, 35, 35, 0.08);
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card .cc-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gv2-lc);
+    color: var(--gv2-coral-deep);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card h4 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card p {
+    margin: 0;
+    color: var(--gv2-muted);
+    font-size: 11px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card.is-empty {
+    grid-column: 1 / -1;
+    min-height: 220px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-completed {
+    margin-top: 18px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-completed .head h3 {
+    margin: 0 0 12px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 15px;
+    color: var(--gv2-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-completed .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.myavana-goals-v2-page .comp-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.62));
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: var(--gv2-r);
+    box-shadow: 0 10px 24px rgba(34, 35, 35, 0.06);
+    padding: 14px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.myavana-goals-v2-page .comp-card .top {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.myavana-goals-v2-page .comp-card .check {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--gv2-green-mid);
+    background: var(--gv2-green-bg);
+    color: var(--gv2-green);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .comp-card .title {
+    margin: 0;
+    display: block;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    color: var(--gv2-onyx);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.myavana-goals-v2-page .comp-card .date {
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--gv2-dim);
+}
+
+.myavana-goals-v2-page .comp-card .reward {
+    border: 1px solid var(--gv2-amber-mid);
+    background: var(--gv2-amber-bg);
+    color: var(--gv2-amber);
+    border-radius: 999px;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 92px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--gv2-coral);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(231, 166, 144, 0.5);
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.35);
+    backdrop-filter: blur(3px);
+    z-index: 80;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.myavana-goals-v2-page .myavana-gv2-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.myavana-goals-v2-page .myavana-gv2-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 540px;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(250, 248, 247, 0.82));
+    border-left: 1px solid rgba(255, 255, 255, 0.78);
+    box-shadow: 0 18px 42px rgba(34, 35, 35, 0.14);
+    z-index: 90;
+    transform: translate3d(calc(100% + 32px), 0, 0);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.28s ease, opacity 0.2s ease, visibility 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-drawer.is-open {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.myavana-goals-v2-page .drawer-head {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.64);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.myavana-goals-v2-page .drawer-head h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+}
+
+.myavana-goals-v2-page .drawer-head .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .drawer-head .tabs {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid rgba(255, 255, 255, 0.74);
+    border-radius: 999px;
+    padding: 3px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.myavana-goals-v2-page .drawer-head .tabs .tab {
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    color: var(--gv2-muted);
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .drawer-head .tabs .tab.is-active {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--gv2-onyx);
+}
+
+.myavana-goals-v2-page .drawer-head .close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--gv2-border);
+    background: var(--gv2-stone);
+    color: var(--gv2-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .drawer-scroll {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 100%;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.myavana-goals-v2-page .pane { display: none; }
+.myavana-goals-v2-page .pane.is-active { display: block; }
+
+.myavana-goals-v2-page .hero {
+    padding: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.62);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.18));
+}
+
+.myavana-goals-v2-page .hero .strip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--gv2-coral), #f0b89a);
+}
+
+.myavana-goals-v2-page .hero .badges {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.myavana-goals-v2-page .hero h4 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--gv2-onyx);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.myavana-goals-v2-page .hero p {
+    margin: 7px 0 12px;
+    color: var(--gv2-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.myavana-goals-v2-page .hero .big-progress .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .hero .big-progress .pct {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 34px;
+    color: var(--gv2-coral-deep);
+    line-height: 1;
+}
+
+.myavana-goals-v2-page .hero .big-progress .lbl {
+    margin-top: 1px;
+    color: var(--gv2-muted);
+    font-size: 11px;
+}
+
+.myavana-goals-v2-page .hero .big-progress .status {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    color: var(--gv2-green);
+}
+
+.myavana-goals-v2-page .hero .big-progress .track {
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--gv2-stone);
+}
+
+.myavana-goals-v2-page .hero .big-progress .fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--gv2-coral), #f0b89a);
+    transition: width 1s ease;
+}
+
+.myavana-goals-v2-page .hero .timeline {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .hero .timeline .item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--gv2-muted);
+    font-size: 11px;
+}
+
+.myavana-goals-v2-page .hero .timeline .sep {
+    width: 18px;
+    height: 1px;
+    background: var(--gv2-border2);
+}
+
+.myavana-goals-v2-page .body {
+    padding: 18px;
+}
+
+.myavana-goals-v2-page .body .sec { margin-bottom: 20px; }
+
+.myavana-goals-v2-page .label {
+    margin-bottom: 9px;
+    color: var(--gv2-dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.myavana-goals-v2-page .value-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .value-grid .v {
+    border-radius: var(--gv2-rsm);
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 12px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.myavana-goals-v2-page .value-grid .v.current {
+    border: 1px solid rgba(231, 166, 144, 0.35);
+    background: var(--gv2-lc);
+}
+
+.myavana-goals-v2-page .value-grid .num {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 19px;
+    color: var(--gv2-blueberry);
+}
+
+.myavana-goals-v2-page .value-grid .v.current .num { color: var(--gv2-coral-deep); }
+
+.myavana-goals-v2-page .value-grid .l {
+    margin-top: 2px;
+    color: var(--gv2-dim);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.myavana-goals-v2-page .body p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--gv2-muted);
+    line-height: 1.75;
+}
+
+.myavana-goals-v2-page .reward-pill {
+    border-radius: 999px;
+    border: 1px solid var(--gv2-amber-mid);
+    background: var(--gv2-amber-bg);
+    color: var(--gv2-amber);
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+}
+
+.myavana-goals-v2-page .milestone-item,
+.myavana-goals-v2-page .checkin-item,
+.myavana-goals-v2-page .routine-item {
+    border-bottom: 1px solid var(--gv2-border);
+    padding: 12px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.myavana-goals-v2-page .milestone-item:last-child,
+.myavana-goals-v2-page .checkin-item:last-child,
+.myavana-goals-v2-page .routine-item:last-child { border-bottom: 0; }
+
+.myavana-goals-v2-page .ms-icon,
+.myavana-goals-v2-page .ck-icon,
+.myavana-goals-v2-page .rt-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .ms-icon.hit,
+.myavana-goals-v2-page .ck-icon { background: var(--gv2-lc); color: var(--gv2-coral-deep); border: 1px solid rgba(231, 166, 144, 0.35); }
+.myavana-goals-v2-page .ms-icon.next,
+.myavana-goals-v2-page .rt-icon { background: var(--gv2-stone); color: var(--gv2-blueberry); border: 1px solid var(--gv2-border); }
+.myavana-goals-v2-page .ms-icon.future { background: var(--gv2-stone); color: var(--gv2-dim); border: 1px dashed var(--gv2-border2); }
+
+.myavana-goals-v2-page .ms-content,
+.myavana-goals-v2-page .ck-content,
+.myavana-goals-v2-page .rt-content { flex: 1; min-width: 0; }
+
+.myavana-goals-v2-page .ms-title,
+.myavana-goals-v2-page .ck-note,
+.myavana-goals-v2-page .rt-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gv2-text);
+}
+
+.myavana-goals-v2-page .ms-sub,
+.myavana-goals-v2-page .ck-sub,
+.myavana-goals-v2-page .rt-sub {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--gv2-muted);
+}
+
+.myavana-goals-v2-page .ms-badge {
+    border-radius: 999px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    padding: 3px 9px;
+    flex-shrink: 0;
+}
+
+.myavana-goals-v2-page .ms-badge.hit { background: var(--gv2-lc); color: var(--gv2-coral-deep); }
+.myavana-goals-v2-page .ms-badge.next { background: var(--gv2-bb-light); color: var(--gv2-blueberry); }
+.myavana-goals-v2-page .ms-badge.future { background: var(--gv2-stone); color: var(--gv2-dim); }
+
+.myavana-goals-v2-page .checkins-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.myavana-goals-v2-page .impact {
+    margin-top: 14px;
+    border-radius: var(--gv2-rsm);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: linear-gradient(180deg, rgba(74, 77, 104, 0.08), rgba(255, 255, 255, 0.46));
+    color: var(--gv2-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.myavana-goals-v2-page .drawer-foot {
+    border-top: 1px solid rgba(255, 255, 255, 0.64);
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.44);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin .box {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 100vw - 28px);
+    margin: 32px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: var(--gv2-sh-lg);
+    padding: 20px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin h3 {
+    margin: 0;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin .top .close {
+    border: 1px solid var(--gv2-border);
+    background: var(--gv2-stone);
+    color: var(--gv2-muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    line-height: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin p {
+    margin: 4px 0 14px;
+    color: var(--gv2-muted);
+    font-size: 12px;
+}
+
+.myavana-goals-v2-page .field-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gv2-text);
+    font-weight: 700;
+}
+
+.myavana-goals-v2-page .measure-row {
+    margin-bottom: 12px;
+    border: 1px solid var(--gv2-border);
+    border-radius: var(--gv2-rsm);
+    background: var(--gv2-stone);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+}
+
+.myavana-goals-v2-page .measure-row input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 21px;
+    color: var(--gv2-onyx);
+    font-weight: 700;
+}
+
+.myavana-goals-v2-page .measure-row span {
+    color: var(--gv2-muted);
+    font-size: 12px;
+}
+
+.myavana-goals-v2-page .moods,
+.myavana-goals-v2-page .stars {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 12px;
+}
+
+.myavana-goals-v2-page .moods .mood {
+    border: 1px solid var(--gv2-border);
+    background: var(--gv2-stone);
+    border-radius: 999px;
+    color: var(--gv2-text);
+    font-size: 12px;
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .moods .mood.is-selected {
+    border-color: var(--gv2-coral);
+    background: var(--gv2-lc);
+}
+
+.myavana-goals-v2-page .stars .star {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gv2-border);
+    background: var(--gv2-stone);
+    color: var(--gv2-dim);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.myavana-goals-v2-page .stars .star .myavana-gv2-lucide {
+    stroke: currentColor;
+    fill: transparent;
+}
+
+.myavana-goals-v2-page .stars .star.is-selected {
+    border-color: var(--gv2-coral);
+    background: var(--gv2-lc);
+    color: var(--gv2-coral);
+}
+
+.myavana-goals-v2-page .stars .star.is-selected .myavana-gv2-lucide {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin textarea {
+    width: 100%;
+    min-height: 90px;
+    resize: none;
+    border: 1px solid var(--gv2-border);
+    border-radius: var(--gv2-rsm);
+    background: var(--gv2-stone);
+    padding: 11px;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gv2-text);
+}
+
+.myavana-goals-v2-page .myavana-gv2-checkin .btn-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 95;
+    transition: opacity 0.2s;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker {
+    position: fixed;
+    left: 50%;
+    bottom: -100%;
+    transform: translateX(-50%);
+    width: min(500px, 100vw);
+    background: #fff;
+    border-top: 1px solid var(--gv2-border);
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--gv2-sh-lg);
+    padding: 16px 18px 26px;
+    z-index: 96;
+    transition: bottom 0.28s;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker.is-open { bottom: 0; }
+
+.myavana-goals-v2-page .myavana-gv2-picker .handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--gv2-border2);
+    margin: 0 auto 14px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker h3 {
+    margin: 0;
+    text-align: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker p {
+    margin: 4px 0 16px;
+    text-align: center;
+    color: var(--gv2-muted);
+    font-size: 12px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.myavana-goals-v2-page .myavana-gv2-picker .picker-grid button {
+    border: 1.5px solid var(--gv2-border);
+    background: var(--gv2-stone);
+    border-radius: var(--gv2-r);
+    font-size: 12px;
+    color: var(--gv2-text);
+    font-weight: 700;
+    padding: 14px 10px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+@media (max-width: 1280px) {
+    .myavana-goals-v2-page .myavana-gv2-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-completed .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 960px) {
+    .myavana-goals-v2-page .myavana-gv2-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .myavana-goals-v2-page .myavana-gv2 {
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-overview {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-overview-stats {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-overview-stats article {
+        flex: 1;
+        min-width: 0;
+        padding: 10px 6px;
+    }
+
+    .myavana-goals-v2-page .status-tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-completed .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-drawer {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100dvh - 16px);
+        top: 8px;
+        bottom: 8px;
+        border-radius: 16px;
+        border-left: 1px solid var(--gv2-border);
+        max-height: calc(100dvh - 16px);
+        transform: translate3d(calc(100% + 24px), 0, 0);
+    }
+
+    .myavana-goals-v2-page .drawer-head {
+        flex-wrap: wrap;
+    }
+
+    .myavana-goals-v2-page .drawer-foot {
+        flex-wrap: wrap;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-drawer.is-open {
+        transform: translate3d(-8px, 0, 0);
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-fab {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-checkin .box {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+        margin: 8px auto;
+        overflow-y: auto;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker {
+        width: calc(100vw - 16px);
+        bottom: -110%;
+        border-radius: 16px;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker.is-open {
+        bottom: 8px;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker .picker-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

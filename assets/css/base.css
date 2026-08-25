@@ -1,0 +1,93 @@
+/**
+ * Scoped Base Reset & Typography
+ *
+ * @package Myavana\Next
+ */
+
+.myavana-next {
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--myavana-onyx);
+    background-color: var(--myavana-stone);
+    min-height: 100vh;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.myavana-next *,
+.myavana-next *::before,
+.myavana-next *::after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+.myavana-next h1,
+.myavana-next h2,
+.myavana-next h3,
+.myavana-next h4,
+.myavana-next h5,
+.myavana-next h6 {
+    font-family: var(--font-heading);
+    color: var(--myavana-onyx);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.myavana-next h1 { font-size: 28px; }
+.myavana-next h2 { font-size: 22px; }
+.myavana-next h3 { font-size: 18px; }
+.myavana-next h4 { font-size: 16px; }
+
+.myavana-next p {
+    margin-bottom: var(--space-xs);
+    color: var(--myavana-muted);
+}
+
+.myavana-next a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.myavana-next button,
+.myavana-next input,
+.myavana-next textarea,
+.myavana-next select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* :where() keeps this reset's specificity at plain `button` (0,0,1) so it
+   can never outrank a .myavana-btn-* variant class (0,1,0) regardless of
+   stylesheet order — a real <button> using .myavana-btn-primary was
+   otherwise silently losing its background to this reset. */
+:where(.myavana-next) button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+}
+
+.myavana-next img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.myavana-next .screen-reader-text {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    word-wrap: normal !important;
+}
+

@@ -1,0 +1,31 @@
+/* Route-owned goal composer: prevents bare shared-form markup from appearing in Goals. */
+.myavana-goals-v2-page .offcanvas-overlay-hjn { position: fixed; inset: 0; z-index: 1200; opacity: 0; pointer-events: none; background: rgba(34,35,35,.52); backdrop-filter: blur(4px); transition: opacity .2s ease; }
+.myavana-goals-v2-page .offcanvas-overlay-hjn.is-open { opacity: 1; pointer-events: auto; }
+.myavana-goals-v2-page #goalOffcanvas.offcanvas-hjn { position: fixed; inset: 0 0 0 auto; z-index: 1201; display: flex; flex-direction: column; width: min(560px,100vw); height: 100dvh; overflow: hidden; background: #fdfbf9; box-shadow: -12px 0 48px rgba(34,35,35,.18); transform: translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.myavana-goals-v2-page #goalOffcanvas.offcanvas-hjn.is-open { transform: translateX(0); }
+.myavana-goals-v2-page #goalOffcanvas .offcanvas-header-hjn { position: relative; padding: 30px 64px 24px 28px; background: #4a4d68; color: #fff; }
+.myavana-goals-v2-page #goalOffcanvas .offcanvas-title-hjn { margin: 0; color: #fff; font-family: 'Archivo Black', sans-serif; font-size: 24px; letter-spacing: -.03em; }
+.myavana-goals-v2-page #goalOffcanvas .offcanvas-subtitle-hjn { margin: 7px 0 0; color: rgba(255,255,255,.72); font-size: 14px; }
+.myavana-goals-v2-page #goalOffcanvas .offcanvas-close-hjn { position: absolute; top: 22px; right: 22px; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+.myavana-goals-v2-page #goalOffcanvas .offcanvas-content-hjn { flex: 1; overflow-y: auto; padding: 24px 28px 32px; }
+.myavana-goals-v2-page #goalForm .float-field-hjn,.myavana-goals-v2-page #goalForm .form-group-hjn { margin-bottom: 20px; }
+.myavana-goals-v2-page #goalForm .form-row-hjn { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.myavana-goals-v2-page #goalForm .form-input-hjn,.myavana-goals-v2-page #goalForm .form-select-hjn,.myavana-goals-v2-page #goalForm .form-textarea-hjn { width:100%; border:1px solid #dedbd7; border-radius:10px; background:#fff; color:#222323; padding:13px 14px; font:inherit; font-size:14px; }
+.myavana-goals-v2-page #goalForm .form-textarea-hjn { resize:vertical; }
+.myavana-goals-v2-page #goalForm .float-label-hjn,.myavana-goals-v2-page #goalForm .form-label-hjn { display:block; margin:0 0 7px; color:#4a4d68; font-size:12px; font-weight:700; }
+.myavana-goals-v2-page #goalForm .float-field-hjn { display:flex; flex-direction:column-reverse; }
+.myavana-goals-v2-page #goalForm .float-field-hjn .float-label-hjn { margin:0 0 7px; }
+.myavana-goals-v2-page #goalForm .form-input-hjn:focus,.myavana-goals-v2-page #goalForm .form-select-hjn:focus,.myavana-goals-v2-page #goalForm .form-textarea-hjn:focus { outline:none; border-color:#e7a690; box-shadow:0 0 0 3px rgba(231,166,144,.2); }
+.myavana-goals-v2-page #goalForm .tag-pills-hjn { display:flex; flex-wrap:wrap; gap:8px; }
+.myavana-goals-v2-page #goalForm .tag-pill-hjn { border:1px solid #dedbd7; border-radius:999px; background:#fff; color:#4a4d68; padding:7px 10px; font:inherit; font-size:12px; cursor:pointer; }
+.myavana-goals-v2-page #goalForm .tag-pill-hjn.is-active { border-color:#4a4d68; background:#4a4d68; color:#fff; }
+.myavana-goals-v2-page #goalForm .section-divider-hjn { display:flex; align-items:center; gap:10px; margin:25px 0 14px; color:#4a4d68; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+.myavana-goals-v2-page #goalForm .section-divider-hjn::after { content:''; flex:1; height:1px; background:#e5e2de; }
+.myavana-goals-v2-page #goalForm .btn-add-hjn { border:0; background:transparent; color:#4a4d68; padding:5px 0; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+.myavana-goals-v2-page #goalForm .form-actions-hjn { display:flex; justify-content:flex-end; gap:10px; padding-top:20px; border-top:1px solid #e5e2de; }
+.myavana-goals-v2-page #goalForm .btn-cancel-hjn,.myavana-goals-v2-page #goalForm .btn-save-hjn { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:11px 16px; font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+.myavana-goals-v2-page #goalForm .btn-cancel-hjn { border:1px solid #d7d3ce; background:#fff; color:#4a4d68; }
+.myavana-goals-v2-page #goalForm .btn-save-hjn { border:1px solid #4a4d68; background:#4a4d68; color:#fff; }
+.myavana-goals-v2-page #goalForm .form-loading-hjn { position:sticky; bottom:0; padding:12px; border-radius:10px; background:#222323; color:#fff; text-align:center; font-size:13px; }
+.myavana-goals-v2-page #goalForm .form-loading-hjn p { margin:0; }
+@media (max-width:560px) { .myavana-goals-v2-page #goalOffcanvas .offcanvas-content-hjn { padding:20px; } .myavana-goals-v2-page #goalForm .form-row-hjn { grid-template-columns:1fr; gap:0; } }

@@ -1,0 +1,108 @@
+/**
+ * Community Feed & Hair Twins View Styles
+ *
+ * @package Myavana\Next
+ */
+
+.myavana-community-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+}
+
+@media (min-width: 992px) {
+    .myavana-community-layout {
+        grid-template-columns: 1.8fr 1fr;
+    }
+}
+
+/* Post Composer */
+.myavana-composer-card {
+    background: var(--myavana-white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg);
+    border: 1px solid var(--myavana-border);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: var(--space-xl);
+}
+
+.myavana-composer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--myavana-border);
+}
+
+/* Social Feed Post Card */
+.myavana-post-card {
+    background: var(--myavana-white);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--myavana-border);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.myavana-post-author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.myavana-post-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.myavana-post-media {
+    margin: var(--space-md) 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-height: 420px;
+}
+
+.myavana-post-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.myavana-post-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--myavana-border);
+    color: var(--myavana-muted);
+    font-size: 13px;
+}
+
+.myavana-post-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--myavana-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.myavana-post-action-btn:hover {
+    color: var(--myavana-coral-dark);
+}
+
+/* Hair Twins Cards */
+.myavana-twin-card {
+    background: var(--myavana-white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    border: 1px solid var(--myavana-border);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
