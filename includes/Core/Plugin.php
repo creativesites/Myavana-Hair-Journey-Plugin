@@ -81,6 +81,24 @@ class Plugin {
         if (is_admin()) {
             SettingsPage::init();
         }
+
+        // Outgoing mail has been sending from whichever address a given
+        // code path (WP core, WP Mail SMTP's dashboard config, another
+        // plugin, or our own AuthService) happened to set last — including
+        // a personal testing inbox left over from early SMTP setup. Every
+        // site email must consistently claim to be from
+        // support@myavana.com, so this hooks at the highest possible
+        // priority to run after (and win over) any other plugin's
+        // wp_mail_from filter, including WP Mail SMTP's own.
+        add_filter('wp_mail_from', [$this, 'forceMailFromAddress'], PHP_INT_MAX);
+    }
+
+    /**
+     * @param string $original
+     * @return string
+     */
+    public function forceMailFromAddress(string $original): string {
+        return 'support@myavana.com';
     }
 
     /**

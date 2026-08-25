@@ -25,6 +25,16 @@ class AuthService {
     private const RESET_TOKEN_TTL = HOUR_IN_SECONDS;
 
     /**
+     * The site's own transactional emails (verification, password reset)
+     * must always claim to be from support@myavana.com, regardless of
+     * whatever address the WP Mail SMTP plugin (or any other mail plugin)
+     * happens to be configured with at the time — that dashboard setting
+     * has drifted between a personal testing inbox and this address before,
+     * which silently changed who these emails appeared to come from.
+     */
+    private const MAIL_FROM_ADDRESS = 'support@myavana.com';
+
+    /**
      * Register a new user with email + password.
      *
      * @param array $data ['name' => string, 'email' => string, 'password' => string, 'terms' => bool]
@@ -262,7 +272,7 @@ class AuthService {
 
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . $siteName . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
+            'From: ' . $siteName . ' <' . self::MAIL_FROM_ADDRESS . '>',
         ];
 
         return wp_mail($user->user_email, $subject, $message, $headers);
@@ -417,7 +427,7 @@ class AuthService {
 
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . $siteName . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
+            'From: ' . $siteName . ' <' . self::MAIL_FROM_ADDRESS . '>',
         ];
 
         return wp_mail($user->user_email, $subject, $message, $headers);

@@ -19,6 +19,7 @@ MyavanaNext.Journey = (function() {
     let compareA = null;
     let compareB = null;
     let shareContext = null;
+    let pendingFocusEntryId = null;
 
     const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback', quick_checkin: 'Check-in', standard: 'Entry' };
     const MOOD_LABELS = { happy: '✨ Great', neutral: '🌿 Normal', dry: '🍂 Dry', itchy: '💆 Sensitive' };
@@ -67,6 +68,32 @@ MyavanaNext.Journey = (function() {
         renderStorySegments();
         renderStoryThumbs();
         renderStorySlide();
+        applyPendingFocus();
+    }
+
+    /**
+     * Called from Today's story strip: switch to the timeline view (a
+     * single entry has no dedicated detail screen of its own) and, once
+     * this refresh finishes rendering, scroll to and briefly highlight the
+     * matching card so the tap visibly landed somewhere.
+     */
+    function focusEntry(entryId) {
+        pendingFocusEntryId = String(entryId || '');
+        switchView('timeline');
+    }
+
+    function applyPendingFocus() {
+        if (!pendingFocusEntryId) return;
+        const id = pendingFocusEntryId;
+        pendingFocusEntryId = null;
+
+        const card = container.querySelector(`.myavana-timeline-card[data-entry-id="${id}"]`);
+        if (!card) return;
+        window.requestAnimationFrame(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('is-focused');
+            window.setTimeout(() => card.classList.remove('is-focused'), 2200);
+        });
     }
 
     // =========================
@@ -615,5 +642,5 @@ MyavanaNext.Journey = (function() {
         return div.innerHTML;
     }
 
-    return { init, refresh };
+    return { init, refresh, focusEntry };
 })();

@@ -54,11 +54,6 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                     <span><?php esc_html_e('Chat with us', 'myavana-hair-journey-next'); ?></span>
                 </button>
 
-                <!-- Quick Check-in Button (Desktop) -->
-                <button type="button" class="myavana-btn myavana-btn-dark myavana-btn-sm btn-open-smart-entry" id="desktop-quick-entry-btn">
-                    <span>+</span> <?php esc_html_e('New entry', 'myavana-hair-journey-next'); ?>
-                </button>
-
                 <?php if (is_user_logged_in()) : ?>
                     <div class="myavana-next-account-menu">
                         <button type="button" class="myavana-next-avatar-btn" id="myavana-account-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="myavana-account-dropdown" title="<?php echo esc_attr($displayName); ?>">

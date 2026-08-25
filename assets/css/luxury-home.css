@@ -786,6 +786,12 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 16px;
 }
 
+/* Extra specificity so this always wins regardless of stylesheet load
+   order — the hero's "My Hair Timeline" link must stay white-on-dark. */
+.myavana-luxury-hero .myavana-luxury-hero-actions a.myavana-luxury-btn-primary {
+    color: var(--myavana-white);
+}
+
 /* Hero Visual */
 .myavana-luxury-hero-visual {
     display: flex;
@@ -1917,6 +1923,22 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .myavana-luxury-member-metric {
+        padding: 12px 8px;
+    }
+
+    .myavana-luxury-member-metric .value {
+        font-size: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .myavana-luxury-member-metric .label {
+        font-size: 9.5px;
+        letter-spacing: 0.04em;
+    }
+
     .myavana-luxury-features-grid {
         grid-template-columns: 1fr;
         gap: var(--space-lg);
@@ -1936,6 +1958,16 @@ h1, h2, h3, h4, h5, h6 {
     .myavana-luxury-final-cta-actions .myavana-luxury-btn-secondary {
         width: 100%;
         justify-content: center;
+    }
+
+    .myavana-luxury-cta-center .myavana-luxury-btn-primary {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+        white-space: normal;
+        padding: 16px 20px;
+        font-size: 14px;
     }
 
     .myavana-luxury-trust-indicators {
@@ -2014,6 +2046,19 @@ h1, h2, h3, h4, h5, h6 {
     .myavana-luxury-stat-label,
     .action-content p {
         font-size: 10px;
+    }
+
+    .myavana-luxury-member-metric {
+        padding: 10px 6px;
+    }
+
+    .myavana-luxury-member-metric .value {
+        font-size: 17px;
+        margin-bottom: 4px;
+    }
+
+    .myavana-luxury-member-metric .label {
+        font-size: 8.5px;
     }
 
     .action-icon {

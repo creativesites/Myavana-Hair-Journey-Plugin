@@ -98,6 +98,75 @@
 .myavana-latest-entry span { color: var(--myavana-muted); font-size: 12px; }
 .myavana-latest-entry strong { font-size: 15px; margin-top: 2px; }
 .myavana-latest-entry p { -webkit-box-orient: vertical; display: -webkit-box; font-size: 13px; -webkit-line-clamp: 2; margin: 4px 0 0; overflow: hidden; }
+
+.myavana-today-story-strip {
+    display: flex;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 4px 2px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+}
+.myavana-today-story-strip::-webkit-scrollbar { height: 0; }
+
+.myavana-today-story-item {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    scroll-snap-align: start;
+    width: 64px;
+}
+
+.myavana-today-story-ring {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--myavana-coral) 0%, #e7a690 100%);
+    transition: transform .15s ease;
+}
+.myavana-today-story-item:hover .myavana-today-story-ring,
+.myavana-today-story-item:focus-visible .myavana-today-story-ring { transform: scale(1.05); }
+
+.myavana-today-story-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--myavana-white);
+    display: block;
+}
+
+.myavana-today-story-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--myavana-light-coral);
+    border: 2px solid var(--myavana-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9b5a49;
+    font-size: 18px;
+}
+
+.myavana-today-story-label {
+    color: var(--myavana-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
 .myavana-text-action { background: none; border: 0; color: var(--myavana-onyx) !important; cursor: pointer; font-size: 13px; font-weight: 700; margin-top: 18px; padding: 0; }
 .myavana-text-action span { color: var(--myavana-coral-dark); margin-left: 4px; }
 

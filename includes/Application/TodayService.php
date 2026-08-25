@@ -75,6 +75,7 @@ class TodayService {
             'hasRoutineSteps' => $hasRoutineSteps,
             'checklist' => $checklist,
             'latestEntry' => $latestEntry,
+            'recentEntries' => array_slice($entries, 0, 5),
             'insight' => $this->getInsight($userId, $profile, $entries, $checklist, $goals, $streakDays, $dayCount),
             'routineProducts' => array_slice($this->routineService->getProductCabinet($userId), 0, 3),
             'week' => $this->buildWeekStrip($entries),

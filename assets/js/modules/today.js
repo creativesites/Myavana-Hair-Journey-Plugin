@@ -49,7 +49,7 @@ MyavanaNext.Today = (function() {
         renderChecklist(data.checklist || {});
         renderInsight(data.insight || null);
         renderProducts(data.routineProducts || []);
-        renderLatestEntry(data.latestEntry || null);
+        renderRecentEntries(data.recentEntries && data.recentEntries.length ? data.recentEntries : (data.latestEntry ? [data.latestEntry] : []));
         renderWeek(data.week || []);
         renderGoals(data.goals || []);
         renderUpcoming(data.upcomingGoals || []);
@@ -126,16 +126,59 @@ MyavanaNext.Today = (function() {
         `).join('');
     }
 
-    function renderLatestEntry(entry) {
+    function renderRecentEntries(entries) {
         const target = container.querySelector('#today-latest-entry');
         if (!target) return;
-        if (!entry) {
+        if (!entries.length) {
             target.innerHTML = `<div class="myavana-calm-empty"><p>Your timeline starts with one small update.</p><button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-open-entry>Add your first update</button></div>`;
             target.querySelector('[data-open-entry]')?.addEventListener('click', () => MyavanaNext.SmartEntry.open());
             return;
         }
-        const image = entry.featuredImage || (entry.photos && entry.photos[0]);
-        target.innerHTML = `<article class="myavana-latest-entry">${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<div class="myavana-latest-entry-placeholder" aria-hidden="true">✦</div>'}<div><span>${escapeHtml(entry.date || '')}</span><strong>${escapeHtml(entry.title || 'Hair update')}</strong>${entry.notes ? `<p>${escapeHtml(entry.notes)}</p>` : ''}</div></article>`;
+
+        const [latest, ...rest] = entries;
+        const latestImage = latest.featuredImage || (latest.photos && latest.photos[0]);
+
+        target.innerHTML = `
+            <article class="myavana-latest-entry">
+                ${latestImage ? `<img src="${escapeHtml(latestImage)}" alt="" />` : '<div class="myavana-latest-entry-placeholder" aria-hidden="true">✦</div>'}
+                <div><span>${escapeHtml(formatEntryDate(latest.date))}</span><strong>${escapeHtml(latest.title || 'Hair update')}</strong>${latest.notes ? `<p>${escapeHtml(latest.notes)}</p>` : ''}</div>
+            </article>
+            ${rest.length ? `
+                <div class="myavana-today-story-strip" role="list" aria-label="More recent entries">
+                    ${rest.map(entry => {
+                        const image = entry.featuredImage || (entry.photos && entry.photos[0]);
+                        return `
+                            <button type="button" class="myavana-today-story-item" role="listitem" data-entry-id="${escapeHtml(String(entry.id || ''))}" aria-label="${escapeHtml(entry.title || 'Hair update')}, ${escapeHtml(formatEntryDate(entry.date))}">
+                                <span class="myavana-today-story-ring">
+                                    ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="myavana-today-story-placeholder" aria-hidden="true">✦</span>'}
+                                </span>
+                                <span class="myavana-today-story-label">${escapeHtml(formatEntryDate(entry.date, true))}</span>
+                            </button>`;
+                    }).join('')}
+                </div>
+            ` : ''}
+        `;
+
+        target.querySelectorAll('.myavana-today-story-item[data-entry-id]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (MyavanaNext.Journey && typeof MyavanaNext.Journey.focusEntry === 'function') {
+                    MyavanaNext.Journey.focusEntry(btn.dataset.entryId);
+                }
+                MyavanaNext.App.navigate('journey');
+            });
+        });
+    }
+
+    /**
+     * Entry dates arrive as raw MySQL datetimes from the REST payload — turn
+     * them into something a story strip can show in a couple of characters
+     * (short = weekday only, e.g. "Wed") or a friendlier full label.
+     */
+    function formatEntryDate(mysqlDate, short = false) {
+        if (!mysqlDate) return '';
+        const parsed = new Date(String(mysqlDate).replace(' ', 'T'));
+        if (isNaN(parsed.getTime())) return short ? '' : String(mysqlDate);
+        return parsed.toLocaleDateString('en-US', short ? { weekday: 'short' } : { month: 'short', day: 'numeric' });
     }
 
     function renderWeek(week) {

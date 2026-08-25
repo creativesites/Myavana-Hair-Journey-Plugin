@@ -45,6 +45,7 @@ MyavanaNext.SmartEntry = (function() {
 
     function open() {
         if (!modalBackdrop) return;
+        state.photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
         state = defaultState();
 
         renderTypeSelection();
@@ -84,25 +85,21 @@ MyavanaNext.SmartEntry = (function() {
         });
 
         // Photo picker
-        const addBtn = () => modalBackdrop.querySelector('#entry-photo-add');
         const fileInput = modalBackdrop.querySelector('#smart-entry-file-input');
         modalBackdrop.addEventListener('click', (e) => {
             if (e.target.closest('#entry-photo-add')) fileInput?.click();
         });
-        fileInput?.addEventListener('change', async (e) => {
+        fileInput?.addEventListener('change', (e) => {
             const files = Array.from(e.target.files || []);
             fileInput.value = '';
-            for (const file of files) {
-                await uploadPhoto(file);
-            }
+            files.forEach(addPhoto);
         });
         modalBackdrop.addEventListener('click', (e) => {
             const removeBtn = e.target.closest('.myavana-entry-photo-remove');
-            if (removeBtn) {
-                const idx = parseInt(removeBtn.getAttribute('data-idx'), 10);
-                state.photos.splice(idx, 1);
-                renderPhotoGrid();
-            }
+            if (removeBtn) removePhoto(removeBtn.getAttribute('data-local-id'));
+
+            const retryBtn = e.target.closest('.myavana-entry-photo-retry');
+            if (retryBtn) retryPhoto(retryBtn.getAttribute('data-local-id'));
         });
 
         // Mood, goal, length-point, visibility pill groups (event delegation)
@@ -225,6 +222,16 @@ MyavanaNext.SmartEntry = (function() {
         modalBackdrop.querySelectorAll('[data-entry-type]').forEach((btn) => {
             btn.classList.toggle('active', btn.getAttribute('data-entry-type') === state.type);
         });
+
+        const requiredMark = modalBackdrop.querySelector('#entry-title-required-mark');
+        if (requiredMark) requiredMark.hidden = state.type !== 'milestone';
+
+        const titleInput = modalBackdrop.querySelector('#entry-title');
+        if (titleInput) {
+            titleInput.placeholder = state.type === 'milestone'
+                ? 'e.g. First silk press since the chop'
+                : 'e.g. Wash day with new deep conditioner';
+        }
     }
 
     function renderMood() {
@@ -278,8 +285,23 @@ MyavanaNext.SmartEntry = (function() {
     }
 
     const MAX_PHOTO_BYTES = 15 * 1024 * 1024;
+    const MAX_PHOTOS = 6;
+    let photoSeq = 0;
 
-    async function uploadPhoto(file) {
+    /**
+     * Adds a photo the instant it's picked — a local preview (object URL)
+     * renders immediately, independent of whether the background upload to
+     * the server succeeds, fails, or is still in flight. This is the fix
+     * for "no preview shows": previously the thumbnail only ever appeared
+     * *after* a successful round trip to /journal/upload, so a slow
+     * connection, a rejected file, or any server-side hiccup meant nothing
+     * ever appeared at all with no indication why.
+     */
+    function addPhoto(file) {
+        if (state.photos.length >= MAX_PHOTOS) {
+            MyavanaNext.API.showToast(`You can add up to ${MAX_PHOTOS} photos per entry.`, 'error');
+            return;
+        }
         if (!file.type || !file.type.startsWith('image/')) {
             MyavanaNext.API.showToast(`"${file.name}" isn't an image file.`, 'error');
             return;
@@ -289,22 +311,61 @@ MyavanaNext.SmartEntry = (function() {
             return;
         }
 
+        const photo = {
+            localId: 'p' + (++photoSeq),
+            previewUrl: URL.createObjectURL(file),
+            status: 'uploading', // 'uploading' | 'uploaded' | 'failed'
+            url: null,
+            attachmentId: null,
+            error: '',
+            file,
+        };
+        state.photos.push(photo);
+        renderPhotoGrid();
+        runUpload(photo);
+    }
+
+    async function runUpload(photo) {
         try {
-            MyavanaNext.API.showToast('Uploading photo...', 'info');
-            const result = await MyavanaNext.API.upload(file);
+            const result = await MyavanaNext.API.upload(photo.file);
             if (!result || !result.url) {
-                throw new Error('Upload returned no image URL.');
+                throw new Error("Upload didn't return an image URL.");
             }
-            state.photos.push(result);
-            renderPhotoGrid();
+
+            // The photo may have been removed while this upload was still
+            // in flight — nothing left to update.
+            const current = state.photos.find((p) => p.localId === photo.localId);
+            if (!current) return;
+
+            current.status = 'uploaded';
+            current.url = result.url;
+            current.attachmentId = result.attachmentId;
         } catch (err) {
             console.error('[SmartEntry] Photo upload failed', err);
-            // MyavanaNext.API already toasts most failures (a rejected mime
-            // type, a server-side error message); this covers the cases it
-            // can't — a network drop or a non-JSON response — so a failed
-            // upload is never just silence with no preview appearing.
-            MyavanaNext.API.showToast(err.message && err.message !== 'Upload returned no image URL.' ? err.message : `Couldn't upload "${file.name}". Please try again.`, 'error');
+            const current = state.photos.find((p) => p.localId === photo.localId);
+            if (!current) return;
+            current.status = 'failed';
+            current.error = err.message || 'Upload failed';
+        } finally {
+            renderPhotoGrid();
         }
+    }
+
+    function retryPhoto(localId) {
+        const photo = state.photos.find((p) => p.localId === localId);
+        if (!photo) return;
+        photo.status = 'uploading';
+        photo.error = '';
+        renderPhotoGrid();
+        runUpload(photo);
+    }
+
+    function removePhoto(localId) {
+        const idx = state.photos.findIndex((p) => p.localId === localId);
+        if (idx === -1) return;
+        URL.revokeObjectURL(state.photos[idx].previewUrl);
+        state.photos.splice(idx, 1);
+        renderPhotoGrid();
     }
 
     function renderPhotoGrid() {
@@ -312,16 +373,28 @@ MyavanaNext.SmartEntry = (function() {
         const countLabel = modalBackdrop.querySelector('#entry-photo-count');
         if (!grid) return;
 
-        if (countLabel) countLabel.textContent = state.photos.length ? `${state.photos.length} added` : '';
+        if (countLabel) countLabel.textContent = state.photos.length ? `${state.photos.length}/${MAX_PHOTOS}` : '';
 
-        const thumbs = state.photos.map((p, i) => `
-            <div class="myavana-entry-photo-thumb">
-                <img src="${escapeHtml(p.url)}" alt="" />
-                <button type="button" class="myavana-entry-photo-remove" data-idx="${i}" aria-label="Remove photo">✕</button>
+        const thumbs = state.photos.map((p) => `
+            <div class="myavana-entry-photo-thumb is-${p.status}">
+                <img src="${escapeHtml(p.previewUrl)}" alt="" />
+                ${p.status === 'uploading' ? '<div class="myavana-entry-photo-spinner" aria-label="Uploading"></div>' : ''}
+                ${p.status === 'failed' ? `
+                    <div class="myavana-entry-photo-error">
+                        <span>${escapeHtml(p.error || "Couldn't upload")}</span>
+                        <button type="button" class="myavana-entry-photo-retry" data-local-id="${p.localId}">Retry</button>
+                    </div>` : ''}
+                <button type="button" class="myavana-entry-photo-remove" data-local-id="${p.localId}" aria-label="Remove photo">✕</button>
             </div>
         `).join('');
 
-        grid.innerHTML = thumbs + '<button type="button" class="myavana-entry-photo-add" id="entry-photo-add"><span>📸</span></button>';
+        const addTile = state.photos.length < MAX_PHOTOS ? `
+            <button type="button" class="myavana-entry-photo-add" id="entry-photo-add">
+                <span class="myavana-entry-photo-add-icon" aria-hidden="true">+</span>
+                <span class="myavana-entry-photo-add-label">${state.photos.length ? 'Add more' : 'Add photo'}</span>
+            </button>` : '';
+
+        grid.innerHTML = thumbs + addTile;
     }
 
     const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback' };
@@ -334,13 +407,17 @@ MyavanaNext.SmartEntry = (function() {
             ['Type', TYPE_LABELS[state.type] || state.type],
             ['Date', state.date],
         ];
+        if (state.title.trim()) {
+            rows.push(['Title', state.title.trim()]);
+        }
         if (state.type === 'length_check' && state.hairLength) {
             rows.push(['Length', `${state.hairLength}" (${state.hairLengthPoint || 'overall'})`]);
         }
-        if (state.type === 'milestone' && state.title) {
-            rows.push(['Milestone', state.title]);
-        }
-        rows.push(['Photos', state.photos.length ? String(state.photos.length) : 'None']);
+        const uploadedCount = state.photos.filter((p) => p.status === 'uploaded').length;
+        const pendingCount = state.photos.length - uploadedCount;
+        rows.push(['Photos', state.photos.length
+            ? `${uploadedCount} ready${pendingCount ? `, ${pendingCount} still uploading/failed` : ''}`
+            : 'None']);
         if (state.goalId) {
             const goal = state.goals.find((g) => g.id === state.goalId);
             if (goal) rows.push(['Goal', goal.title]);
@@ -366,17 +443,36 @@ MyavanaNext.SmartEntry = (function() {
         if (isSubmitting) return;
 
         captureStepInputs(2);
+
+        if (state.type === 'milestone' && !state.title.trim()) {
+            MyavanaNext.API.showToast('Give this milestone a name.', 'error');
+            goToStep(2);
+            return;
+        }
+
+        // Photos upload in the background from the moment they're picked —
+        // don't let a save race ahead of one that's still in flight and
+        // silently drop it from the entry. A failed upload doesn't block
+        // saving (the member may have already retried and given up); an
+        // in-progress one does, briefly, since it's about to succeed.
+        if (state.photos.some((p) => p.status === 'uploading')) {
+            MyavanaNext.API.showToast('Still uploading your photos — one moment…', 'info');
+            return;
+        }
+
         const submitBtn = modalBackdrop.querySelector('#entry-submit-btn');
+        const uploadedPhotos = state.photos.filter((p) => p.status === 'uploaded');
+        const failedCount = state.photos.length - uploadedPhotos.length;
 
         const payload = {
             entryType: state.type,
-            title: state.type === 'milestone' ? state.title : '',
+            title: state.title.trim(),
             date: state.date,
             mood: state.mood,
             goalId: state.goalId,
             notes: state.notes,
             productsUsed: state.products.split(',').map((s) => s.trim()).filter(Boolean),
-            photos: state.photos.map((p) => ({ url: p.url, attachmentId: p.attachmentId })),
+            photos: uploadedPhotos.map((p) => ({ url: p.url, attachmentId: p.attachmentId })),
             visibility: state.visibility,
         };
 
@@ -395,6 +491,9 @@ MyavanaNext.SmartEntry = (function() {
             const result = await MyavanaNext.API.post('journal/entries', payload);
 
             MyavanaNext.API.showToast(result.message || 'Entry saved ✨', 'success');
+            if (failedCount > 0) {
+                MyavanaNext.API.showToast(`${failedCount} photo${failedCount > 1 ? 's' : ''} couldn't be uploaded and ${failedCount > 1 ? "weren't" : "wasn't"} included.`, 'error');
+            }
             if (result.updatedGoal) {
                 MyavanaNext.API.showToast(`${result.updatedGoal.title}: ${result.updatedGoal.progress}% progress`, 'info');
             }

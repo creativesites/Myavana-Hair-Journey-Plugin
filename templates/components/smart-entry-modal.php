@@ -54,20 +54,27 @@ if (!defined('ABSPATH')) {
 
                 <div class="myavana-form-group">
                     <div class="myavana-entry-field-header">
-                        <label class="myavana-label" style="margin:0;"><?php esc_html_e('Add photos', 'myavana-hair-journey-next'); ?></label>
+                        <label class="myavana-label" style="margin:0;"><?php esc_html_e('Photos', 'myavana-hair-journey-next'); ?></label>
                         <span class="myavana-entry-photo-count" id="entry-photo-count"></span>
                     </div>
                     <div class="myavana-entry-photo-grid" id="entry-photo-grid">
                         <button type="button" class="myavana-entry-photo-add" id="entry-photo-add">
-                            <span>📸</span>
+                            <span class="myavana-entry-photo-add-icon" aria-hidden="true">+</span>
+                            <span class="myavana-entry-photo-add-label"><?php esc_html_e('Add photo', 'myavana-hair-journey-next'); ?></span>
                         </button>
                     </div>
-                    <input type="file" id="smart-entry-file-input" accept="image/*" multiple style="display:none;" />
+                    <input type="file" id="smart-entry-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple style="display:none;" />
+                    <p class="myavana-entry-hint"><?php esc_html_e('JPEG, PNG, WEBP, or HEIC — up to 15MB each, up to 6 photos.', 'myavana-hair-journey-next'); ?></p>
                 </div>
             </div>
 
             <!-- STEP 2: Details (conditional on type) -->
             <div class="myavana-entry-step" data-step="2" style="display:none;">
+                <div class="myavana-form-group">
+                    <label class="myavana-label" for="entry-title"><?php esc_html_e('Title', 'myavana-hair-journey-next'); ?> <span class="myavana-entry-required-mark" id="entry-title-required-mark" hidden>*</span></label>
+                    <input type="text" class="myavana-input" id="entry-title" maxlength="120" placeholder="<?php esc_attr_e('e.g. Wash day with new deep conditioner', 'myavana-hair-journey-next'); ?>" />
+                </div>
+
                 <div class="myavana-entry-row">
                     <div class="myavana-form-group" style="flex:0 0 180px;">
                         <label class="myavana-label" for="entry-date"><?php esc_html_e('Date', 'myavana-hair-journey-next'); ?></label>
@@ -106,14 +113,6 @@ if (!defined('ABSPATH')) {
                             <button type="button" class="myavana-entry-pill" data-length-point="overall"><?php esc_html_e('Overall', 'myavana-hair-journey-next'); ?></button>
                         </div>
                         <p class="myavana-entry-hint"><?php esc_html_e('Length checks feed your growth chart and, if linked to a length goal, its progress.', 'myavana-hair-journey-next'); ?></p>
-                    </div>
-                </div>
-
-                <!-- Milestone fields -->
-                <div class="myavana-entry-conditional" data-type-field="milestone" style="display:none;">
-                    <div class="myavana-form-group">
-                        <label class="myavana-label" for="entry-title"><?php esc_html_e('Name this milestone', 'myavana-hair-journey-next'); ?></label>
-                        <input type="text" class="myavana-input" id="entry-title" placeholder="<?php esc_attr_e('First silk press since the chop', 'myavana-hair-journey-next'); ?>" />
                     </div>
                 </div>
 
