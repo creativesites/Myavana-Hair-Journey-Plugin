@@ -21,11 +21,12 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                 <img src="<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="MYAVANA" class="myavana-next-logo" />
             </a>
 
-            <!-- Desktop Navigation Links: mirrors the established MYAVANA app header. -->
+            <!-- Desktop navigation only exposes destinations the visitor can actually use. -->
             <nav class="myavana-next-nav-desktop" aria-label="Primary Navigation">
                 <a href="#home" class="myavana-next-nav-link" data-tab="home">
                     <?php esc_html_e('Home', 'myavana-hair-journey-next'); ?>
                 </a>
+                <?php if (is_user_logged_in()) : ?>
                 <a href="#today" class="myavana-next-nav-link active" data-tab="today">
                     <?php esc_html_e('Today', 'myavana-hair-journey-next'); ?>
                 </a>
@@ -44,6 +45,7 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                 <a href="#profile" class="myavana-next-nav-link" data-tab="profile">
                     <?php esc_html_e('Profile', 'myavana-hair-journey-next'); ?>
                 </a>
+                <?php endif; ?>
             </nav>
 
             <!-- Header Utilities -->
@@ -51,8 +53,15 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                 <!-- Chat Support Trigger (Launches Kommunicate) -->
                 <button type="button" class="myavana-next-concierge-btn btn-open-kommunicate" aria-label="<?php esc_attr_e('Open Hair Care Chat', 'myavana-hair-journey-next'); ?>">
                     <span class="myavana-next-concierge-badge"></span>
-                    <span><?php esc_html_e('Chat with us', 'myavana-hair-journey-next'); ?></span>
+                    <span><?php esc_html_e('Chat with Mia', 'myavana-hair-journey-next'); ?></span>
                 </button>
+
+                <?php if (is_user_logged_in()) : ?>
+                    <!-- Quick Check-in Button (Desktop) — only meaningful once there's a journey to add to. -->
+                    <button type="button" class="myavana-btn myavana-btn-dark myavana-btn-sm btn-open-smart-entry" id="desktop-quick-entry-btn">
+                        <span>+</span> <?php esc_html_e('New entry', 'myavana-hair-journey-next'); ?>
+                    </button>
+                <?php endif; ?>
 
                 <?php if (is_user_logged_in()) : ?>
                     <div class="myavana-next-account-menu">
@@ -78,8 +87,8 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                         </div>
                     </div>
                 <?php else : ?>
-                    <a href="#" data-open-auth="signin" class="myavana-btn myavana-btn-outline myavana-btn-sm">
-                        <?php esc_html_e('Sign In', 'myavana-hair-journey-next'); ?>
+                    <a href="#auth" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-btn-sm myavana-next-get-started">
+                        <?php esc_html_e('Get started', 'myavana-hair-journey-next'); ?>
                     </a>
                 <?php endif; ?>
             </div>

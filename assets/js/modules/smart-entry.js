@@ -502,6 +502,9 @@ MyavanaNext.SmartEntry = (function() {
 
             if (MyavanaNext.Today) MyavanaNext.Today.refresh();
             if (MyavanaNext.Journey) MyavanaNext.Journey.refresh();
+            // Mya's Stories and Profile tabs read the same journal record, so
+            // drop her cached copy or she'd keep showing the pre-save state.
+            if (MyavanaNext.Mya) MyavanaNext.Mya.invalidateJourney();
         } catch (err) {
             console.error('[SmartEntry] Submit failed', err);
         } finally {

@@ -122,6 +122,18 @@ class Assets {
         wp_enqueue_style('myavana-routine-composer', MYAVANA_NEXT_URL . 'assets/css/routine-composer.css', ['myavana-routines-page-redesign'], self::ver('assets/css/routine-composer.css'));
         wp_enqueue_style('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/css/goals-page-redesign.css', ['myavana-goal-routine-pages'], self::ver('assets/css/goals-page-redesign.css'));
         wp_enqueue_style('myavana-goal-composer', MYAVANA_NEXT_URL . 'assets/css/goal-composer.css', ['myavana-goals-page-redesign'], self::ver('assets/css/goal-composer.css'));
+
+        // Retints the ported Routines/Goals/Community stylesheets above onto
+        // the shared coral/onyx palette. Depends on all of them (plus the
+        // tokens they need) so it always loads last and wins the cascade
+        // without !important.
+        wp_enqueue_style('myavana-legacy-harmony', MYAVANA_NEXT_URL . 'assets/css/legacy-harmony.css', [
+            'myavana-next-tokens',
+            'myavana-routine-composer',
+            'myavana-goal-composer',
+            'myavana-social-feed-css',
+        ], self::ver('assets/css/legacy-harmony.css'));
+
         wp_enqueue_script('myavana-lucide', 'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js', [], '0.469.0', true);
         wp_enqueue_script('myavana-routines-page-redesign', MYAVANA_NEXT_URL . 'assets/js/routines-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/routines-page-redesign.js'), true);
         wp_enqueue_script('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/js/goals-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/goals-page-redesign.js'), true);

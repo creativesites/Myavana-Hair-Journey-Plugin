@@ -62,6 +62,8 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
         </div>
     </main>
 
+    <?php include MYAVANA_NEXT_PATH . 'templates/components/site-footer.php'; ?>
+
     <!-- Mobile Bottom Navigation -->
     <?php include MYAVANA_NEXT_PATH . 'templates/components/nav-mobile-tabs.php'; ?>
 

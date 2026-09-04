@@ -107,7 +107,7 @@ class AuthRoutes extends RestController {
     public function forgotPassword(\WP_REST_Request $request): \WP_REST_Response {
         $data = $request->get_json_params() ?: $request->get_params();
         $service = new AuthService();
-        $result = $service->requestPasswordReset((string) ($data['email'] ?? ''));
+        $result = $service->requestPasswordReset((string) ($data['login'] ?? ''));
 
         if (is_wp_error($result)) {
             return $this->fromWpError($result);
@@ -119,7 +119,11 @@ class AuthRoutes extends RestController {
     public function resetPassword(\WP_REST_Request $request): \WP_REST_Response {
         $data = $request->get_json_params() ?: $request->get_params();
         $service = new AuthService();
-        $result = $service->resetPassword($data);
+        $result = $service->resetPassword(
+            (string) ($data['login'] ?? ''),
+            (string) ($data['key'] ?? ''),
+            (string) ($data['password'] ?? '')
+        );
 
         if (is_wp_error($result)) {
             return $this->fromWpError($result);

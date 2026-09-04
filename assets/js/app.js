@@ -20,22 +20,26 @@ MyavanaNext.App = (function() {
         if (MyavanaNext.Community) MyavanaNext.Community.init();
         if (MyavanaNext.Profile) MyavanaNext.Profile.init();
         if (MyavanaNext.Auth) MyavanaNext.Auth.init();
-        if (MyavanaNext.Onboarding) MyavanaNext.Onboarding.init();
 
         bindNavigation();
         bindGlobalActions();
 
-        // The authenticated tabs (today/journey/routine/community/profile)
-        // only exist in the DOM when logged in. For a logged-out visitor
-        // there's no #view-today to navigate to, and calling navigate()
-        // would hide every .myavana-next-view (discovery, auth) looking for
-        // a tab that doesn't exist, leaving a blank page. Auth.js owns
-        // switching between discovery/auth for logged-out visitors instead.
-        // (Checking for *any* .myavana-next-view is not enough — home,
-        // discovery, and auth all carry that class and are always in the
-        // DOM regardless of login state, so that check never actually
-        // caught the logged-out case it was written for.)
-        if (!(window.myavanaNextData && window.myavanaNextData.isLoggedIn)) {
+        // Guests begin on the complete public homepage. Community and auth
+        // are sibling views; the welcome prompt is an overlay, never a route.
+        if (!document.querySelector('#view-today')) {
+            const initialHash = window.location.hash.replace('#', '').toLowerCase();
+            const targetId = initialHash === 'community' ? 'view-community' : initialHash === 'auth' ? 'view-auth' : 'view-home';
+
+            document.querySelectorAll('.myavana-next-view').forEach(view => {
+                const isTarget = view.id === targetId;
+                view.classList.toggle('active', isTarget);
+                view.style.display = isTarget ? 'block' : 'none';
+            });
+
+            if (targetId === 'view-auth' && MyavanaNext.Auth) {
+                MyavanaNext.Auth.open('signin');
+            }
+            initWelcomePrompt();
             return;
         }
 
@@ -50,17 +54,6 @@ MyavanaNext.App = (function() {
     function navigate(tabName, updateHistory = true) {
         if (!validTabs.includes(tabName)) {
             tabName = 'today';
-        }
-
-        // The authenticated tabs only exist in the DOM when logged in. The
-        // header/mobile nav render their links unconditionally though, so a
-        // logged-out visitor can still click "Today" or land on #journey —
-        // without this check, the loop below would hide every view (home,
-        // discovery, auth) looking for a #view-today that was never
-        // rendered, leaving a blank page instead of just not navigating.
-        if (!document.querySelector(`#view-${tabName}`)) {
-            if (MyavanaNext.Auth) MyavanaNext.Auth.open('signin');
-            return;
         }
 
         // Update Store
@@ -78,7 +71,7 @@ MyavanaNext.App = (function() {
         });
 
         // Update Desktop Navigation Links
-        document.querySelectorAll('.myavana-next-nav-link').forEach(link => {
+        document.querySelectorAll('.myavana-next-nav-link, [data-home-nav]').forEach(link => {
             if (link.getAttribute('data-tab') === tabName) {
                 link.classList.add('active');
             } else {
@@ -100,53 +93,21 @@ MyavanaNext.App = (function() {
         }
 
         // Trigger view refresh if available
-        const refreshers = {
-            today: () => MyavanaNext.Today?.refresh(),
-            journey: () => MyavanaNext.Journey?.refresh(),
-            routine: () => MyavanaNext.Routine?.refresh(),
-            community: () => MyavanaNext.Community?.refresh(),
-            profile: () => MyavanaNext.Profile?.refresh(),
-        };
-        const pending = refreshers[tabName] ? refreshers[tabName]() : undefined;
-        trackNavProgress(pending);
+        if (tabName === 'today' && MyavanaNext.Today) MyavanaNext.Today.refresh();
+        if (tabName === 'journey' && MyavanaNext.Journey) MyavanaNext.Journey.refresh();
+        if (tabName === 'routine' && MyavanaNext.Routine) MyavanaNext.Routine.refresh();
+        if (tabName === 'community' && MyavanaNext.Community) MyavanaNext.Community.refresh();
+        if (tabName === 'profile' && MyavanaNext.Profile) MyavanaNext.Profile.refresh();
+
+        // Keep Mya page-aware. The shell routes with pushState, which fires
+        // neither hashchange nor popstate, so the widget would otherwise stay
+        // pinned to whichever tab happened to be open when it booted.
+        if (MyavanaNext.Mya && MyavanaNext.Mya.syncRoute) {
+            MyavanaNext.Mya.syncRoute(tabName);
+        }
 
         // Smooth scroll to top of app
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /**
-     * Tapping a nav item swaps views instantly, but the destination's data
-     * often hasn't loaded yet — with nothing marking that, a tap can read as
-     * "did that even register?" This is the first visible response: it
-     * starts the moment navigate() runs and completes when the view's own
-     * refresh() promise resolves, with a timeout safety net so it can never
-     * get stuck on screen if a module's refresh() doesn't settle.
-     */
-    function trackNavProgress(pending) {
-        const bar = document.querySelector('#myavana-nav-progress');
-        if (!bar) return;
-
-        bar.classList.remove('is-done');
-        // Reflow so re-triggering the animation on a rapid second tap restarts it.
-        void bar.offsetWidth;
-        bar.classList.add('is-active');
-
-        const finish = () => {
-            bar.classList.remove('is-active');
-            bar.classList.add('is-done');
-            window.setTimeout(() => bar.classList.remove('is-done'), 250);
-        };
-
-        const safety = window.setTimeout(finish, 1500);
-
-        if (pending && typeof pending.finally === 'function') {
-            pending.finally(() => { window.clearTimeout(safety); finish(); });
-        } else {
-            // No async work for this tab (e.g. Home) — still show the bar
-            // briefly so the tap reads as intentional, not a glitch.
-            window.clearTimeout(safety);
-            window.setTimeout(finish, 220);
-        }
     }
 
     function bindNavigation() {
@@ -194,17 +155,48 @@ MyavanaNext.App = (function() {
     }
 
     function bindGlobalActions() {
-        // Kommunicate chat triggers
+        // Primary Myavana Chat triggers (Repointed to Mya per G1 directive)
         document.querySelectorAll('.btn-open-kommunicate').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (MyavanaNext.Kommunicate) {
+                if (window.MyavanaWidget && typeof window.MyavanaWidget.open === 'function') {
+                    window.MyavanaWidget.open();
+                } else if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.open === 'function') {
+                    window.MyavanaNext.Mya.open();
+                } else if (MyavanaNext.Kommunicate) {
                     MyavanaNext.Kommunicate.open();
                 }
             });
         });
 
         bindAccountDropdown();
+    }
+
+    function initWelcomePrompt() {
+        const modal = document.querySelector('#myavana-welcome-modal');
+        if (!modal || localStorage.getItem('myavana_welcome_prompt_seen')) return;
+
+        const close = () => {
+            modal.hidden = true;
+            localStorage.setItem('myavana_welcome_prompt_seen', '1');
+        };
+        const open = () => {
+            modal.hidden = false;
+            modal.querySelector('[data-welcome-goal]')?.focus();
+        };
+
+        modal.querySelectorAll('[data-close-welcome]').forEach(button => button.addEventListener('click', close));
+        modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !modal.hidden) close(); });
+        modal.querySelectorAll('[data-welcome-goal]').forEach(button => {
+            button.addEventListener('click', () => {
+                modal.querySelectorAll('[data-welcome-goal]').forEach(item => item.classList.remove('selected'));
+                button.classList.add('selected');
+                modal.querySelector('.myavana-welcome-preview span').textContent = `${button.dataset.welcomeGoal}: a tailored routine, private photo timeline, and guidance that evolves with your entries.`;
+            });
+        });
+        modal.querySelector('[data-open-auth]')?.addEventListener('click', close);
+        window.setTimeout(open, 16000);
     }
 
     function bindAccountDropdown() {

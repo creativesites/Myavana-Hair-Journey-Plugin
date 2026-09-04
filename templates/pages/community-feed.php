@@ -137,6 +137,7 @@ function myavana_community_feed_shortcode($atts = []) {
         ));
         ?>
 
+        <aside class="myavana-community-sidebar" aria-label="Your community tools">
         <div class="myavana-profile-widget">
             <div class="myavana-profile-widget-header">
                 <div class="myavana-profile-widget-avatar-section">
@@ -244,6 +245,7 @@ function myavana_community_feed_shortcode($atts = []) {
                 </article>
             </div>
         </section>
+        </aside>
 
         <!-- Filter Tabs -->
         <?php if ($atts['show_filters'] === 'true') : ?>

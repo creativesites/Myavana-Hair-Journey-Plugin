@@ -20,19 +20,6 @@ if (!defined('ABSPATH')) {
 class AuthService {
     private const MAX_LOGIN_ATTEMPTS = 5;
     private const ATTEMPT_WINDOW = 15 * MINUTE_IN_SECONDS;
-    private const MAX_RESET_REQUESTS = 3;
-    private const RESET_REQUEST_WINDOW = 15 * MINUTE_IN_SECONDS;
-    private const RESET_TOKEN_TTL = HOUR_IN_SECONDS;
-
-    /**
-     * The site's own transactional emails (verification, password reset)
-     * must always claim to be from support@myavana.com, regardless of
-     * whatever address the WP Mail SMTP plugin (or any other mail plugin)
-     * happens to be configured with at the time — that dashboard setting
-     * has drifted between a personal testing inbox and this address before,
-     * which silently changed who these emails appeared to come from.
-     */
-    private const MAIL_FROM_ADDRESS = 'support@myavana.com';
 
     /**
      * Register a new user with email + password.
@@ -272,7 +259,7 @@ class AuthService {
 
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . $siteName . ' <' . self::MAIL_FROM_ADDRESS . '>',
+            'From: ' . $siteName . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
         ];
 
         return wp_mail($user->user_email, $subject, $message, $headers);
@@ -310,130 +297,91 @@ class AuthService {
     // =========================
 
     /**
-     * Start a password reset for the given email. Always returns a
-     * success-shaped message regardless of whether the email is registered,
-     * so this endpoint can't be used to enumerate accounts.
+     * Always returns the same generic success shape whether or not the
+     * account exists, so this endpoint can't be used to enumerate
+     * registered emails the way a "no account found" response would.
      *
      * @return array|\WP_Error
      */
-    public function requestPasswordReset(string $email) {
-        $email = sanitize_email($email);
-        if (empty($email) || !is_email($email)) {
-            return new \WP_Error('invalid_email', __('Please enter a valid email address.', 'myavana-hair-journey-next'), ['status' => 400, 'field' => 'email']);
+    public function requestPasswordReset(string $login) {
+        $login = sanitize_text_field($login);
+        if (empty($login)) {
+            return new \WP_Error('missing_login', __('Please enter your email address.', 'myavana-hair-journey-next'), ['status' => 400]);
         }
 
-        $rateLimitError = $this->checkResetRateLimit($email);
-        if ($rateLimitError) {
-            return $rateLimitError;
-        }
-        $this->recordResetRequest($email);
+        $generic = ['message' => __("If an account exists for that email, we've sent a password reset link.", 'myavana-hair-journey-next')];
 
-        $genericResult = ['message' => __("If an account exists for that email, we've sent a link to reset the password.", 'myavana-hair-journey-next')];
-
-        $user = get_user_by('email', $email);
+        $user = is_email($login) ? get_user_by('email', $login) : get_user_by('login', $login);
         if (!$user) {
-            return $genericResult;
+            return $generic;
         }
 
-        $token = wp_generate_password(32, false);
-        update_user_meta($user->ID, 'myavana_password_reset_token', $token);
-        update_user_meta($user->ID, 'myavana_password_reset_sent', time());
+        $key = get_password_reset_key($user);
+        if (is_wp_error($key)) {
+            return $generic;
+        }
 
         $resetUrl = add_query_arg([
             'myavana_next_reset_password' => '1',
-            'uid' => $user->ID,
-            'token' => $token,
+            'login' => rawurlencode($user->user_login),
+            'key' => $key,
         ], home_url('/'));
 
-        $this->sendPasswordResetEmail($user, $resetUrl);
+        $siteName = get_bloginfo('name');
+        $subject = __('Reset your MYAVANA password', 'myavana-hair-journey-next');
+        $message = $this->getResetPasswordEmailTemplate($user, $resetUrl, $siteName);
 
-        return $genericResult;
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . $siteName . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
+        ];
+
+        wp_mail($user->user_email, $subject, $message, $headers);
+
+        return $generic;
     }
 
     /**
-     * Consume a password reset token and set a new password.
-     *
-     * @param array $data ['userId' => int, 'token' => string, 'password' => string]
-     * @return array|\WP_Error ['userId', 'message']
+     * @return \WP_User|\WP_Error
      */
-    public function resetPassword(array $data) {
-        $userId = absint($data['userId'] ?? 0);
-        $token = (string) ($data['token'] ?? '');
-        $password = (string) ($data['password'] ?? '');
+    public function validateResetKey(string $login, string $key) {
+        $user = check_password_reset_key($key, $login);
+        if (is_wp_error($user)) {
+            return new \WP_Error(
+                'invalid_reset_key',
+                __('This password reset link is invalid or has expired. Please request a new one.', 'myavana-hair-journey-next'),
+                ['status' => 400]
+            );
+        }
+        return $user;
+    }
 
-        $invalidLinkError = new \WP_Error(
-            'invalid_reset_link',
-            __('This password reset link is invalid or has expired. Please request a new one.', 'myavana-hair-journey-next'),
-            ['status' => 400]
-        );
-
-        if (!$userId || !$token) {
-            return $invalidLinkError;
+    /**
+     * @return array|\WP_Error
+     */
+    public function resetPassword(string $login, string $key, string $newPassword) {
+        $user = $this->validateResetKey($login, $key);
+        if (is_wp_error($user)) {
+            return $user;
         }
 
-        $stored = get_user_meta($userId, 'myavana_password_reset_token', true);
-        $sentAt = (int) get_user_meta($userId, 'myavana_password_reset_sent', true);
-
-        if (!$stored || !$sentAt || !hash_equals($stored, $token) || (time() - $sentAt) > self::RESET_TOKEN_TTL) {
-            return $invalidLinkError;
-        }
-
-        $passwordError = $this->validatePasswordStrength($password);
+        $passwordError = $this->validatePasswordStrength($newPassword);
         if ($passwordError) {
             return new \WP_Error('weak_password', $passwordError, ['status' => 400, 'field' => 'password']);
         }
 
-        $user = get_user_by('id', $userId);
-        if (!$user) {
-            return $invalidLinkError;
-        }
+        reset_password($user, $newPassword);
 
-        wp_set_password($password, $userId);
-        delete_user_meta($userId, 'myavana_password_reset_token');
-        delete_user_meta($userId, 'myavana_password_reset_sent');
-
-        wp_set_current_user($userId);
-        wp_set_auth_cookie($userId, true);
+        wp_set_current_user($user->ID);
+        wp_set_auth_cookie($user->ID, true);
 
         return [
-            'userId' => $userId,
+            'userId' => $user->ID,
             'message' => __('Your password has been reset. Welcome back!', 'myavana-hair-journey-next'),
         ];
     }
 
-    private function checkResetRateLimit(string $email): ?\WP_Error {
-        $key = 'myavana_next_reset_attempts_' . md5(strtolower($email));
-        $attempts = (int) get_transient($key);
-        if ($attempts >= self::MAX_RESET_REQUESTS) {
-            return new \WP_Error(
-                'rate_limited',
-                __('Too many reset requests. Please check your inbox or try again shortly.', 'myavana-hair-journey-next'),
-                ['status' => 429]
-            );
-        }
-        return null;
-    }
-
-    private function recordResetRequest(string $email): void {
-        $key = 'myavana_next_reset_attempts_' . md5(strtolower($email));
-        $attempts = (int) get_transient($key);
-        set_transient($key, $attempts + 1, self::RESET_REQUEST_WINDOW);
-    }
-
-    private function sendPasswordResetEmail(\WP_User $user, string $resetUrl): bool {
-        $siteName = get_bloginfo('name');
-        $subject = __('Reset your MYAVANA password', 'myavana-hair-journey-next');
-        $message = $this->getPasswordResetEmailTemplate($user, $resetUrl, $siteName);
-
-        $headers = [
-            'Content-Type: text/html; charset=UTF-8',
-            'From: ' . $siteName . ' <' . self::MAIL_FROM_ADDRESS . '>',
-        ];
-
-        return wp_mail($user->user_email, $subject, $message, $headers);
-    }
-
-    private function getPasswordResetEmailTemplate(\WP_User $user, string $resetUrl, string $siteName): string {
+    private function getResetPasswordEmailTemplate(\WP_User $user, string $resetUrl, string $siteName): string {
         ob_start();
         ?>
         <!DOCTYPE html>
@@ -459,11 +407,11 @@ class AuthService {
                 </div>
                 <div class="content">
                     <p><?php echo esc_html(sprintf(__('Hi %s,', 'myavana-hair-journey-next'), $user->display_name ?: $user->user_login)); ?></p>
-                    <p><?php echo esc_html__('We received a request to reset the password for your MYAVANA account. Click below to choose a new one.', 'myavana-hair-journey-next'); ?></p>
+                    <p><?php echo esc_html__('We received a request to reset your MYAVANA password. Click the button below to choose a new one.', 'myavana-hair-journey-next'); ?></p>
                     <p style="text-align: center;">
                         <a href="<?php echo esc_url($resetUrl); ?>" class="button"><?php echo esc_html__('Reset My Password', 'myavana-hair-journey-next'); ?></a>
                     </p>
-                    <p><small><?php echo esc_html__("This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email — your password won't change.", 'myavana-hair-journey-next'); ?></small></p>
+                    <p><small><?php echo esc_html__("This link expires soon for your security. If you didn't request a password reset, you can safely ignore this email — your password will stay the same.", 'myavana-hair-journey-next'); ?></small></p>
                 </div>
                 <div class="footer">
                     <p><?php echo esc_html__('This email was sent from MYAVANA Hair Journey', 'myavana-hair-journey-next'); ?></p>

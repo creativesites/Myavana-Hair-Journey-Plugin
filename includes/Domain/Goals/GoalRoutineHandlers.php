@@ -640,15 +640,20 @@ if (!function_exists('myavana_record_routine_tracking_status')) {
         }
 
         if ($status === 'completed' && $previous_status !== 'completed') {
-            myavana_award_points(
-                $user_id,
-                Myavana_Gamification::get_reward_value('routine_completed', 10),
-                'Routine completed',
-                'routine_completion',
-                $routine_id,
-                'routine_completed:' . $routine_entity_key . ':' . $date,
-                ['date' => $date]
-            );
+            // Points/badges (Myavana_Gamification) haven't been ported to
+            // this plugin yet — skip the bonus rather than fatal-erroring
+            // the whole completion request over it.
+            if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+                myavana_award_points(
+                    $user_id,
+                    Myavana_Gamification::get_reward_value('routine_completed', 10),
+                    'Routine completed',
+                    'routine_completion',
+                    $routine_id,
+                    'routine_completed:' . $routine_entity_key . ':' . $date,
+                    ['date' => $date]
+                );
+            }
 
             $records = myavana_get_routine_tracking_records($user_id);
             $streak = myavana_calculate_routine_streak($routine_item, $records, $routine_id, $date);

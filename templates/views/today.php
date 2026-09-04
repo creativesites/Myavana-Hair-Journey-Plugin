@@ -128,10 +128,10 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
             <aside class="myavana-today-help" aria-label="Hair care support">
                 <div>
                     <strong><?php esc_html_e('Need hair-care help?', 'myavana-hair-journey-next'); ?></strong>
-                    <p><?php esc_html_e('Chat with the MYAVANA team whenever you need a little guidance.', 'myavana-hair-journey-next'); ?></p>
+                    <p><?php esc_html_e('Chat with Mia whenever you need a little guidance.', 'myavana-hair-journey-next'); ?></p>
                 </div>
                 <button type="button" class="myavana-btn myavana-btn-outline btn-open-kommunicate">
-                    <?php esc_html_e('Chat with us', 'myavana-hair-journey-next'); ?>
+                    <?php esc_html_e('Chat with Mia', 'myavana-hair-journey-next'); ?>
                 </button>
             </aside>
         </aside>

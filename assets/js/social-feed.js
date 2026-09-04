@@ -162,6 +162,7 @@
     function renderPosts(posts) {
         const $grid = $('#myavana-feed-grid');
         $grid.empty();
+        $('.myavana-feed-caught-up').remove();
         postCache.clear();
 
         posts.forEach(post => {

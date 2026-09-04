@@ -123,6 +123,21 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
+/* #view-home is rendered inside the app shell's max-width:1200px
+   .myavana-next-container, which double-boxes this page's own full-bleed
+   hero/section backgrounds. Break it out to span the viewport; each
+   section's own inner container (.myavana-luxury-hero-container etc.)
+   still centers its content at the section's intended max-width. */
+#view-home {
+    width: 100vw;
+    max-width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
 /* ================================================
    LUXURY NAVIGATION SYSTEM
    ================================================ */
@@ -401,7 +416,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .myavana-luxury-btn-secondary {
-    background: transparent;
+    background: var(--myavana-light-coral) !important;
     color: var(--myavana-onyx);
     font-family: var(--font-secondary);
     font-size: 14px;
@@ -1620,15 +1635,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .myavana-luxury-final-cta-actions .myavana-luxury-btn-secondary {
+    background: var(--myavana-white);
     border-color: var(--myavana-white);
-    color: var(--myavana-white);
+    color: var(--myavana-onyx);
     padding: 18px 36px;
     font-size: 16px;
 }
 
 .myavana-luxury-final-cta-actions .myavana-luxury-btn-secondary:hover {
-    background: var(--myavana-white);
-    color: var(--myavana-onyx);
+    background: transparent;
+    color: var(--myavana-white);
 }
 
 /* Trust Indicators */
@@ -2254,6 +2270,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .myavana-luxury-homepage .myavana-luxury-hero-description { color: var(--myavana-ink-soft); opacity: 1; }
 .myavana-luxury-homepage .myavana-luxury-btn-primary { background: var(--myavana-onyx); box-shadow: none; }
+.myavana-luxury-homepage .myavana-luxury-btn-primary,
+.myavana-luxury-homepage .myavana-luxury-btn-primary:visited { color: #fff !important; }
 .myavana-luxury-homepage .myavana-luxury-btn-primary:hover { background: #4a4440; box-shadow: 0 10px 24px rgba(34,35,35,.12); }
 .myavana-luxury-homepage .myavana-luxury-btn-secondary { border-color: var(--myavana-line); background: transparent; color: var(--myavana-onyx); }
 .myavana-luxury-homepage .myavana-luxury-btn-secondary:hover { border-color: rgba(185,111,88,.5); background: #fff; color: var(--myavana-onyx); }
@@ -2326,6 +2344,15 @@ h1, h2, h3, h4, h5, h6 {
 .myavana-luxury-homepage .myavana-luxury-member-card-actions .myavana-luxury-btn-secondary { border-color: var(--myavana-line); background: #fff; color: var(--myavana-onyx); }
 .myavana-luxury-homepage .myavana-luxury-member-card-actions .myavana-luxury-btn-secondary:hover,
 .myavana-luxury-homepage .myavana-luxury-member-actions .myavana-luxury-btn-secondary:hover { background: #f8e8df; color: var(--myavana-onyx); }
+
+/* The dark final CTA needs a true white headline; the gradient treatment is
+   reserved for light surfaces where it remains legible. */
+.myavana-luxury-homepage .myavana-luxury-final-cta-title,
+.myavana-luxury-homepage .myavana-luxury-final-cta-title .gradient-text {
+    color: #fff;
+    background: none;
+    -webkit-text-fill-color: #fff;
+}
 .myavana-luxury-homepage .myavana-luxury-member-card-head .eyebrow,
 .myavana-luxury-homepage .myavana-luxury-member-item .item-type { color: var(--myavana-coral-deep); }
 .myavana-luxury-homepage .myavana-luxury-member-card-head h3,

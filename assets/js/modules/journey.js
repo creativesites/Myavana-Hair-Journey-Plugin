@@ -200,10 +200,16 @@ MyavanaNext.Journey = (function() {
 
                 ${entry.notes ? `<p data-role="notes-display">${escapeHtml(entry.notes)}</p>` : ''}
 
-                ${(entry.photos || []).length ? `
+                ${(() => {
+                    // Older entries used WordPress's post-thumbnail mechanism
+                    // instead of the entry_photos meta array — fall back to
+                    // it so those entries still show their photo here.
+                    const cardPhotos = (entry.photos || []).length ? entry.photos : (entry.featuredImage ? [entry.featuredImage] : []);
+                    return cardPhotos.length ? `
                 <div class="myavana-timeline-card-photos">
-                    ${entry.photos.map((p) => `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`).join('')}
-                </div>` : ''}
+                    ${cardPhotos.map((p) => `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`).join('')}
+                </div>` : '';
+                })()}
 
                 ${entry.changeDescription ? `
                 <div class="myavana-timeline-card-change">

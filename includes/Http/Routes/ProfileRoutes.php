@@ -128,7 +128,10 @@ class ProfileRoutes extends RestController {
         $monthlyCounts = [];
 
         foreach ($entries as $entry) {
-            $rating = (int) ($entry['healthRating'] ?? 0);
+            // Journal entries record moisture on a 1-5 scale; there has never
+            // been a 'healthRating' field, so reading one left avgHealthScore
+            // pinned at 0 for every member.
+            $rating = (int) ($entry['moistureLevel'] ?? 0);
             if ($rating > 0) {
                 $healthRatings[] = $rating;
             }

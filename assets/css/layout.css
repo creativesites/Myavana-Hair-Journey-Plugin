@@ -10,11 +10,7 @@
     min-height: 100vh;
     background-color: var(--myavana-stone);
     position: relative;
-    /* Space for the fixed mobile nav bar (72px) plus a margin, and the
-       iPhone home-indicator safe area on notched devices — env() safely
-       resolves to 0px wherever viewport-fit=cover isn't set, so this is a
-       no-op everywhere else. */
-    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0; /* Space for mobile nav bar */
 }
 
 /* The app owns its page chrome just as the original MYAVANA plugin did.
@@ -42,7 +38,7 @@ body.myavana-next-app-page #wpadminbar {
 
 @media (min-width: 992px) {
     .myavana-next-shell {
-        padding-bottom: 40px;
+        padding-bottom: 0;
     }
 }
 
@@ -53,28 +49,43 @@ body.myavana-next-app-page #wpadminbar {
     padding: 0 var(--space-md);
 }
 
+/* Desktop-only footer: a quieter endpoint to the app, not a second navigation
+   system competing with the focused mobile tab bar. */
+.myavana-next-footer { display: none; }
+
+@media (min-width: 768px) {
+    .myavana-next-footer {
+        display: block;
+        margin-top: 56px;
+        padding: 46px 0 0;
+        background: #202122;
+        color: rgba(255,255,255,.72);
+    }
+    .myavana-next-footer-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.35fr) minmax(180px, .85fr) minmax(190px, .8fr);
+        gap: 48px;
+        padding-bottom: 42px;
+    }
+    .myavana-next-footer-brand { max-width: 330px; }
+    .myavana-next-footer-logo { display: block; width: 118px; height: auto; max-height: 28px; object-fit: contain; filter: brightness(0) invert(1); margin-bottom: 16px; }
+    .myavana-next-footer-brand p { margin: 0; font-size: 14px; line-height: 1.65; }
+    .myavana-next-footer-label { display: block; margin-bottom: 14px; color: #f8c5ac; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .myavana-next-footer-links { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
+    .myavana-next-footer a { color: rgba(255,255,255,.72); font-size: 14px; text-decoration: none; transition: color .18s ease; }
+    .myavana-next-footer a:hover { color: #fff; }
+    .myavana-next-footer-chat { padding: 0; border: 0; background: none; color: #fff; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .myavana-next-footer-chat span { color: #f8c5ac; }
+    .myavana-next-footer-legal { display: flex; gap: 14px; margin-top: 18px; }
+    .myavana-next-footer-legal a { color: rgba(255,255,255,.48); font-size: 12px; }
+    .myavana-next-footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 15px 0; color: rgba(255,255,255,.42); font-size: 12px; }
+}
+
 @media (min-width: 768px) {
     .myavana-next-container {
         padding: 0 var(--space-xl);
     }
 }
-
-/* ==========================================================================
-   Nav Progress Bar
-   ========================================================================== */
-.myavana-nav-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 3px;
-    width: 0;
-    background: var(--gradient-coral);
-    z-index: 200;
-    opacity: 0;
-    transition: width .35s ease, opacity .2s ease;
-}
-.myavana-nav-progress.is-active { width: 65%; opacity: 1; transition: width .5s ease, opacity .15s ease; }
-.myavana-nav-progress.is-done { width: 100%; opacity: 1; transition: width .2s ease; }
 
 /* ==========================================================================
    Header & Top Navigation Bar
@@ -89,57 +100,6 @@ body.myavana-next-app-page #wpadminbar {
     border-bottom: 1px solid rgba(34, 35, 35, 0.08);
     transition: var(--transition-fast);
 }
-
-.myavana-verify-banner {
-    background: var(--myavana-light-coral);
-    border-bottom: 1px solid var(--myavana-border);
-}
-
-.myavana-verify-banner-inner {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm) var(--space-lg);
-    justify-content: space-between;
-    padding: 10px 0;
-}
-
-.myavana-verify-banner-text {
-    color: var(--myavana-onyx);
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.myavana-verify-banner-actions {
-    align-items: center;
-    display: flex;
-    gap: var(--space-sm);
-}
-
-.myavana-verify-banner-resend {
-    background: var(--myavana-onyx);
-    border: 0;
-    border-radius: var(--radius-pill);
-    color: var(--myavana-white);
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 16px;
-    white-space: nowrap;
-}
-
-.myavana-verify-banner-dismiss {
-    background: none;
-    border: 0;
-    color: var(--myavana-onyx);
-    cursor: pointer;
-    font-size: 20px;
-    line-height: 1;
-    opacity: 0.6;
-    padding: 4px;
-}
-
-.myavana-verify-banner-dismiss:hover { opacity: 1; }
 
 .myavana-next-header-inner {
     display: flex;
@@ -208,6 +168,21 @@ body.myavana-next-app-page #wpadminbar {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+}
+
+.myavana-next-header .myavana-next-get-started,
+.myavana-next-header .myavana-next-get-started:visited {
+    background: var(--myavana-light-coral);
+    border-color: rgba(231, 166, 144, .72);
+    color: var(--myavana-onyx) !important;
+    box-shadow: none;
+}
+
+.myavana-next-header .myavana-next-get-started:hover {
+    background: #f8d9c8;
+    border-color: var(--myavana-coral);
+    color: var(--myavana-onyx) !important;
+    transform: translateY(-1px);
 }
 
 .myavana-next-concierge-btn {
@@ -426,29 +401,11 @@ body.myavana-next-app-page #wpadminbar {
     border-top: 1px solid var(--myavana-border);
     z-index: 99;
     padding: 0 var(--space-xs);
-    /* Grows the bar to clear the iPhone home-indicator gesture area on
-       notched devices instead of sitting the tap targets under it. */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    height: calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 992px) {
     .myavana-next-mobile-nav {
         display: none;
-    }
-}
-
-/* Our full-width bottom tab bar (72px + safe-area inset) can sit directly
-   on top of Kommunicate's own bottom-corner launcher bubble/iframe on
-   mobile, making it visually covered and effectively untappable. Push it
-   up above our nav using Kommunicate's documented selectors. Harmless if
-   any of these don't match the widget's actual current markup. */
-@media (max-width: 991px) {
-    body.myavana-next-app-page #kommunicate-widget-iframe,
-    body.myavana-next-app-page .km-chat-widget-button,
-    body.myavana-next-app-page #chat-popup-widget-container,
-    body.myavana-next-app-page .km-custom-widget-launcher {
-        bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
@@ -482,12 +439,6 @@ body.myavana-next-app-page #wpadminbar {
     stroke: var(--myavana-coral-dark);
 }
 
-.myavana-next-tab-item:active,
-.myavana-next-nav-link:active {
-    opacity: .55;
-    transition: opacity .05s ease;
-}
-
 /* Floating Check-in Action Button (FAB) */
 .myavana-next-tab-fab {
     display: flex;
@@ -515,4 +466,48 @@ body.myavana-next-app-page #wpadminbar {
 .myavana-next-tab-fab:active {
     transform: scale(1.08) translateY(-2px);
     box-shadow: 0 14px 34px rgba(231, 166, 144, 0.6);
+}
+
+/* The "louie" theme's page-fullwidth.php template renders its own #footer
+   (get_footer()) after this shortcode's own <footer class="myavana-next-footer">
+   — same page, two stacked footers. Suppress the theme's wherever our app
+   shell is actually present, without touching #footer on any other page. */
+body:has(.myavana-next-shell) #footer {
+    display: none !important;
+}
+#footer, .edit-link{
+    display: none !important;
+}
+
+/* Mobile: the header already competes for space with the logo + Get
+   Started/account controls, and the bottom tab bar's own FAB already
+   covers "add an entry" — so the desktop quick-entry button (despite the
+   id) shouldn't also be fighting for room up top. */
+@media (max-width: 767px) {
+    .myavana-next-shell #desktop-quick-entry-btn {
+        display: none !important;
+    }
+}
+
+/* Kommunicate's own floating launcher bubble sits bottom-right and covers
+   the mobile tab bar/FAB. Our own "Chat with Mia" trigger already opens
+   the same widget, so the vendor's floating bubble is redundant on mobile. */
+@media (max-width: 767px) {
+    #kommunicate-widget-iframe,
+    #chat-popup-widget-container,
+    .km-chat-widget-button,
+    .km-custom-widget-launcher {
+        display: none !important;
+    }
+}
+
+/* Home ends in a dark final-CTA band; the app shell's normal breathing
+   room between a view and the (also dark) footer just reads as an
+   unwanted band of blank page between two dark sections here. */
+body:has(#view-home.active) .myavana-next-main {
+    padding-bottom: 0;
+}
+
+body:has(#view-home.active) .myavana-next-footer {
+    margin-top: 0 !important;
 }
