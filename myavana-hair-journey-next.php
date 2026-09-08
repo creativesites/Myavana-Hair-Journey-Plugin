@@ -3,7 +3,7 @@
  * Plugin Name: MYAVANA Hair Journey Next
  * Plugin URI: https://myavana.com
  * Description: The next-generation MYAVANA Hair Journey experience. Unified single-page application shell featuring Today Habit Hub, Two-Speed Smart Entry, Journey Workspace, Routine & Goals, Community, and transparent AI Hair Concierge.
- * Version: 3.2.0
+ * Version: 3.2.3
  * Author: MYAVANA
  * Author URI: https://myavana.com
  * Text Domain: myavana-hair-journey-next
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Plugin Constants
-define('MYAVANA_NEXT_VERSION', '3.2.0');
+define('MYAVANA_NEXT_VERSION', '3.2.3');
 define('MYAVANA_NEXT_FILE', __FILE__);
 define('MYAVANA_NEXT_PATH', plugin_dir_path(__FILE__));
 define('MYAVANA_NEXT_URL', plugin_dir_url(__FILE__));
