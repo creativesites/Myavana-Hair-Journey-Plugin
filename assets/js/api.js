@@ -55,9 +55,22 @@ MyavanaNext.API = (function() {
             });
         }
 
+        // The public auth endpoints are registered with permission_callback
+        // __return_true and need no nonce. Sending one is actively harmful:
+        // WordPress core's rest_cookie_check_errors() runs BEFORE any route's
+        // own permission_callback, so a stale nonce rejects the request with
+        // "Cookie check failed" (403) even on a route that requires no auth.
+        //
+        // The homepage is edge-cached for up to 31 days, so the nonce baked
+        // into that HTML is routinely older than WordPress's ~24h nonce
+        // lifetime. Every new visitor therefore received the same expired
+        // nonce and could not register, log in, or use Google sign-in.
+        //
+        // isPublicEndpoint() already existed for the 401/403 retry path below;
+        // it simply was never applied here.
         const headers = {
-            'X-WP-Nonce': getNonce(),
             'Accept': 'application/json',
+            ...(isPublicEndpoint(endpoint) ? {} : { 'X-WP-Nonce': getNonce() }),
             ...(options.headers || {})
         };
 
