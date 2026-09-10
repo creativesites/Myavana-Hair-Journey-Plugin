@@ -62,6 +62,7 @@ class TodayInsightContextBuilder {
             'wash_days_last_7_days' => $washDays,
             'todays_routine_completion_percent' => $checklist['completionPercent'] ?? 0,
             'current_streak_days' => $streakDays,
+            'total_journal_entries' => count($entries),
             'day_count_on_journey' => $dayCount,
         ];
     }

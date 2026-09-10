@@ -113,7 +113,7 @@ MyavanaNext.Journey = (function() {
         const s = data.stats;
         el.innerHTML = [
             statCard(s.currentLength ? `${s.currentLength}"` : '—', 'Current length'),
-            statCard(`${s.healthScore}`, 'Health score', true),
+            statCard(`${s.careIndex !== undefined ? s.careIndex : s.healthScore}%`, 'Care consistency', true),
             statCard(`${s.totalEntries}`, 'Journey entries'),
             statCard(`${s.photoCount}`, 'Photos logged'),
         ].join('');

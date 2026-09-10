@@ -12,6 +12,8 @@ use Myavana\Next\Domain\Journal\JournalRepository;
 use Myavana\Next\Domain\Routine\RoutineService;
 use Myavana\Next\Domain\Goals\GoalRepository;
 use Myavana\Next\Domain\AI\InsightEngine;
+use Myavana\Next\Domain\Intelligence\ContextBuilders\TodayInsightContextBuilder;
+use Myavana\Next\Domain\Rewards\GamificationRepository;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -55,6 +57,20 @@ class TodayService {
         $hasRoutineSteps = !empty($checklist['items']) && count($checklist['items']) > 0;
         $firstEntry = !empty($entries) ? end($entries) : null;
         $dayCount = $firstEntry ? max(1, (int) round((time() - strtotime($firstEntry['date'])) / DAY_IN_SECONDS) + 1) : 1;
+        $goals = $this->goalRepo->getGoals($userId);
+        $streakDays = (int) ((new GamificationRepository())->getStats($userId)['currentStreak'] ?? 0);
+
+        // The richer AI insight is requested independently by the client. The
+        // Today hub itself must always be fast and reliable, so it returns the
+        // fact-based fallback rather than calling a removed legacy AI method.
+        $insightContext = TodayInsightContextBuilder::build(
+            $profile,
+            $entries,
+            $checklist,
+            $goals,
+            $streakDays,
+            $dayCount
+        );
 
         return [
             'greeting' => $this->getGreeting($profile->displayName),
@@ -65,10 +81,10 @@ class TodayService {
             'checklist' => $checklist,
             'latestEntry' => $latestEntry,
             'recentEntries' => $recentEntries,
-            'insight' => $this->insightEngine->generateDailyInsight($profile, array_slice($entries, 0, 5)),
+            'insight' => $this->insightEngine->generateFallbackInsight($insightContext),
             'routineProducts' => array_slice($this->routineService->getProductCabinet($userId), 0, 3),
             'week' => $this->buildWeekStrip($entries),
-            'goals' => array_slice($this->goalRepo->getGoals($userId), 0, 3),
+            'goals' => array_slice($goals, 0, 3),
             'upcomingGoals' => $this->buildUpcomingGoals($userId),
             'memory' => $this->findMemory($userId, $entries),
         ];

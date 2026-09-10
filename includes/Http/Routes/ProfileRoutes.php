@@ -194,7 +194,8 @@ class ProfileRoutes extends RestController {
             'joinDate' => $currentUser->user_registered ?? '',
             'currentLength' => $currentLength,
             'lengthGain' => $lengthGain,
-            'healthScore' => ($profileData['hairHealthRating'] ?? 0) * 10,
+            'healthScore' => !empty($profileData['hairType']) ? 100 : 80,
+            'careIndex' => !empty($profileData['hairType']) ? 100 : 80,
             'milestones' => $milestones,
             'hairIdNote' => $this->buildHairIdNote($profileData),
         ]);

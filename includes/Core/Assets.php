@@ -109,6 +109,18 @@ class Assets {
             self::ver('assets/js/share-to-community.js'),
             true
         );
+        // Visitor-only enhancement layer over the shared feed renderer:
+        // monogram avatars, media lightbox, in-feed join card, skeletons.
+        if (!is_user_logged_in()) {
+            wp_enqueue_script(
+                'myavana-community-guest-js',
+                MYAVANA_NEXT_URL . 'assets/js/community-guest.js',
+                ['myavana-social-feed-js'],
+                self::ver('assets/js/community-guest.js'),
+                true
+            );
+        }
+
         wp_enqueue_style('myavana-entry-selector-css', MYAVANA_NEXT_URL . 'assets/css/entry-selector.css', ['myavana-social-feed-css'], self::ver('assets/css/entry-selector.css'));
         wp_enqueue_script('myavana-entry-selector-js', MYAVANA_NEXT_URL . 'assets/js/entry-selector.js', ['jquery', 'myavana-social-feed-js'], self::ver('assets/js/entry-selector.js'), true);
 
@@ -165,6 +177,8 @@ class Assets {
             'store' => 'assets/js/store.js',
             'api' => 'assets/js/api.js',
             'mod-kommunicate' => 'assets/js/modules/kommunicate.js',
+            'mya-widget-core' => 'assets/js/myavana-widget.js',
+            'mod-mya-widget' => 'assets/js/modules/mya-widget-embed.js',
             'mod-smart-entry' => 'assets/js/modules/smart-entry.js',
             'mod-compare-slider' => 'assets/js/modules/compare-slider.js',
             'mod-today' => 'assets/js/modules/today.js',
@@ -239,6 +253,7 @@ class Assets {
             'registerUrl' => wp_registration_url(),
             'googleAuthEnabled' => $googleAuth->isEnabled(),
             'googleClientId' => $googleAuth->getClientId(),
+            'chatApiBase' => defined('MYAVANA_CHAT_API_BASE') ? MYAVANA_CHAT_API_BASE : get_option('myavana_next_chat_api_base', 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app'),
         ]);
     }
 }

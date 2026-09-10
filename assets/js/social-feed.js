@@ -3678,20 +3678,27 @@
             return '';
         }
 
+        // Undo PHP addslashes()-style escaping on plain quote characters
+        // before touching entities, so \' and \" don't survive as stray
+        // backslashes once the entity beside them is decoded.
         normalized = normalized
-            .replace(/\\+(&#0*39;|&#x0*27;|&apos;)/gi, "'$1")
-            .replace(/\\+(&quot;|&amp;)/gi, '$1')
+            .replace(/\\(['"\\])/g, '$1')
             // Old content occasionally includes its own Markdown read-more link;
             // the feed supplies the accessible native control below the post.
             .replace(/\s*\[\*\*Read more\*\*\]\([^)]*\)\s*$/i, '');
 
-        // Decode repeatedly because some legacy records were entity-encoded twice.
+        // Decode repeatedly because some legacy records were entity-encoded
+        // twice (&amp;#039; -> &#039; -> ') — each pass only resolves one layer.
         for (let attempt = 0; attempt < 3; attempt += 1) {
             const decoded = decodeHtmlEntities(normalized);
             if (decoded === normalized) break;
             normalized = decoded;
         }
-        return normalized.replace(/\\+&#0*39;|\\+&#x0*27;|\\+&apos;/gi, "'");
+
+        // A backslash that was escaping the *encoded* form (\&#039; rather
+        // than \') survives decoding untouched, sitting right before the
+        // character the entity resolved to — strip it now that it's exposed.
+        return normalized.replace(/\\(?=['"&])/g, '');
     }
 
     function parseTextWithMentionsAndHashtags(text) {
@@ -3965,7 +3972,7 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        if ($('.myavana-community-container').length) {
+        if ($('.myavana-community-container, .myavana-community-guest').length) {
             initCommunityFeed();
             startActivityPolling();
         }

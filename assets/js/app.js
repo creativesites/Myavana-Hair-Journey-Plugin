@@ -156,7 +156,7 @@ MyavanaNext.App = (function() {
 
     function bindGlobalActions() {
         // Primary Myavana Chat triggers (Repointed to Mya per G1 directive)
-        document.querySelectorAll('.btn-open-kommunicate').forEach(btn => {
+        document.querySelectorAll('.btn-open-mya, .btn-open-kommunicate').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (window.MyavanaWidget && typeof window.MyavanaWidget.open === 'function') {

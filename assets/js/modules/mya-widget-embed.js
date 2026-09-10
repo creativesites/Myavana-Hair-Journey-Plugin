@@ -22,7 +22,7 @@ window.MyavanaNext = window.MyavanaNext || {};
 MyavanaNext.Mya = (function () {
     'use strict';
 
-    var DEFAULT_CHAT_BASE = 'http://localhost:8080';
+    var DEFAULT_CHAT_BASE = 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app';
     var VALID_ROUTES = ['home', 'today', 'journey', 'routine', 'community', 'profile'];
 
     // The journey record is a single fairly wide REST response, so it is

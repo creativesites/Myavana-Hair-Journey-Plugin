@@ -241,7 +241,7 @@ function myavana_luxury_home_view() {
     wp_localize_script('myavana-luxury-home', 'myavanaLuxuryData', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('myavana_nonce'),
-        'aiToolUrl' => 'https://www.myavana.com/pages/consumer',
+        'aiToolUrl' => get_option('myavana_next_hair_analysis_url', '#routine'),
         'isLoggedIn' => $is_logged_in,
         'currentUserId' => $is_logged_in ? $current_user->ID : 0,
         'currentUserName' => $is_logged_in ? $current_user->display_name : '',
@@ -271,8 +271,7 @@ function myavana_luxury_home_view() {
                             Professional Hair Care, Personalized for You
                         </h2>
                         <p class="myavana-luxury-hero-description">
-                            Join thousands of women who've transformed their hair health with our AI-powered platform.
-                            Get personalized recommendations, track your progress, and connect with a supportive community.
+                            Build a hair-care plan around your real goals, capture the changes you see, and learn what helps your hair thrive.
                         </p>
                         <div class="myavana-luxury-hero-actions">
                             <a href="#auth" data-open-auth="signup" class="myavana-luxury-btn-primary">
@@ -294,16 +293,16 @@ function myavana_luxury_home_view() {
                         <!-- Global Stats -->
                         <div class="myavana-luxury-global-stats">
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">50K+</span>
-                                <span class="myavana-luxury-stat-label">Hair Journeys</span>
+                                <span class="myavana-luxury-stat-number">Your</span>
+                                <span class="myavana-luxury-stat-label">Personal Care Plan</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">98%</span>
-                                <span class="myavana-luxury-stat-label">Satisfaction Rate</span>
+                                <span class="myavana-luxury-stat-number">Private</span>
+                                <span class="myavana-luxury-stat-label">Progress Tracking</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">1M+</span>
-                                <span class="myavana-luxury-stat-label">AI Analyses</span>
+                                <span class="myavana-luxury-stat-number">Real</span>
+                                <span class="myavana-luxury-stat-label">Community Support</span>
                             </div>
                         </div>
                     </div>
@@ -377,9 +376,9 @@ function myavana_luxury_home_view() {
                                     <i class="fas fa-camera"></i>
                                     My Hair Timeline
                                 </a>
-                                <button type="button" class="myavana-luxury-btn-secondary btn-open-kommunicate">
+                                <button type="button" class="myavana-luxury-btn-secondary btn-open-mya btn-open-kommunicate" data-action="open-mya-chat">
                                     <i class="fas fa-comment-dots"></i>
-                                    Chat with Concierge
+                                    Chat with Mya
                                 </button>
                             </div>
                         <?php endif; ?>
@@ -569,7 +568,8 @@ function myavana_luxury_home_view() {
 
 
 
-            <!-- Features Section (Non-logged-in users only) -->
+        <?php if (!$is_logged_in): ?>
+            <!-- Public product story -->
             <section class="myavana-luxury-features" id="features">
                 <div class="myavana-luxury-features-container">
                     <div class="myavana-luxury-section-header">
@@ -771,6 +771,8 @@ function myavana_luxury_home_view() {
                     </div>
                 </div>
             </section>
+        <?php endif; ?>
+
             <!-- Entry Form Modal -->
             <div class="myavana-modal-overlay" id="entryModal" style="display: none;">
                 <div class="mya-modal">
@@ -982,8 +984,8 @@ function myavana_luxury_home_view() {
             // Create dropdown if it doesn't exist
             const dropdownHTML = `
                 <div class="myavana-luxury-profile-dropdown-menu">
-                    <a href="/members/<?php echo $current_user->user_login; ?>/profile/">View Profile</a>
-                    <a href="/hair-journey/">My Timeline</a>
+                    <a href="#profile" data-tab="profile" data-home-nav>View Profile</a>
+                    <a href="#journey" data-tab="journey" data-home-nav>My Timeline</a>
                     <a href="<?php echo wp_logout_url(home_url()); ?>" class="logout">Logout</a>
                 </div>
             `;
@@ -1003,20 +1005,38 @@ function myavana_luxury_home_view() {
         setTimeout(() => document.addEventListener('click', closeDropdown), 0);
     }
 
-    // Modal integration (assumes modal system exists)
-    if (typeof showMyavanaModal !== 'function') {
-        window.showMyavanaModal = function(modalType) {
-            console.log('Opening modal:', modalType);
-            // Fallback behavior if modal system isn't loaded
-            if (modalType === 'register') {
-                alert('Registration modal would open here');
-            } else if (modalType === 'login') {
-                alert('Login modal would open here');
-            } else if (modalType === 'ai-analysis') {
-                window.location.href = 'https://www.myavana.com/pages/consumer';
+    // Modal integration (connects to Myavana Next auth & assessment modal)
+    window.showMyavanaModal = function(modalType) {
+        console.log('Opening modal:', modalType);
+        if (modalType === 'register' || modalType === 'signup') {
+            const signupBtn = document.querySelector('[data-open-auth="signup"]');
+            if (signupBtn) {
+                signupBtn.click();
+            } else {
+                window.location.hash = '#auth';
             }
-        };
-    }
+        } else if (modalType === 'login' || modalType === 'signin') {
+            const signinBtn = document.querySelector('[data-open-auth="signin"]');
+            if (signinBtn) {
+                signinBtn.click();
+            } else {
+                window.location.hash = '#auth';
+            }
+        } else if (modalType === 'ai-analysis') {
+            // Direct to in-app Hair Assessment / Onboarding Blueprint instead of external Shopify
+            const authData = window.myavanaNextData || {};
+            if (authData.isLoggedIn) {
+                window.location.hash = '#routine';
+            } else {
+                const signupBtn = document.querySelector('[data-open-auth="signup"]');
+                if (signupBtn) {
+                    signupBtn.click();
+                } else {
+                    window.location.hash = '#auth';
+                }
+            }
+        }
+    };
     </script>
     <?php
     return ob_get_clean();

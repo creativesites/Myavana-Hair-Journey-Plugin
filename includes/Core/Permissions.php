@@ -55,12 +55,35 @@ class Permissions {
     }
 
     /**
-     * Permission callback for REST API (authenticated user)
+     * Check if request carries a valid internal service key
+     *
+     * @return bool
+     */
+    public static function hasValidServiceKey(): bool {
+        if (!defined('MYAVANA_SERVICE_KEY') || empty(MYAVANA_SERVICE_KEY)) {
+            return false;
+        }
+        $expectedKey = MYAVANA_SERVICE_KEY;
+        $providedKey = '';
+        if (!empty($_SERVER['HTTP_X_MYAVANA_SERVICE_KEY'])) {
+            $providedKey = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_MYAVANA_SERVICE_KEY']));
+        } elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Bearer\s+(.*)$/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            $providedKey = trim($matches[1]);
+        }
+        return !empty($providedKey) && hash_equals($expectedKey, $providedKey);
+    }
+
+    /**
+     * Permission callback for REST API (authenticated user or authorized service)
      *
      * @param \WP_REST_Request $request
      * @return bool|\WP_Error
      */
     public static function restUserCheck(\WP_REST_Request $request) {
+        if (self::hasValidServiceKey()) {
+            return true;
+        }
+
         if (!self::isAuthenticated()) {
             return new \WP_Error(
                 'rest_forbidden',

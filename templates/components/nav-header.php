@@ -21,7 +21,8 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                 <img src="<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="MYAVANA" class="myavana-next-logo" />
             </a>
 
-            <!-- Desktop navigation only exposes destinations the visitor can actually use. -->
+            <!-- Public navigation shows the product's full shape; member tools are
+                 guarded with a clear sign-in route instead of disappearing. -->
             <nav class="myavana-next-nav-desktop" aria-label="Primary Navigation">
                 <a href="#home" class="myavana-next-nav-link" data-tab="home">
                     <?php esc_html_e('Home', 'myavana-hair-journey-next'); ?>
@@ -45,15 +46,28 @@ $displayName = $currentUser->display_name ?: $currentUser->user_login;
                 <a href="#profile" class="myavana-next-nav-link" data-tab="profile">
                     <?php esc_html_e('Profile', 'myavana-hair-journey-next'); ?>
                 </a>
+                <?php else : ?>
+                <a href="#community" class="myavana-next-nav-link" data-tab="community">
+                    <?php esc_html_e('Community', 'myavana-hair-journey-next'); ?>
+                </a>
+                <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your daily care plan">
+                    <?php esc_html_e('Today', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
+                </a>
+                <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your private progress timeline">
+                    <?php esc_html_e('My Journey', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
+                </a>
+                <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your personalized routines and goals">
+                    <?php esc_html_e('Routines', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
+                </a>
                 <?php endif; ?>
             </nav>
 
             <!-- Header Utilities -->
             <div class="myavana-next-header-actions">
-                <!-- Chat Support Trigger (Launches Kommunicate) -->
-                <button type="button" class="myavana-next-concierge-btn btn-open-kommunicate" aria-label="<?php esc_attr_e('Open Hair Care Chat', 'myavana-hair-journey-next'); ?>">
+                <!-- Chat Support Trigger (Launches Mya AI) -->
+                <button type="button" class="myavana-next-concierge-btn btn-open-mya btn-open-kommunicate" data-action="open-mya-chat" aria-label="<?php esc_attr_e('Open Hair Care Chat with Mya', 'myavana-hair-journey-next'); ?>">
                     <span class="myavana-next-concierge-badge"></span>
-                    <span><?php esc_html_e('Chat with Mia', 'myavana-hair-journey-next'); ?></span>
+                    <span><?php esc_html_e('Chat with Mya', 'myavana-hair-journey-next'); ?></span>
                 </button>
 
                 <?php if (is_user_logged_in()) : ?>

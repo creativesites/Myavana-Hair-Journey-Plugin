@@ -1353,7 +1353,24 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
+
+/* One-time public welcome prompt: intentionally compact so the homepage
+   remains the main experience, rather than becoming a forced funnel. */
+.myavana-welcome-modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(20, 21, 21, .48); backdrop-filter: blur(8px); }
+.myavana-welcome-modal[hidden] { display: none; }
+.myavana-welcome-modal-card { position: relative; width: min(100%, 560px); padding: clamp(28px, 5vw, 48px); border-radius: 28px; background: #fff; box-shadow: 0 28px 80px rgba(0,0,0,.24); text-align: center; }
+.myavana-welcome-modal-card h2 { margin: 16px 0 12px; font-size: clamp(28px, 4vw, 42px); line-height: 1.04; text-transform: uppercase; }
+.myavana-welcome-modal-card > p { max-width: 440px; margin: 0 auto 22px; color: rgba(34,35,35,.72); }
+.myavana-welcome-close { position: absolute; top: 12px; right: 15px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f5f5f7; color: #222323; font-size: 26px; line-height: 1; cursor: pointer; }
+.myavana-welcome-goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.myavana-welcome-goals button { min-height: 68px; padding: 10px; border: 1px solid rgba(34,35,35,.12); border-radius: 14px; background: #fff; color: #222323; font: 600 13px var(--font-secondary); cursor: pointer; }
+.myavana-welcome-goals button:hover, .myavana-welcome-goals button.selected { border-color: var(--myavana-coral); background: var(--myavana-light-coral); }
+.myavana-welcome-preview { display: grid; gap: 4px; padding: 14px; margin-bottom: 22px; border-radius: 14px; background: #f5f5f7; text-align: left; font-size: 13px; }
+.myavana-welcome-preview span { color: rgba(34,35,35,.7); }
+.myavana-welcome-later { display: block; margin: 14px auto 0; border: 0; background: transparent; color: #626262; font: 600 13px var(--font-secondary); cursor: pointer; text-decoration: underline; }
+@media (max-width: 520px) { .myavana-welcome-goals { grid-template-columns: 1fr; } .myavana-welcome-goals button { min-height: 44px; } }
 
 .myavana-luxury-section-description {
     font-size: 18px;

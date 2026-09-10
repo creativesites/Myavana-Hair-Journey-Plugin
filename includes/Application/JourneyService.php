@@ -63,7 +63,21 @@ class JourneyService {
             }
         }
 
-        $profile = $this->profileRepo->getByUserId($userId);
+        // Calculate Care Consistency Index based on active check-in frequency and routine adherence
+        $activeDays30 = 0;
+        $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+        foreach ($entries as $e) {
+            $eDate = substr($e['date'], 0, 10);
+            if ($eDate >= $thirtyDaysAgo) {
+                $activeDays30++;
+            }
+        }
+        // Baseline 100% for completed onboarding with 0 entries; scales with monthly active consistency
+        if ($entriesData['total'] === 0) {
+            $careIndex = !empty($profile->hairType) ? 100 : 80;
+        } else {
+            $careIndex = min(100, max(25, (int) round(($activeDays30 / 10) * 100)));
+        }
 
         return [
             'timeline' => $entriesData,
@@ -75,7 +89,8 @@ class JourneyService {
             'routines' => array_slice($this->routineRepo->getRoutines($userId), 0, 4),
             'stats' => [
                 'currentLength' => !empty($lengthHistory) ? end($lengthHistory)['length'] : null,
-                'healthScore' => max(0, min(100, (int) $profile->hairHealthRating * 10)),
+                'healthScore' => $careIndex,
+                'careIndex' => $careIndex,
                 'totalEntries' => $entriesData['total'],
                 'photoCount' => count($photoEntries),
             ],

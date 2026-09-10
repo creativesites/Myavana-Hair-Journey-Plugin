@@ -11,7 +11,6 @@ MyavanaNext.Auth = (function() {
     'use strict';
 
     let authView = null;
-    let discoveryView = null;
     let googleInitialized = false;
 
     const PANEL_IDS = {
@@ -24,8 +23,6 @@ MyavanaNext.Auth = (function() {
     function init() {
         authView = document.querySelector('#view-auth');
         if (!authView) return;
-
-        discoveryView = document.querySelector('#view-discovery');
 
         bindOpenTriggers();
         bindTabToggle();
@@ -52,15 +49,14 @@ MyavanaNext.Auth = (function() {
     }
 
     function open(mode) {
-        const home = document.querySelector('#view-home');
-        if (home) {
-            home.style.display = 'none';
-            home.classList.remove('active');
-        }
-        if (discoveryView) {
-            discoveryView.style.display = 'none';
-            discoveryView.classList.remove('active');
-        }
+        // Whichever guest view is currently showing (home, community, ...)
+        // needs to actually hide — not just #view-home — otherwise auth
+        // renders stacked underneath it instead of replacing it.
+        document.querySelectorAll('.myavana-next-view').forEach((view) => {
+            if (view === authView) return;
+            view.style.display = 'none';
+            view.classList.remove('active');
+        });
         authView.style.display = 'block';
         authView.classList.add('active');
         switchTab(PANEL_IDS[mode] ? mode : 'signin');

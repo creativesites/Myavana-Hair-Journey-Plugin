@@ -315,7 +315,7 @@
             '.mya-search-wrap{position:relative;margin-bottom:4px;z-index:1;}',
             '.mya-search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:' + COLORS.muted + ';pointer-events:none;transition:color 0.18s ease;}',
             '.mya-search-wrap:focus-within svg{color:' + COLORS.coralDark + ';}',
-            '.mya-history-search{width:100%;background:#ffffff;border:1.5px solid ' + COLORS.borderInput + ';border-radius:13px;',
+            '.mya-history-search{width:100%;background:#ffffff;border:1.5px solid ' + COLORS.borderInput + ';border-radius:13px;border-color:' + COLORS.borderInput + '!important;',
             'padding:11px 34px 11px 36px;font-size:12.5px;outline:none;font-family:inherit;color:' + COLORS.onyx + ';',
             // An inset top highlight so the upper edge reads crisply even where
             // the panel background is almost the same white as the field.

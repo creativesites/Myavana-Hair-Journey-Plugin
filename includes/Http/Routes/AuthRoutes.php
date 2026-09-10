@@ -53,6 +53,12 @@ class AuthRoutes extends RestController {
             'callback' => [$this, 'resetPassword'],
             'permission_callback' => '__return_true',
         ]);
+
+        register_rest_route(self::NAMESPACE, '/auth/chat-token', [
+            'methods' => \WP_REST_Server::READABLE,
+            'callback' => [$this, 'getChatToken'],
+            'permission_callback' => '__return_true',
+        ]);
     }
 
     public function register(\WP_REST_Request $request): \WP_REST_Response {
@@ -130,6 +136,58 @@ class AuthRoutes extends RestController {
         }
 
         return $this->respondSuccess($result);
+    }
+
+    /**
+     * Mint a short-lived token for Mya chat sessions (authenticated or guest)
+     */
+    public function getChatToken(\WP_REST_Request $request): \WP_REST_Response {
+        $userId = $this->getUserId();
+
+        if ($userId > 0) {
+            $user = get_userdata($userId);
+            if (!$user) {
+                return $this->respondError(__('User not found.', 'myavana-hair-journey-next'), 'not_found', 404);
+            }
+
+            $payload = [
+                'userId' => $userId,
+                'email' => $user->user_email,
+                'name' => $user->display_name,
+                'exp' => time() + 300,
+            ];
+        } else {
+            // Guest token for unauthenticated visitors
+            $guestId = 'guest_' . wp_generate_uuid4();
+            $payload = [
+                'userId' => $guestId,
+                'email' => '',
+                'name' => 'Guest',
+                'isGuest' => true,
+                'exp' => time() + 300,
+            ];
+        }
+
+        $secret = defined('MYAVANA_CHAT_SECRET') ? MYAVANA_CHAT_SECRET : wp_salt('auth');
+        $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
+
+        $response = [
+            'token' => $token,
+            'expiresIn' => 300,
+        ];
+
+        if ($userId > 0) {
+            $user = get_userdata($userId);
+            $response['userId'] = $userId;
+            $response['userName'] = $user->display_name;
+            $response['firstName'] = $user->first_name ?: $user->display_name;
+        } else {
+            $response['userId'] = $payload['userId'];
+            $response['userName'] = 'Guest';
+            $response['firstName'] = 'Guest';
+        }
+
+        return $this->respondSuccess($response);
     }
 
     /**
