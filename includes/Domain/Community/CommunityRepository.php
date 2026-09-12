@@ -101,7 +101,7 @@ class CommunityRepository {
             return new \WP_Error('empty_content', __('Please write a message to share with the community.', 'myavana-hair-journey-next'));
         }
 
-        $mediaUrl = esc_url_raw($data['mediaUrl'] ?? '');
+        $mediaUrl = esc_url_raw($data['mediaUrl'] ?? ($data['media_urls'][0] ?? ($data['imageUrl'] ?? '')));
         $mediaType = sanitize_key($data['mediaType'] ?? (!empty($mediaUrl) ? 'image' : 'text'));
         $title = sanitize_text_field($data['title'] ?? '');
 
@@ -143,6 +143,153 @@ class CommunityRepository {
             'likeCount' => 0,
             'commentCount' => 0,
             'isLiked' => false,
+            'createdAt' => __('Just now', 'myavana-hair-journey-next'),
+        ];
+    }
+
+    /**
+     * Toggle like on post
+     */
+    public function toggleLike(int $userId, int $postId): array {
+        global $wpdb;
+        $likesTable = $wpdb->prefix . 'myavana_post_likes';
+        $postsTable = $wpdb->prefix . 'myavana_community_posts';
+        $ciTable = $wpdb->prefix . 'myavana_ci_posts';
+
+        $activePostsTable = ($wpdb->get_var("SHOW TABLES LIKE '$postsTable'") === $postsTable) ? $postsTable : $ciTable;
+
+        // Ensure likes table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '$likesTable'") !== $likesTable) {
+            $charset_collate = $wpdb->get_charset_collate();
+            $wpdb->query("CREATE TABLE IF NOT EXISTS $likesTable (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                post_id mediumint(9) NOT NULL,
+                user_id bigint(20) NOT NULL,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                UNIQUE KEY post_user (post_id, user_id),
+                KEY user_id (user_id)
+            ) $charset_collate;");
+        }
+
+        $existing = $wpdb->get_var($wpdb->prepare("SELECT id FROM $likesTable WHERE post_id = %d AND user_id = %d", $postId, $userId));
+
+        if ($existing) {
+            $wpdb->delete($likesTable, ['post_id' => $postId, 'user_id' => $userId], ['%d', '%d']);
+            if ($activePostsTable) {
+                $wpdb->query($wpdb->prepare("UPDATE $activePostsTable SET likes_count = GREATEST(0, likes_count - 1) WHERE id = %d", $postId));
+            }
+            $isLiked = false;
+        } else {
+            $wpdb->insert($likesTable, [
+                'post_id' => $postId,
+                'user_id' => $userId,
+                'created_at' => current_time('mysql'),
+            ]);
+            if ($activePostsTable) {
+                $wpdb->query($wpdb->prepare("UPDATE $activePostsTable SET likes_count = likes_count + 1 WHERE id = %d", $postId));
+            }
+            $isLiked = true;
+        }
+
+        $likeCount = $activePostsTable ? (int) $wpdb->get_var($wpdb->prepare("SELECT likes_count FROM $activePostsTable WHERE id = %d", $postId)) : 0;
+
+        return [
+            'postId' => $postId,
+            'isLiked' => $isLiked,
+            'likeCount' => $likeCount,
+        ];
+    }
+
+    /**
+     * Get comments for a post
+     */
+    public function getComments(int $postId): array {
+        global $wpdb;
+        $table = $wpdb->prefix . 'myavana_post_comments';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") !== $table) {
+            return [];
+        }
+
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table WHERE post_id = %d ORDER BY created_at ASC LIMIT 50",
+            $postId
+        ));
+
+        $comments = [];
+        if ($rows) {
+            foreach ($rows as $row) {
+                $author = get_userdata((int) $row->user_id);
+                $authorName = $author ? ($author->display_name ?: $author->user_login) : 'Member';
+                $comments[] = [
+                    'id' => (int) $row->id,
+                    'postId' => (int) $row->post_id,
+                    'userId' => (int) $row->user_id,
+                    'authorName' => $authorName,
+                    'authorAvatar' => get_avatar_url((int) $row->user_id, ['size' => 48]),
+                    'content' => wp_kses_post($row->content),
+                    'createdAt' => human_time_diff(strtotime($row->created_at), current_time('timestamp')) . ' ' . __('ago', 'myavana-hair-journey-next'),
+                ];
+            }
+        }
+        return $comments;
+    }
+
+    /**
+     * Add comment to post
+     */
+    public function addComment(int $userId, int $postId, string $content) {
+        global $wpdb;
+        $clean = wp_kses_post(trim($content));
+        if (empty($clean)) {
+            return new \WP_Error('empty_comment', __('Comment text cannot be empty.', 'myavana-hair-journey-next'));
+        }
+
+        $commentsTable = $wpdb->prefix . 'myavana_post_comments';
+        $postsTable = $wpdb->prefix . 'myavana_community_posts';
+        $ciTable = $wpdb->prefix . 'myavana_ci_posts';
+        $activePostsTable = ($wpdb->get_var("SHOW TABLES LIKE '$postsTable'") === $postsTable) ? $postsTable : $ciTable;
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$commentsTable'") !== $commentsTable) {
+            $charset_collate = $wpdb->get_charset_collate();
+            $wpdb->query("CREATE TABLE IF NOT EXISTS $commentsTable (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                post_id mediumint(9) NOT NULL,
+                user_id bigint(20) NOT NULL,
+                parent_id mediumint(9) DEFAULT 0,
+                content text NOT NULL,
+                likes_count int(11) DEFAULT 0,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY post_id (post_id),
+                KEY user_id (user_id)
+            ) $charset_collate;");
+        }
+
+        $inserted = $wpdb->insert($commentsTable, [
+            'post_id' => $postId,
+            'user_id' => $userId,
+            'content' => $clean,
+            'created_at' => current_time('mysql'),
+        ]);
+
+        if (!$inserted) {
+            return new \WP_Error('db_error', __('Could not post comment. Please try again.', 'myavana-hair-journey-next'));
+        }
+
+        $commentId = (int) $wpdb->insert_id;
+        if ($activePostsTable) {
+            $wpdb->query($wpdb->prepare("UPDATE $activePostsTable SET comments_count = comments_count + 1 WHERE id = %d", $postId));
+        }
+
+        $author = get_userdata($userId);
+        return [
+            'id' => $commentId,
+            'postId' => $postId,
+            'userId' => $userId,
+            'authorName' => $author ? ($author->display_name ?: $author->user_login) : __('You', 'myavana-hair-journey-next'),
+            'authorAvatar' => get_avatar_url($userId, ['size' => 48]),
+            'content' => $clean,
             'createdAt' => __('Just now', 'myavana-hair-journey-next'),
         ];
     }

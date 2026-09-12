@@ -27,6 +27,10 @@ class Router {
         add_shortcode('myavana_hair-journey-page', [__CLASS__, 'renderLegacyJourneyPage']);
         add_shortcode('myavana_hair_journey_page', [__CLASS__, 'renderLegacyJourneyPage']);
         add_shortcode('myavana_hair_journey', [__CLASS__, 'renderLegacyJourneyPage']);
+        add_shortcode('myavana_apk_download', [__CLASS__, 'renderApkDownloadShortcode']);
+
+        // Intercept /download/, /download-apk/, /app/ routes for APK Download Page
+        add_action('template_redirect', [__CLASS__, 'handleDownloadRedirect'], 5);
 
         // Intercept /onboarding/ route so it doesn't 404 (HJ-015)
         add_action('template_redirect', [__CLASS__, 'handleOnboardingRedirect']);
@@ -60,6 +64,47 @@ class Router {
             $atts['tab'] = 'journey';
         }
         return self::renderShortcode($atts);
+    }
+
+    /**
+     * Intercept /download/, /download-apk/, and /app/ routes to serve APK download page
+     */
+    public static function handleDownloadRedirect(): void {
+        $uri = isset($_SERVER['REQUEST_URI']) ? trim((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') : '';
+        $downloadRoutes = ['download', 'download-app', 'get-app', 'preview', 'app', 'apk'];
+        if (in_array($uri, $downloadRoutes, true)) {
+            self::renderApkDownloadPage();
+            exit;
+        }
+    }
+
+    /**
+     * Render the APK download page template
+     */
+    public static function renderApkDownloadPage(): void {
+        $templatePath = MYAVANA_NEXT_PATH . 'templates/pages/apk-download.php';
+        if (file_exists($templatePath)) {
+            status_header(200);
+            header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+            header("Surrogate-Control: no-store");
+            header("CDN-Cache-Control: no-store");
+            header("Cloudflare-CDN-Cache-Control: no-store");
+            include $templatePath;
+        } else {
+            status_header(404);
+            echo 'Download page template missing.';
+        }
+    }
+
+    /**
+     * Shortcode handler for [myavana_apk_download]
+     */
+    public static function renderApkDownloadShortcode($atts = []): string {
+        ob_start();
+        self::renderApkDownloadPage();
+        return ob_get_clean();
     }
 
     /**

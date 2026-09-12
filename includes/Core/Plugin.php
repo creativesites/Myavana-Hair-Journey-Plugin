@@ -17,6 +17,7 @@ use Myavana\Next\Http\Routes\CommunityRoutes;
 use Myavana\Next\Http\Routes\ProfileRoutes;
 use Myavana\Next\Http\Routes\AiRoutes;
 use Myavana\Next\Http\Routes\AuthRoutes;
+use Myavana\Next\Http\Routes\DownloadRoutes;
 use Myavana\Next\Domain\Auth\AuthService;
 
 if (!defined('ABSPATH')) {
@@ -175,6 +176,7 @@ class Plugin {
         (new ProfileRoutes())->registerRoutes();
         (new AiRoutes())->registerRoutes();
         (new AuthRoutes())->registerRoutes();
+        (new DownloadRoutes())->registerRoutes();
     }
 
     /**

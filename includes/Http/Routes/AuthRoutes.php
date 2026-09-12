@@ -59,6 +59,12 @@ class AuthRoutes extends RestController {
             'callback' => [$this, 'getChatToken'],
             'permission_callback' => '__return_true',
         ]);
+
+        register_rest_route(self::NAMESPACE, '/auth/sync-mobile-user', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'syncMobileUser'],
+            'permission_callback' => '__return_true',
+        ]);
     }
 
     public function register(\WP_REST_Request $request): \WP_REST_Response {
@@ -188,6 +194,78 @@ class AuthRoutes extends RestController {
         }
 
         return $this->respondSuccess($response);
+    }
+
+    /**
+     * Silently synchronize mobile app user with WordPress site user
+     */
+    public function syncMobileUser(\WP_REST_Request $request): \WP_REST_Response {
+        $data = $request->get_json_params() ?: $request->get_params();
+        $email = sanitize_email($data['email'] ?? '');
+        $name  = sanitize_text_field($data['name'] ?? '');
+        $hairType = sanitize_text_field($data['hairType'] ?? '');
+
+        if (empty($email)) {
+            return $this->respondError(__('Email is required for synchronization.', 'myavana-hair-journey-next'), 'missing_email', 400);
+        }
+
+        $user = get_user_by('email', $email);
+        $userId = 0;
+
+        if (!$user) {
+            $username = sanitize_user(explode('@', $email)[0]);
+            if (username_exists($username)) {
+                $username .= '_' . wp_rand(100, 999);
+            }
+            $randomPassword = wp_generate_password(24, true, true);
+            $userId = wp_create_user($username, $randomPassword, $email);
+
+            if (is_wp_error($userId)) {
+                return $this->fromWpError($userId);
+            }
+
+            if (!empty($name)) {
+                wp_update_user([
+                    'ID' => $userId,
+                    'display_name' => $name,
+                    'first_name' => $name,
+                ]);
+            }
+            $user = get_userdata($userId);
+        } else {
+            $userId = (int) $user->ID;
+            if (!empty($name) && empty($user->display_name)) {
+                wp_update_user([
+                    'ID' => $userId,
+                    'display_name' => $name,
+                ]);
+            }
+        }
+
+        if (!empty($hairType)) {
+            update_user_meta($userId, 'myavana_hair_type', $hairType);
+        }
+
+        // Issue 30-day mobile auth token
+        $payload = [
+            'userId' => $userId,
+            'email' => $email,
+            'name' => $user->display_name ?: $name ?: $user->user_login,
+            'exp' => time() + (86400 * 30),
+        ];
+
+        $secret = defined('MYAVANA_CHAT_SECRET') ? MYAVANA_CHAT_SECRET : wp_salt('auth');
+        $token = base64_encode(json_encode($payload)) . '.' . hash_hmac('sha256', json_encode($payload), $secret);
+
+        return $this->respondSuccess([
+            'userId' => $userId,
+            'email' => $email,
+            'name' => $user->display_name ?: $name ?: $user->user_login,
+            'avatar' => get_avatar_url($userId, ['size' => 96]),
+            'token' => $token,
+            'hairType' => (string) get_user_meta($userId, 'myavana_hair_type', true) ?: $hairType,
+            'synced' => true,
+        ]);
     }
 
     /**
