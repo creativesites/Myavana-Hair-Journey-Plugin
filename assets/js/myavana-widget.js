@@ -3958,11 +3958,28 @@
         scrollToBottom(state.els.stream);
     }
 
+    /**
+     * Remove a card's image if it fails to load. A broken <img> renders its
+     * alt text - the card title - directly under the heading, so a dead image
+     * URL made every such card show its title twice.
+     */
+    function hideOnImageError(card) {
+        var imgs = card.querySelectorAll('img');
+        for (var i = 0; i < imgs.length; i++) {
+            imgs[i].addEventListener('error', function () {
+                if (this.parentNode) this.parentNode.removeChild(this);
+            });
+        }
+    }
+
     function renderProductCard(block) {
         var data = block.data || {};
         var card = document.createElement('div');
         card.className = 'mya-card mya-product-card';
         var heading = esc(data.name || data.title || 'Recommended Hair Product');
+        // Messages go through sendMessage as plain text, so they need the RAW
+        // name. Using the escaped heading sent "Moisture &amp; Repair" to Mya.
+        var rawHeading = String(data.name || data.title || 'this product');
         var brand = esc(data.brand || 'MYAVANA Recommended');
         var category = esc(data.category || 'Targeted Hair Care');
         var reason = esc(data.reason || data.description || '');
@@ -3982,22 +3999,28 @@
             reason ? '<p style="font-size:12.5px;color:' + COLORS.onyxSoft + ';line-height:1.45;margin:8px 0;">' + reason + '</p>' : '',
             '<div class="mya-card-actions">',
             '  <button class="mya-action-btn primary view-prod-btn">' + ICONS.shoppingBag + ' <span>View Product</span></button>',
-            '  <button class="mya-action-btn add-routine-btn">' + ICONS.plus + ' <span>Add to Routine</span></button>',
+            '  <button class="mya-action-btn add-routine-btn">' + ICONS.plus + ' <span>Fit Into My Routine</span></button>',
             '</div>'
         ].join('');
 
         card.innerHTML = html;
 
+        hideOnImageError(card);
+
         card.querySelector('.view-prod-btn').addEventListener('click', function () {
             if (data.url || data.link) {
                 window.open(data.url || data.link, '_blank');
             } else {
-                sendMessage('Tell me more about ' + heading);
+                sendMessage('Tell me more about ' + rawHeading);
             }
         });
 
+        // There is no tool that saves a product into a routine, so "Add to
+        // Routine" made Mya claim "I've added it to your routine cabinet" when
+        // nothing was saved. Ask how it fits instead - an honest request Mya
+        // can actually fulfil.
         card.querySelector('.add-routine-btn').addEventListener('click', function () {
-            sendMessage('Add ' + heading + ' to my daily hair routine');
+            sendMessage('How would ' + rawHeading + ' fit into my hair routine?');
         });
 
         state.els.stream.appendChild(card);
@@ -4052,6 +4075,7 @@
         var card = document.createElement('div');
         card.className = 'mya-card mya-media-card';
         var title = esc(data.title || data.heading || 'Hairstyle & Strand Inspiration');
+        var rawTitle = String(data.title || data.heading || 'this style');
         var sub = esc(data.category || data.subcategory || (data.hairType ? 'Curated for ' + data.hairType : 'Style Inspiration'));
         var imgUrl = esc(data.imageUrl || data.image || '');
         var caption = esc(data.caption || data.description || data.text || '');
@@ -4087,12 +4111,18 @@
 
         card.innerHTML = html.join('');
 
+        hideOnImageError(card);
+
+        // Each button now sends what its label says. They were crossed: "Try
+        // This Style" asked about maintenance and "Ask Maintenance Tips" asked
+        // for products, which is how a style question drifted into a product
+        // pitch. Raw title, not the HTML-escaped one.
         card.querySelector('.try-style-btn').addEventListener('click', function () {
-            sendMessage('How do I maintain and protect ' + title + '?');
+            sendMessage('I want to try ' + rawTitle + '. What should I know before getting it done?');
         });
 
         card.querySelector('.ask-tips-btn').addEventListener('click', function () {
-            sendMessage('What products should I use for ' + title + '?');
+            sendMessage('How do I maintain and protect ' + rawTitle + '?');
         });
 
         state.els.stream.appendChild(card);
@@ -4175,7 +4205,14 @@
         card.innerHTML = html;
 
         card.querySelector('.nav-open-btn').addEventListener('click', function () {
-            if (ROUTES[target]) {
+            // `target` falls back to 'today' when the block names no screen,
+            // and ROUTES.today always exists - so a "Shop MYAVANA" card with
+            // only a url opened the Today tab instead of the store. A url with
+            // no explicit screen is an external link.
+            var explicitScreen = data.screen || data.route || data.target;
+            if (data.url && !explicitScreen) {
+                window.open(data.url, '_blank');
+            } else if (ROUTES[target]) {
                 switchView(target);
             } else if (data.url) {
                 window.open(data.url, '_blank');
