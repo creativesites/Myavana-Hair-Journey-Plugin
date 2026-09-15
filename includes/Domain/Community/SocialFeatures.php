@@ -54,7 +54,25 @@ class Myavana_Social_Features {
         $this->user_id = get_current_user_id();
         return (int) $this->user_id;
     }
-    
+
+    /**
+     * Get user avatar URL with custom avatar fallback
+     * Checks for custom avatar first, then falls back to WordPress default
+     */
+    private function get_user_avatar_url($user_id, $size = 64) {
+        $user_id = (int) $user_id;
+        if ($user_id <= 0) {
+            return get_avatar_url(0, ['size' => $size]);
+        }
+
+        $custom_avatar = get_user_meta($user_id, 'myavana_custom_avatar_url', true);
+        if (!empty($custom_avatar) && is_string($custom_avatar)) {
+            return $custom_avatar;
+        }
+
+        return get_avatar_url($user_id, ['size' => $size]);
+    }
+
     /**
      * Create necessary database tables for social features
      */
@@ -477,7 +495,7 @@ class Myavana_Social_Features {
         // Enhance posts with additional data
         $entry_count_cache = [];
         foreach ($posts as &$post) {
-            $post->user_avatar = get_avatar_url($post->user_id);
+            $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
             $post->user_profile_url = '#'; // Could be customized
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->is_bookmarked = $this->is_post_bookmarked($post->id, $this->user_id);
@@ -869,7 +887,7 @@ class Myavana_Social_Features {
                 $comment_id
             ));
 
-            $comment->user_avatar = get_avatar_url($comment->user_id);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 48);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
 
             wp_send_json_success(array(
@@ -1049,7 +1067,7 @@ class Myavana_Social_Features {
 
         // Enhance comments with user data
         foreach ($comments as &$comment) {
-            $comment->user_avatar = get_avatar_url($comment->user_id, 40);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 40);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
             $comment->post_id = $post_id;
 
@@ -1360,7 +1378,7 @@ class Myavana_Social_Features {
         $profile = array(
             'user_id' => $user_id,
             'display_name' => $user->display_name,
-            'avatar' => get_avatar_url($user_id, 120),
+            'avatar' => $this->get_user_avatar_url($user_id, 120),
             'bio' => get_user_meta($user_id, 'description', true),
             'stats' => $stats,
             'recent_posts' => $recent_posts,
@@ -1403,7 +1421,7 @@ class Myavana_Social_Features {
         
         // Enhance posts with additional data
         foreach ($trending_posts as &$post) {
-            $post->user_avatar = get_avatar_url($post->user_id);
+            $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->formatted_date = human_time_diff(strtotime($post->created_at)) . ' ago';
         }
@@ -1560,7 +1578,7 @@ class Myavana_Social_Features {
                 $items[] = [
                     'user_id' => (int) $row->user_id,
                     'display_name' => sanitize_text_field($row->display_name ?: 'Community Member'),
-                    'avatar' => get_avatar_url((int) $row->user_id, ['size' => 72]),
+                    'avatar' => $this->get_user_avatar_url((int) $row->user_id, 72),
                     'posts_count' => (int) $row->posts_count,
                     'followers_count' => (int) $row->followers_count,
                     'engagement_score' => (int) $row->engagement_score,
@@ -1697,7 +1715,7 @@ class Myavana_Social_Features {
         ));
 
         foreach ($comments as &$comment) {
-            $comment->user_avatar = get_avatar_url($comment->user_id, 32);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 32);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
         }
 

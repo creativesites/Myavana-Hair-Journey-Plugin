@@ -23,8 +23,22 @@ header("Cloudflare-CDN-Cache-Control: no-store");
 
 $downloadEndpoint = home_url('/wp-json/myavana/v1/download/apk');
 $statsEndpoint    = home_url('/wp-json/myavana/v1/download/stats');
-$apkUrl           = home_url('/wp-content/uploads/apk/myavana-mya-preview-build28.apk');
+$apkUrl           = home_url('/wp-content/uploads/apk/myavana-mya-preview-build29.apk');
 $downloadCount    = (int) get_option('myavana_apk_download_count', 0);
+
+$apkFsPath = ABSPATH . 'wp-content/uploads/apk/myavana-mya-preview-build29.apk';
+$apkSizeStr = '292.4 MB';
+$buildTimeStr = 'Sept 12, 2026 • 8:23 PM CEST';
+if (file_exists($apkFsPath)) {
+    $bytes = (int) filesize($apkFsPath);
+    if ($bytes > 0) {
+        $apkSizeStr = round($bytes / (1024 * 1024), 1) . ' MB';
+    }
+    $mtime = filemtime($apkFsPath);
+    if ($mtime > 0) {
+        $buildTimeStr = gmdate('M j, Y • g:i A', $mtime + 7200) . ' CEST';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -678,16 +692,18 @@ $downloadCount    = (int) get_option('myavana_apk_download_count', 0);
             <svg class="btn-icon" viewBox="0 0 24 24">
                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
             </svg>
-            <span>Download APK (292 MB)</span>
+            <span>Download APK (<?php echo esc_html($apkSizeStr); ?>)</span>
         </a>
 
         <!-- Specs Subtitle -->
         <div class="download-meta">
-            <span class="download-meta-item">Version: <strong>v10.8 (Build 56)</strong></span>
+            <span class="download-meta-item">Version: <strong>v10.9 (Build 57)</strong></span>
             <span>•</span>
-            <span class="download-meta-item">Build: <strong>#28</strong></span>
+            <span class="download-meta-item">Build: <strong>#29</strong></span>
             <span>•</span>
-            <span class="download-meta-item">OS: <strong>Android 8.0+</strong></span>
+            <span class="download-meta-item">Size: <strong><?php echo esc_html($apkSizeStr); ?></strong></span>
+            <span>•</span>
+            <span class="download-meta-item">Built: <strong><?php echo esc_html($buildTimeStr); ?></strong></span>
         </div>
 
         <!-- Live Download Counter -->
@@ -709,15 +725,15 @@ $downloadCount    = (int) get_option('myavana_apk_download_count', 0);
         </div>
         <div class="spec-card">
             <div class="spec-label">Size</div>
-            <div class="spec-value">292 MB</div>
+            <div class="spec-value"><?php echo esc_html($apkSizeStr); ?></div>
         </div>
         <div class="spec-card">
             <div class="spec-label">Architecture</div>
             <div class="spec-value">Universal</div>
         </div>
         <div class="spec-card">
-            <div class="spec-label">Release Date</div>
-            <div class="spec-value">Sept 12, 2026</div>
+            <div class="spec-label">Build Time</div>
+            <div class="spec-value"><?php echo esc_html($buildTimeStr); ?></div>
         </div>
     </div>
 
@@ -844,7 +860,7 @@ $downloadCount    = (int) get_option('myavana_apk_download_count', 0);
             <div class="step-number">1</div>
             <div class="step-content">
                 <div class="step-title">Tap the Download APK Button</div>
-                <div class="step-desc">Chrome will begin downloading the 292 MB preview build to your phone.</div>
+                <div class="step-desc">Chrome will begin downloading the <?php echo esc_html($apkSizeStr); ?> preview build to your phone.</div>
             </div>
         </div>
 

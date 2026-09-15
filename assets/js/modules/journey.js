@@ -564,16 +564,16 @@ MyavanaNext.Journey = (function() {
         preview.style.backgroundImage = img ? `url('${img}')` : 'none';
 
         const destinations = [
-            ['Copy link', 'copy_link'],
-            ['Download image', 'download'],
-            ['MYAVANA community', 'community'],
-            ['Instagram story', 'instagram'],
-            ['Send to my stylist', 'stylist'],
+            ['Copy link', 'copy_link', false],
+            ['Download image', 'download', false],
+            ['MYAVANA community', 'community', true],
+            ['Instagram story', 'instagram', true],
+            ['Send to my stylist', 'stylist', true],
         ];
-        container.querySelector('#journey-share-destinations').innerHTML = destinations.map(([label, key]) => `
-            <button type="button" data-dest="${key}">${escapeHtml(label)}<span>›</span></button>
+        container.querySelector('#journey-share-destinations').innerHTML = destinations.map(([label, key, comingSoon]) => `
+            <button type="button" data-dest="${key}"${comingSoon ? ' disabled aria-disabled="true"' : ''}>${escapeHtml(label)}<span>${comingSoon ? 'Soon' : '›'}</span></button>
         `).join('');
-        container.querySelectorAll('[data-dest]').forEach((btn) => {
+        container.querySelectorAll('[data-dest]:not(:disabled)').forEach((btn) => {
             btn.addEventListener('click', () => handleShareDestination(btn.getAttribute('data-dest')));
         });
 
@@ -631,15 +631,7 @@ MyavanaNext.Journey = (function() {
             a.download = 'myavana-entry.jpg';
             a.target = '_blank';
             a.click();
-            return;
         }
-
-        if (key === 'community') {
-            MyavanaNext.API.showToast('Sharing to the community feed is coming soon.', 'info');
-            return;
-        }
-
-        MyavanaNext.API.showToast('This destination is coming soon.', 'info');
     }
 
     function escapeHtml(str) {

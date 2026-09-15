@@ -13,6 +13,23 @@ if (!defined('ABSPATH')) {
 
 class CommunityRepository {
     /**
+     * Get user avatar URL with custom avatar fallback
+     */
+    private function get_user_avatar_url($user_id, $size = 64) {
+        $user_id = (int) $user_id;
+        if ($user_id <= 0) {
+            return \get_avatar_url(0, ['size' => $size]);
+        }
+
+        $custom_avatar = \get_user_meta($user_id, 'myavana_custom_avatar_url', true);
+        if (!empty($custom_avatar) && is_string($custom_avatar)) {
+            return $custom_avatar;
+        }
+
+        return \get_avatar_url($user_id, ['size' => $size]);
+    }
+
+    /**
      * Get feed posts
      *
      * @param int $userId Current user ID
@@ -50,7 +67,7 @@ class CommunityRepository {
                 foreach ($rows as $row) {
                     $author = get_userdata((int) ($row->user_id ?? 0));
                     $authorName = $author ? ($author->display_name ?: $author->user_login) : __('MYAVANA Member', 'myavana-hair-journey-next');
-                    $authorAvatar = get_avatar_url((int) ($row->user_id ?? 0), ['size' => 64]);
+                    $authorAvatar = $this->get_user_avatar_url((int) ($row->user_id ?? 0), 64);
                     $hairType = (string) get_user_meta((int) ($row->user_id ?? 0), 'myavana_hair_type', true);
 
                     $mediaUrl = '';
@@ -135,7 +152,7 @@ class CommunityRepository {
             'id' => $postId ?: rand(100, 999),
             'userId' => $userId,
             'authorName' => $author ? ($author->display_name ?: $author->user_login) : __('You', 'myavana-hair-journey-next'),
-            'authorAvatar' => get_avatar_url($userId, ['size' => 64]),
+            'authorAvatar' => $this->get_user_avatar_url($userId, 64),
             'hairType' => (string) get_user_meta($userId, 'myavana_hair_type', true),
             'content' => $content,
             'mediaUrl' => $mediaUrl,
@@ -226,7 +243,7 @@ class CommunityRepository {
                     'postId' => (int) $row->post_id,
                     'userId' => (int) $row->user_id,
                     'authorName' => $authorName,
-                    'authorAvatar' => get_avatar_url((int) $row->user_id, ['size' => 48]),
+                    'authorAvatar' => $this->get_user_avatar_url((int) $row->user_id, 48),
                     'content' => wp_kses_post($row->content),
                     'createdAt' => human_time_diff(strtotime($row->created_at), current_time('timestamp')) . ' ' . __('ago', 'myavana-hair-journey-next'),
                 ];
@@ -288,7 +305,7 @@ class CommunityRepository {
             'postId' => $postId,
             'userId' => $userId,
             'authorName' => $author ? ($author->display_name ?: $author->user_login) : __('You', 'myavana-hair-journey-next'),
-            'authorAvatar' => get_avatar_url($userId, ['size' => 48]),
+            'authorAvatar' => $this->get_user_avatar_url($userId, 48),
             'content' => $clean,
             'createdAt' => __('Just now', 'myavana-hair-journey-next'),
         ];

@@ -10,8 +10,14 @@ if (!defined('ABSPATH')) {
 }
 
 $currentUser = wp_get_current_user();
-$avatarUrl = get_avatar_url($currentUser->ID, ['size' => 64]);
+$is_logged_in = is_user_logged_in();
+$avatarUrl = '';
 $displayName = $currentUser->display_name ?: $currentUser->user_login;
+$currentUserId = get_current_user_id();
+if ($is_logged_in) {
+    $custom_avatar = get_user_meta($currentUserId, 'myavana_custom_avatar_url', true);
+    $avatarUrl =!empty($custom_avatar) ? $custom_avatar : get_avatar_url($currentUserId, ['size' => 64]);
+}
 ?>
 <header class="myavana-next-header">
     <div class="myavana-next-container">

@@ -282,7 +282,9 @@ function myavana_community_feed_shortcode($atts = []) {
         <?php
         $current_user_id = get_current_user_id();
         $current_user_data = get_userdata($current_user_id);
-        $user_avatar = get_avatar_url($current_user_id, 80);
+        $is_logged_in = is_user_logged_in();
+        $custom_avatar = get_user_meta($current_user_id, 'myavana_custom_avatar_url', true);
+        $user_avatar = !empty($custom_avatar) ? $custom_avatar : get_avatar_url($current_user_id, ['size' => 80]);
 
         // Resolve profile page URL (shortcode page if available)
         $profile_page_url = home_url('/profile/');

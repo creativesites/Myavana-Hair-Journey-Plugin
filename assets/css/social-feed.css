@@ -454,10 +454,11 @@
 }
 
 .myavana-profile-widget-avatar {
-    width: 80px;
-    height: 80px;
+    width: 80px !important;
+    height: 80px !important;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;    /* Stops flexbox from shrinking the image */
     border: 4px solid var(--myavana-coral);
     box-shadow: 0 4px 12px rgba(231, 166, 144, 0.3);
     transition: all 0.3s ease;

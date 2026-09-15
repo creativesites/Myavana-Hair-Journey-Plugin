@@ -1,0 +1,201 @@
+.myavana-legal-page {
+    --myavana-legal-bg: linear-gradient(180deg, #f8f1eb 0%, #fffaf6 100%);
+    --myavana-legal-surface: #ffffff;
+    --myavana-legal-border: rgba(34, 35, 35, 0.08);
+    --myavana-legal-text: #222323;
+    --myavana-legal-muted: #646a73;
+    --myavana-legal-accent: #e7a690;
+    --myavana-legal-accent-soft: #f6e2d8;
+    --myavana-legal-shadow: 0 18px 40px rgba(34, 35, 35, 0.08);
+    background: var(--myavana-legal-bg);
+    color: var(--myavana-legal-text);
+    padding: 48px 20px 72px;
+}
+
+.myavana-legal-shell {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.myavana-legal-card {
+    background: var(--myavana-legal-surface);
+    border: 1px solid var(--myavana-legal-border);
+    border-radius: 28px;
+    box-shadow: var(--myavana-legal-shadow);
+    overflow: hidden;
+}
+
+.myavana-legal-hero {
+    padding: 40px 40px 28px;
+    background:
+        radial-gradient(circle at top right, rgba(231, 166, 144, 0.28), transparent 34%),
+        linear-gradient(135deg, #fff9f5 0%, #fff3ec 100%);
+    border-bottom: 1px solid var(--myavana-legal-border);
+}
+
+.myavana-legal-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--myavana-legal-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.myavana-legal-title {
+    margin: 0 0 12px;
+    font-family: "Archivo Expanded", "Archivo", sans-serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.02;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.myavana-legal-summary,
+.myavana-legal-updated {
+    margin: 0;
+    max-width: 680px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.myavana-legal-summary {
+    color: var(--myavana-legal-text);
+}
+
+.myavana-legal-updated {
+    margin-top: 12px;
+    color: var(--myavana-legal-muted);
+}
+
+.myavana-legal-content {
+    padding: 18px 40px 40px;
+}
+
+.myavana-legal-section {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--myavana-legal-border);
+}
+
+.myavana-legal-section:last-of-type {
+    border-bottom: 0;
+    padding-bottom: 10px;
+}
+
+.myavana-legal-section h2 {
+    margin: 0 0 14px;
+    font-family: "Archivo", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.myavana-legal-section p,
+.myavana-legal-section li {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--myavana-legal-text);
+}
+
+.myavana-legal-section p + p,
+.myavana-legal-section p + ul,
+.myavana-legal-section ul + p {
+    margin-top: 14px;
+}
+
+.myavana-legal-section ul {
+    margin: 14px 0 0;
+    padding-left: 22px;
+}
+
+.myavana-legal-section li + li {
+    margin-top: 8px;
+}
+
+.myavana-legal-section a,
+.myavana-legal-contact a,
+.myavana-legal-footer a {
+    color: #bb6b4d;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.myavana-legal-section a:hover,
+.myavana-legal-contact a:hover,
+.myavana-legal-footer a:hover {
+    text-decoration: underline;
+}
+
+.myavana-legal-contact {
+    margin-top: 14px;
+    padding: 20px 22px;
+    border-radius: 20px;
+    background: var(--myavana-legal-accent-soft);
+}
+
+.myavana-legal-contact h3 {
+    margin: 0 0 8px;
+    font-size: 0.98rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.myavana-legal-contact p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.myavana-legal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--myavana-legal-border);
+    font-size: 14px;
+    color: var(--myavana-legal-muted);
+}
+
+.myavana-legal-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--myavana-legal-border);
+    color: var(--myavana-legal-text);
+    font-weight: 600;
+}
+
+.myavana-legal-back:hover {
+    background: #fff7f2;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .myavana-legal-page {
+        padding: 24px 14px 48px;
+    }
+
+    .myavana-legal-hero,
+    .myavana-legal-content {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    .myavana-legal-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

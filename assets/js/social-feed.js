@@ -259,6 +259,9 @@
             'celebrate': '🎉',
             'insightful': '💡'
         };
+        // Build robust avatar fallback
+        const defaultAvatar = settings.defaultAvatarUrl || 'https://www.gravatar.com/avatar/?d=mp&s=64';
+        const userAvatar = post.user_avatar && post.user_avatar.trim() !== '' ? post.user_avatar : defaultAvatar;
 
         let reactionCountsHtml = '';
         if (totalReactions > 0) {
@@ -289,11 +292,12 @@
         return `
             <article class="myavana-post-card" data-post-id="${post.id}">
                 <div class="myavana-post-header">
-                    <img src="${escapeHtml(post.user_avatar)}"
-                         alt="${escapeHtml(post.display_name)}"
-                         class="myavana-post-avatar clickable-avatar"
-                         data-user-id="${post.user_id}"
-                         title="View ${escapeHtml(post.display_name)}'s profile">
+                    <img src="${escapeHtml(userAvatar)}"
+                        alt="${escapeHtml(post.display_name)}"
+                        class="myavana-post-avatar clickable-avatar"
+                        data-user-id="${post.user_id}"
+                        title="View ${escapeHtml(post.display_name)}'s profile"
+                        onerror="this.onerror=null; this.src='${escapeHtml(defaultAvatar)}';">
                     <div class="myavana-post-user-info">
                         <h3 class="myavana-post-username clickable-username" data-user-id="${post.user_id}">${escapeHtml(post.display_name)}</h3>
                         ${post.is_verified_journey ? '<span class="myavana-verified-journey-badge">Verified Journey</span>' : ''}
@@ -1239,14 +1243,20 @@
         const isLiked = comment.is_liked ? 'liked' : '';
         const likeFillColor = comment.is_liked ? 'var(--myavana-coral)' : 'none';
         const replyCount = comment.reply_count || 0;
-        const avatarUrl = comment.user_avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e7a690"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
+
+        // Build robust avatar fallback for comments
+        const defaultCommentAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e7a690"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
+        const commentAvatarUrl = comment.user_avatar && comment.user_avatar.trim() !== '' ? comment.user_avatar : defaultCommentAvatar;
 
         return `
             <div class="myavana-comment ${isReply ? 'myavana-comment-reply' : ''}" data-comment-id="${comment.id}" data-post-id="${comment.post_id || ''}">
-                
+
                 <div class="myavana-comment-content">
                     <div class="myavana-comment-header">
-                    <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(comment.display_name)}" class="myavana-comment-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%23e7a690\\'%3E%3Cpath d=\\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\\'/%3E%3C/svg%3E'">
+                        <img src="${escapeHtml(commentAvatarUrl)}"
+                             alt="${escapeHtml(comment.display_name)}"
+                             class="myavana-comment-avatar"
+                             onerror="this.onerror=null; this.src='${escapeHtml(defaultCommentAvatar)}'">
                         <span class="myavana-comment-author">${escapeHtml(comment.display_name)}</span>
                         <span class="myavana-comment-time">${escapeHtml(comment.formatted_date)}</span>
                     </div>
@@ -3361,14 +3371,6 @@
         if (userId) {
             openUserProfileModal(userId);
         }
-    };
-
-    /**
-     * Edit my profile (opens profile edit modal)
-     */
-    window.editMyProfile = function() {
-        // TODO: Implement profile editing modal in Phase 4
-        alert('Profile editing coming soon! For now, you can update your profile from WordPress settings.');
     };
 
     function closeSavedPostsModal() {

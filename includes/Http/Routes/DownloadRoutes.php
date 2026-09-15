@@ -25,6 +25,13 @@ class DownloadRoutes extends RestController {
     public const OPTION_LOG = 'myavana_apk_download_log';
 
     /**
+     * Single source of truth for the currently published APK file.
+     * getApkUrl() and getDownloadStats() both derive from this so the
+     * two can never point at different builds again.
+     */
+    public const APK_FILE = 'myavana-mya-preview-build29.apk';
+
+    /**
      * Register REST API routes
      */
     public function registerRoutes(): void {
@@ -55,7 +62,7 @@ class DownloadRoutes extends RestController {
      */
     public static function getApkUrl(): string {
         $uploads = wp_upload_dir();
-        return trailingslashit($uploads['baseurl']) . 'apk/myavana-mya-preview-build28.apk';
+        return trailingslashit($uploads['baseurl']) . 'apk/' . self::APK_FILE;
     }
 
     /**
@@ -128,20 +135,25 @@ class DownloadRoutes extends RestController {
         $lastDownload = !empty($logs) && is_array($logs) ? ($logs[0]['time'] ?? null) : null;
 
         $uploads = wp_upload_dir();
-        $apkPath = trailingslashit($uploads['basedir']) . 'apk/myavana-mya-preview-build26.apk';
-        $fileSize = file_exists($apkPath) ? size_format(filesize($apkPath)) : '293 MB';
+        $apkPath = trailingslashit($uploads['basedir']) . 'apk/' . self::APK_FILE;
+        $fileSize = file_exists($apkPath) ? size_format(filesize($apkPath)) : null;
+        $releaseDate = file_exists($apkPath) ? gmdate('Y-m-d', filemtime($apkPath)) : null;
         $apkUrl = self::getApkUrl();
+
+        $build = null;
+        if (preg_match('/build(\d+)/i', self::APK_FILE, $matches)) {
+            $build = (int) $matches[1];
+        }
 
         return $this->respondSuccess([
             'count' => $count,
             'last_download' => $lastDownload,
-            'version' => '1.2.0-preview',
-            'build' => 26,
+            'build' => $build,
             'file_size' => $fileSize,
             'download_url' => home_url('/wp-json/' . self::NAMESPACE . '/download/apk'),
             'direct_file_url' => $apkUrl,
-            'file_name' => 'myavana-mya-preview-build26.apk',
-            'release_date' => '2026-09-12',
+            'file_name' => self::APK_FILE,
+            'release_date' => $releaseDate,
             'min_android' => 'Android 8.0+ (API 26)',
         ]);
     }

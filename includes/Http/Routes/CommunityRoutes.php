@@ -29,6 +29,12 @@ class CommunityRoutes extends RestController {
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/community/upload', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'uploadMedia'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/community/posts/(?P<id>\d+)/like', [
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'toggleLike'],
@@ -123,5 +129,74 @@ class CommunityRoutes extends RestController {
         $userId = $this->getUserId();
         $repo = new CommunityRepository();
         return $this->respondSuccess($repo->getHairTwins($userId));
+    }
+
+    /**
+     * Upload community post media (supports multipart and base64)
+     */
+    public function uploadMedia(\WP_REST_Request $request): \WP_REST_Response {
+        $userId = $this->getUserId();
+        $files = $request->get_file_params();
+
+        // Check base64 input first
+        if (empty($files['file']) && empty($files['image'])) {
+            $params = $request->get_json_params() ?: $request->get_params();
+            $base64 = $params['mediaData'] ?? ($params['data'] ?? ($params['image'] ?? ''));
+
+            if (!empty($base64)) {
+                $type = 'jpg';
+                if (preg_match('/^data:image\/(\w+);base64,/', $base64, $matched)) {
+                    $base64 = substr($base64, strpos($base64, ',') + 1);
+                    $type = strtolower($matched[1]);
+                }
+                if (!in_array($type, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+                    return $this->respondError(__('Invalid image type. Supported: JPG, PNG, WEBP.', 'myavana-hair-journey-next'), 'invalid_type', 400);
+                }
+
+                $data = base64_decode($base64);
+                if ($data === false) {
+                    return $this->respondError(__('Base64 decode failed.', 'myavana-hair-journey-next'), 'decode_failed', 400);
+                }
+
+                $filename = 'community_' . $userId . '_' . time() . '_' . wp_generate_password(6, false) . '.' . $type;
+                $upload = wp_upload_bits($filename, null, $data);
+                if (!empty($upload['error'])) {
+                    return $this->respondError($upload['error'], 'upload_error', 500);
+                }
+
+                return $this->respondSuccess([
+                    'url' => esc_url_raw($upload['url']),
+                    'mediaType' => 'image',
+                    'message' => __('Photo uploaded successfully.', 'myavana-hair-journey-next'),
+                ], 201);
+            }
+
+            return $this->respondError(__('No image or photo file provided.', 'myavana-hair-journey-next'), 'missing_file', 400);
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+
+        $file = $files['file'] ?? $files['image'];
+        $upload_overrides = [
+            'test_form' => false,
+            'mimes' => [
+                'jpg|jpeg|jpe' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+            ],
+        ];
+
+        $upload = wp_handle_upload($file, $upload_overrides);
+        if (isset($upload['error'])) {
+            return $this->respondError($upload['error'], 'upload_error', 500);
+        }
+
+        return $this->respondSuccess([
+            'url' => esc_url_raw($upload['url']),
+            'mediaType' => 'image',
+            'message' => __('Photo uploaded successfully.', 'myavana-hair-journey-next'),
+        ], 201);
     }
 }

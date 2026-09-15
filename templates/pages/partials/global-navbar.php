@@ -55,8 +55,8 @@ $is_journey_page = $active_page === 'journey' && !$is_goals_page && !$is_routine
                 <?php endif; ?>
                 
                 <div style="display: flex; gap: 4px; margin-left: 12px; padding-left: 12px; border-left: 1px solid rgba(0,0,0,0.1);">
-                    <a href="#" class="myavana-luxury-nav-link myavana-nav-utility-link" onclick="createGoal(); return false;">+ Goal</a>
-                    <a href="#" class="myavana-luxury-nav-link myavana-nav-utility-link myavana-nav-smart-entry" onclick="createEntry();">+ New Entry</a>
+                    <button type="button" class="myavana-luxury-nav-link myavana-nav-utility-link" onclick="createGoal();">+ Goal</button>
+                    <button type="button" class="myavana-luxury-nav-link myavana-nav-utility-link myavana-nav-smart-entry" onclick="createEntry();">+ New Entry</button>
                 </div>
             </div>
 

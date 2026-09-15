@@ -222,11 +222,21 @@ MyavanaNext.Mya = (function () {
             return;
         }
 
+        // A logged-in member is about to get an async upgrade from a guest id
+        // to their real WP user id below - tell the widget to hold the first
+        // message until that lands (bounded wait; see waitForIdentity in
+        // myavana-widget.js), so it never fires under the wrong identity.
+        var expectingUpgrade = isLoggedIn() && !!getNonce();
+
         try {
             window.MyavanaWidget.init({
                 apiBase: getApiBase(),
                 position: 'bottom-left',
-                context: buildPageContext()
+                context: buildPageContext(),
+                awaitIdentity: expectingUpgrade,
+                welcomeBanner: settings().pluginUrl
+                    ? settings().pluginUrl.replace(/\/$/, '') + '/assets/images/mya-welcome-banner.webp'
+                    : undefined
             });
         } catch (err) {
             console.error('[Mya Widget] Initialization error:', err);
@@ -239,8 +249,24 @@ MyavanaNext.Mya = (function () {
             registerLocalPlatform();
         }
 
+        if (!expectingUpgrade) return;
+
+        fetchChatToken(0);
+    }
+
+    /**
+     * Fetches the member's real WP user id for the chat identity upgrade.
+     * Retries once on failure before giving up - a single transient failure
+     * (network blip, momentarily stale nonce) previously meant Mya never
+     * learned who the member was for the rest of that page load, with no
+     * visible sign anything had gone wrong.
+     */
+    function fetchChatToken(attempt) {
         var nonce = getNonce();
-        if (!nonce) return;
+        if (!nonce) {
+            if (window.MyavanaWidget.cancelIdentityWait) window.MyavanaWidget.cancelIdentityWait();
+            return;
+        }
 
         fetch(getRestUrl('auth/chat-token'), {
             headers: { 'X-WP-Nonce': nonce },
@@ -255,9 +281,21 @@ MyavanaNext.Mya = (function () {
                         userName: res.data.userName,
                         firstName: res.data.firstName || res.data.userName
                     });
+                } else if (attempt < 1) {
+                    setTimeout(function () { fetchChatToken(attempt + 1); }, 800);
+                } else {
+                    console.warn('[Mya Widget] Could not resolve member identity for chat; continuing as guest.');
+                    if (window.MyavanaWidget.cancelIdentityWait) window.MyavanaWidget.cancelIdentityWait();
                 }
             })
-            .catch(function () { /* anonymous/guest fallback */ });
+            .catch(function () {
+                if (attempt < 1) {
+                    setTimeout(function () { fetchChatToken(attempt + 1); }, 800);
+                } else {
+                    console.warn('[Mya Widget] Chat identity request failed twice; continuing as guest.');
+                    if (window.MyavanaWidget.cancelIdentityWait) window.MyavanaWidget.cancelIdentityWait();
+                }
+            });
     }
 
     if (document.readyState === 'loading') {

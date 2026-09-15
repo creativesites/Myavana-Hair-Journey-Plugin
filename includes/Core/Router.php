@@ -29,6 +29,13 @@ class Router {
         add_shortcode('myavana_hair_journey', [__CLASS__, 'renderLegacyJourneyPage']);
         add_shortcode('myavana_apk_download', [__CLASS__, 'renderApkDownloadShortcode']);
 
+        // Legal pages ([myavana_privacy_policy], [myavana_terms]) — ported from the
+        // legacy myavana-hair-journey-updated plugin, which the live /privacy and
+        // /terms pages still reference but which is no longer active.
+        require_once MYAVANA_NEXT_PATH . 'templates/pages/legal.php';
+        add_shortcode('myavana_privacy_policy', 'myavana_privacy_policy_shortcode');
+        add_shortcode('myavana_terms', 'myavana_terms_shortcode');
+
         // Intercept /download/, /download-apk/, /app/ routes for APK Download Page
         add_action('template_redirect', [__CLASS__, 'handleDownloadRedirect'], 5);
 

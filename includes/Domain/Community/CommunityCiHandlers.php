@@ -14,6 +14,25 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Get user avatar URL with custom avatar fallback
+ */
+if (!function_exists('myavana_get_user_avatar_url')) {
+    function myavana_get_user_avatar_url($user_id, $size = 64) {
+        $user_id = (int) $user_id;
+        if ($user_id <= 0) {
+            return get_avatar_url(0, ['size' => $size]);
+        }
+
+        $custom_avatar = get_user_meta($user_id, 'myavana_custom_avatar_url', true);
+        if (!empty($custom_avatar) && is_string($custom_avatar)) {
+            return $custom_avatar;
+        }
+
+        return get_avatar_url($user_id, ['size' => $size]);
+    }
+}
+
 if (!function_exists('myavana_ci_upload_post_media')) {
 /**
  * Upload image/video media for community post edits.
@@ -257,7 +276,7 @@ function myavana_ci_edit_post_handler() {
     $updated_post['is_pinned'] = (int) $updated_post['is_pinned'];
     $updated_post['formatted_date'] = human_time_diff(strtotime($updated_post['created_at']), current_time('timestamp')) . ' ago';
     $updated_post['display_name'] = wp_get_current_user()->display_name;
-    $updated_post['user_avatar'] = get_avatar_url($current_user_id);
+    $updated_post['user_avatar'] = myavana_get_user_avatar_url($current_user_id, 64);
 
     wp_send_json_success([
         'message' => 'Post updated successfully',
@@ -543,7 +562,7 @@ function myavana_ci_reply_to_comment_handler() {
             'parent_id' => $parent_comment_id,
             'user_id' => $current_user_id,
             'display_name' => $user->display_name,
-            'user_avatar' => get_avatar_url($current_user_id),
+            'user_avatar' => myavana_get_user_avatar_url($current_user_id, 64),
             'content' => $content,
             'likes_count' => 0,
             'is_liked' => false,
@@ -672,7 +691,7 @@ function myavana_ci_load_comments_handler() {
             'post_id' => (int)$post_id,
             'user_id' => (int)$comment['user_id'],
             'display_name' => $comment['display_name'],
-            'user_avatar' => get_avatar_url($comment['user_id']),
+            'user_avatar' => myavana_get_user_avatar_url($comment['user_id'], 48),
             'content' => $comment['content'],
             'likes_count' => (int)$comment['likes_count'],
             'is_liked' => (bool)$comment['is_liked'],
@@ -728,7 +747,7 @@ function myavana_ci_get_replies_handler() {
             'id' => (int)$reply['id'],
             'user_id' => (int)$reply['user_id'],
             'display_name' => $reply['display_name'],
-            'user_avatar' => get_avatar_url($reply['user_id']),
+            'user_avatar' => myavana_get_user_avatar_url($reply['user_id'], 48),
             'content' => $reply['content'],
             'likes_count' => (int)$reply['likes_count'],
             'is_liked' => (bool)$reply['is_liked'],
@@ -983,7 +1002,7 @@ function myavana_ci_get_post_analytics_handler() {
             ), ARRAY_A);
 
             foreach ($reactions as &$reaction) {
-                $reaction['user_avatar'] = get_avatar_url($reaction['user_id']);
+                $reaction['user_avatar'] = myavana_get_user_avatar_url($reaction['user_id'], 48);
                 $reaction['formatted_date'] = human_time_diff(strtotime($reaction['created_at']), current_time('timestamp')) . ' ago';
             }
 

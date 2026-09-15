@@ -243,6 +243,7 @@ body.myavana-next-app-page #wpadminbar {
 }
 
 /* User Avatar Dropdown Button */
+/* avatar img is getting squished horizontally - fix */
 .myavana-next-avatar-btn {
     display: flex;
     align-items: center;
@@ -273,10 +274,12 @@ body.myavana-next-app-page #wpadminbar {
 }
 
 .myavana-next-avatar-img {
-    width: 28px;
-    height: 28px;
+    width: 28px!important;
+    min-width: 28px!important;  /* Prevents horizontal squeezing */
+    height: 28px!important;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;    /* Stops flexbox from shrinking the image */
     display: block;
 }
 
