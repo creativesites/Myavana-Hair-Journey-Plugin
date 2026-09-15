@@ -899,6 +899,7 @@ function myavana_community_feed_shortcode($atts = []) {
             ajaxUrl: '<?php echo admin_url('admin-ajax.php'); ?>',
             nonce: '<?php echo wp_create_nonce('myavana_nonce'); ?>',
             userId: <?php echo get_current_user_id(); ?>,
+            userAvatar: '<?php echo esc_url(myavana_get_user_avatar_url(get_current_user_id(), 40)); ?>',
             profileUrl: '<?php echo esc_url($profile_page_url); ?>',
             currentFilter: '<?php echo esc_js($atts['filter']); ?>',
             initialSearch: '',

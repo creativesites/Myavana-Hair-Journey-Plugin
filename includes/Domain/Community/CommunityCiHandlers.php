@@ -514,7 +514,16 @@ function myavana_ci_reply_to_comment_handler() {
     $parent_comment_id = absint($_POST['parent_comment_id'] ?? ($_POST['parent_id'] ?? 0));
     $content = sanitize_textarea_field($_POST['content'] ?? '');
 
-    if (!$post_id || !$parent_comment_id || !$content) {
+    $image_url = null;
+    if (!empty($_FILES['comment_image']['name'])) {
+        $upload = myavana_ci_upload_post_media($_FILES['comment_image'], 'image');
+        if (is_wp_error($upload)) {
+            wp_send_json_error($upload->get_error_message());
+        }
+        $image_url = $upload['url'];
+    }
+
+    if (!$post_id || !$parent_comment_id || ($content === '' && !$image_url)) {
         wp_send_json_error('Missing required fields');
     }
 
@@ -540,9 +549,10 @@ function myavana_ci_reply_to_comment_handler() {
             'user_id' => $current_user_id,
             'parent_id' => $parent_comment_id,
             'content' => $content,
+            'image_url' => $image_url,
             'created_at' => current_time('mysql')
         ],
-        ['%d', '%d', '%d', '%s', '%s']
+        ['%d', '%d', '%d', '%s', '%s', '%s']
     );
 
     if (!$inserted) {
@@ -564,6 +574,7 @@ function myavana_ci_reply_to_comment_handler() {
             'display_name' => $user->display_name,
             'user_avatar' => myavana_get_user_avatar_url($current_user_id, 64),
             'content' => $content,
+            'image_url' => $image_url,
             'likes_count' => 0,
             'is_liked' => false,
             'formatted_date' => 'Just now'
@@ -693,6 +704,7 @@ function myavana_ci_load_comments_handler() {
             'display_name' => $comment['display_name'],
             'user_avatar' => myavana_get_user_avatar_url($comment['user_id'], 48),
             'content' => $comment['content'],
+            'image_url' => $comment['image_url'] ?? null,
             'likes_count' => (int)$comment['likes_count'],
             'is_liked' => (bool)$comment['is_liked'],
             'reply_count' => (int)$comment['replies_count'],
@@ -745,10 +757,12 @@ function myavana_ci_get_replies_handler() {
     foreach ($replies as $reply) {
         $formatted_replies[] = [
             'id' => (int)$reply['id'],
+            'post_id' => (int)$reply['post_id'],
             'user_id' => (int)$reply['user_id'],
             'display_name' => $reply['display_name'],
             'user_avatar' => myavana_get_user_avatar_url($reply['user_id'], 48),
             'content' => $reply['content'],
+            'image_url' => $reply['image_url'] ?? null,
             'likes_count' => (int)$reply['likes_count'],
             'is_liked' => (bool)$reply['is_liked'],
             'formatted_date' => human_time_diff(strtotime($reply['created_at']), current_time('timestamp')) . ' ago'

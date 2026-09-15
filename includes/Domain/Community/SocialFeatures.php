@@ -133,6 +133,7 @@ class Myavana_Social_Features {
             user_id bigint(20) NOT NULL,
             parent_id mediumint(9) DEFAULT 0,
             content text NOT NULL,
+            image_url varchar(500) DEFAULT NULL,
             likes_count int(11) DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -291,6 +292,27 @@ class Myavana_Social_Features {
         dbDelta($routine_bookmarks_sql);
         dbDelta($post_bookmarks_sql);
         dbDelta($notifications_sql);
+
+        $this->ensure_comment_image_column($comments_table);
+    }
+
+    /**
+     * dbDelta doesn't reliably add columns to a table that already exists in
+     * production, so explicitly add image_url (comment media attachments) if
+     * an older install doesn't have it yet.
+     */
+    private function ensure_comment_image_column($comments_table) {
+        global $wpdb;
+        $column = $wpdb->get_results(
+            $wpdb->prepare(
+                "SHOW COLUMNS FROM $comments_table LIKE %s",
+                'image_url'
+            )
+        );
+
+        if (empty($column)) {
+            $wpdb->query("ALTER TABLE $comments_table ADD COLUMN image_url varchar(500) DEFAULT NULL AFTER content");
+        }
     }
     
     /**
@@ -821,14 +843,29 @@ class Myavana_Social_Features {
         }
         
         $post_id = intval($_POST['post_id']);
-        $content = sanitize_textarea_field($_POST['content']);
+        $content = sanitize_textarea_field($_POST['content'] ?? '');
         $parent_id = intval($_POST['parent_id'] ?? 0);
-        
+
+        $image_url = null;
+        if (!empty($_FILES['comment_image']['name'])) {
+            $upload = myavana_ci_upload_post_media($_FILES['comment_image'], 'image');
+            if (is_wp_error($upload)) {
+                wp_send_json_error($upload->get_error_message());
+                return;
+            }
+            $image_url = $upload['url'];
+        }
+
+        if ($content === '' && !$image_url) {
+            wp_send_json_error('Write a comment or add a photo');
+            return;
+        }
+
         global $wpdb;
-        
+
         $comments_table = $wpdb->prefix . 'myavana_post_comments';
         $posts_table = $wpdb->prefix . 'myavana_community_posts';
-        
+
         $result = $wpdb->insert(
             $comments_table,
             array(
@@ -836,11 +873,12 @@ class Myavana_Social_Features {
                 'user_id' => $this->user_id,
                 'parent_id' => $parent_id,
                 'content' => $content,
+                'image_url' => $image_url,
                 'created_at' => current_time('mysql')
             ),
-            array('%d', '%d', '%d', '%s', '%s')
+            array('%d', '%d', '%d', '%s', '%s', '%s')
         );
-        
+
         if ($result) {
             // Update comments count
             $wpdb->query($wpdb->prepare(
