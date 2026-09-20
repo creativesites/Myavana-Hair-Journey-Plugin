@@ -22,6 +22,8 @@ class Assets {
      * manual version bump (and fighting the browser's cache in the
      * meantime).
      */
+    private static bool $enqueued = false;
+
     private static function ver(string $relativePath): string {
         $path = MYAVANA_NEXT_PATH . $relativePath;
         return file_exists($path) ? (string) filemtime($path) : MYAVANA_NEXT_VERSION;
@@ -31,6 +33,15 @@ class Assets {
      * Enqueue frontend assets for MYAVANA Next
      */
     public static function enqueue(): void {
+        if (self::$enqueued) {
+            return;
+        }
+        self::$enqueued = true;
+
+        // Forcefully dequeue legacy Kommunicate scripts if the third-party plugin is still active
+        wp_dequeue_script('plugin_chat_script');
+        wp_dequeue_style('plugin_chat_style');
+
         // Enqueue Google Fonts
         wp_enqueue_style(
             'myavana-next-fonts',
@@ -168,6 +179,7 @@ class Assets {
                 'deleteRoutineNonce' => wp_create_nonce('myavana_delete_routine'),
                 'toggleRoutineNonce' => wp_create_nonce('myavana_toggle_routine_completion'),
                 'nonce' => wp_create_nonce('myavana_nonce'),
+                'goalsUrl' => home_url('/goals/'),
             ]);
             self::$goalRoutineSettingsLocalized = true;
         }
@@ -176,7 +188,6 @@ class Assets {
         $modules = [
             'store' => 'assets/js/store.js',
             'api' => 'assets/js/api.js',
-            'mod-kommunicate' => 'assets/js/modules/kommunicate.js',
             'mya-widget-core' => 'assets/js/myavana-widget.js',
             'mod-mya-widget' => 'assets/js/modules/mya-widget-embed.js',
             'mod-smart-entry' => 'assets/js/modules/smart-entry.js',
@@ -241,6 +252,16 @@ class Assets {
             }
         }
 
+        $chatApiBase = defined('MYAVANA_CHAT_API_BASE') ? MYAVANA_CHAT_API_BASE : get_option('myavana_next_chat_api_base', 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app');
+        if (strpos($chatApiBase, 'localhost:8080') !== false || strpos($chatApiBase, '127.0.0.1:8080') !== false) {
+            $socket = @fsockopen('127.0.0.1', 8080, $errno, $errstr, 0.05);
+            if ($socket) {
+                fclose($socket);
+            } else {
+                $chatApiBase = 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app';
+            }
+        }
+
         wp_localize_script('myavana-next-app', 'myavanaNextData', [
             'restUrl' => esc_url_raw(rest_url('myavana/v1/')),
             'nonce' => wp_create_nonce('wp_rest'),
@@ -253,7 +274,7 @@ class Assets {
             'registerUrl' => wp_registration_url(),
             'googleAuthEnabled' => $googleAuth->isEnabled(),
             'googleClientId' => $googleAuth->getClientId(),
-            'chatApiBase' => defined('MYAVANA_CHAT_API_BASE') ? MYAVANA_CHAT_API_BASE : get_option('myavana_next_chat_api_base', 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app'),
+            'chatApiBase' => $chatApiBase,
         ]);
     }
 }

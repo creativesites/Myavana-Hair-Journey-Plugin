@@ -30,7 +30,7 @@ $is_journey_page = $active_page === 'journey' && !$is_goals_page && !$is_routine
 <nav class="myavana-luxury-nav myavana-global-navbar" id="myavanaGlobalNavbar">
     <div class="myavana-luxury-nav-container">
         <a href="<?php echo esc_url($home_url); ?>" class="myavana-luxury-logo">
-            <img src="<?php echo esc_url(MYAVANA_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="Myavana" class="myavana-logo" />
+            <img src="<?php echo esc_url((defined('MYAVANA_NEXT_URL') ? MYAVANA_NEXT_URL : plugin_dir_url(dirname(__DIR__, 2))) . 'assets/images/myavana-primary-logo.png'); ?>" alt="Myavana" class="myavana-logo" />
         </a>
 
         <?php if (!$is_logged_in): ?>

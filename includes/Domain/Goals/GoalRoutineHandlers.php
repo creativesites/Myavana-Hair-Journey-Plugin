@@ -876,6 +876,25 @@ function myavana_add_goal() {
         $goals = [];
     }
 
+    // Idempotency check: prevent duplicate submissions created within 45 seconds
+    $now_ts = current_time('timestamp');
+    foreach ($goals as $existing_index => $existing_goal) {
+        $existing_title = trim($existing_goal['title'] ?? ($existing_goal['goal_title'] ?? ''));
+        $existing_category = trim($existing_goal['goal_category'] ?? '');
+        $created_ts = isset($existing_goal['created_at']) ? strtotime($existing_goal['created_at']) : 0;
+        if (strcasecmp($existing_title, $title) === 0 && strcasecmp($existing_category, $category) === 0) {
+            if ($created_ts && ($now_ts - $created_ts) < 45) {
+                wp_send_json_success([
+                    'message' => 'Goal saved successfully!',
+                    'goal_id' => $existing_index,
+                    'goal' => $existing_goal,
+                    'deduplicated' => true
+                ]);
+                return;
+            }
+        }
+    }
+
     // Create new goal
     $new_goal = [
         'goal_key' => sanitize_key('goal_' . wp_generate_uuid4()),
@@ -1056,6 +1075,25 @@ function myavana_add_routine() {
     $routines = get_user_meta($user_id, 'myavana_current_routine', true);
     if (!is_array($routines)) {
         $routines = [];
+    }
+
+    // Idempotency check: prevent duplicate submissions created within 45 seconds
+    $now_ts = current_time('timestamp');
+    foreach ($routines as $existing_index => $existing_routine) {
+        $existing_name = trim($existing_routine['title'] ?? ($existing_routine['routine_title'] ?? ''));
+        $existing_freq = trim($existing_routine['frequency'] ?? ($existing_routine['routine_frequency'] ?? ''));
+        $created_ts = isset($existing_routine['created_at']) ? strtotime($existing_routine['created_at']) : 0;
+        if (strcasecmp($existing_name, $name) === 0 && strcasecmp($existing_freq, $frequency) === 0) {
+            if ($created_ts && ($now_ts - $created_ts) < 45) {
+                wp_send_json_success([
+                    'message' => 'Routine saved successfully!',
+                    'routine_id' => $existing_index,
+                    'routine' => $existing_routine,
+                    'deduplicated' => true
+                ]);
+                return;
+            }
+        }
     }
 
     // Create new routine

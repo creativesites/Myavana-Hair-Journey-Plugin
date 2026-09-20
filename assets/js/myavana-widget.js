@@ -32,7 +32,7 @@
     // Bump on every widget change. Logged on init so it is possible to tell
     // at a glance which build a page actually loaded — a stale cache and a
     // not-yet-deployed plugin look identical from the outside otherwise.
-    var BUILD = '2026-09-14.3-hair-profile-card';
+    var BUILD = '2026-09-15.1-premium-composer';
 
     var USER_ID_KEY = 'myavana_widget_user_id';
     var DEFAULT_WELCOME_BANNER = 'https://www.myavana.com/cdn/shop/files/myavana-homepage-hairai_3f6d7318-35d1-4d25-88c5-2b5faa0d6d63.jpg';
@@ -114,7 +114,7 @@
         open: false,
         expanded: false,
         infoOpen: false,
-        drawerOpen: false,
+        addSheetOpen: false,
         activeView: 'chat', // 'chat' | 'stories' | 'history'
         // Platform Architecture: Global vs Local Capabilities
         platform: 'web', // 'wordpress' | 'web' | 'mobile_sdk' | 'salon_pro' | 'shopify'
@@ -135,7 +135,13 @@
         },
         els: {},
         isStreaming: false,
-        stagedPhoto: null,
+        // Composer
+        attachments: [],        // { id, name, status: processing|ready|error, dataUrl, mimeType, previewUrl, error }
+        composerMode: 'empty',  // see computeComposerMode()
+        activeRequest: null,    // the in-flight reply, so it can be stopped
+        dictationPhase: null,   // null | 'recording' | 'transcribing'
+        dictationRecognition: null,
+        dictationTimer: null,
         audioListening: false,
         activeStatusEl: null,
         // Voice Dictation
@@ -272,6 +278,14 @@
             // Hidden — not display:none — so it animates back on close.
             '.mya-launcher.is-morphed{opacity:0;transform:scale(0.6) translateY(10px);pointer-events:none;',
             'transition:opacity 0.2s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);}',
+            // Suppress launcher when offcanvas drawers or modal overlays are active so buttons are never blocked
+            'body.has-active-offcanvas .mya-launcher, body.offcanvas-open .mya-launcher,',
+            'body:has(.offcanvas-hjn.is-open) .mya-launcher, body:has(.offcanvas-hjn.active) .mya-launcher,',
+            'body:has(#goalOffcanvas.is-open) .mya-launcher, body:has(#routineOffcanvas.is-open) .mya-launcher,',
+            'body:has(#entryOffcanvas.is-open) .mya-launcher, body:has(#createOffcanvasOverlay.is-open) .mya-launcher{',
+            '  opacity:0!important;pointer-events:none!important;visibility:hidden!important;',
+            '  transform:scale(0.7) translateY(18px)!important;',
+            '  transition:opacity 0.2s ease, transform 0.2s ease, visibility 0.2s!important;}',
 
             // Scoped reset. This widget is embedded into arbitrary WordPress
             // themes whose global input/button rules otherwise win on
@@ -572,69 +586,181 @@
             '.mya-profile-statement{font-size:12px;color:' + COLORS.blueberry + ';line-height:1.45;margin:10px 0 4px;padding:8px 10px;background:rgba(231,166,144,0.12);border-left:3px solid ' + COLORS.coral + ';border-radius:6px;}',
             '.mya-profile-cta-btn{width:100%;justify-content:center;padding:9px 16px;font-size:12.5px;margin-top:10px;}',
 
-            // Google AI Studio Command Center Composer Box
             // ---- Composer ----
-            // A quiet ground so the field itself reads as the raised surface,
-            // rather than a hard rule cutting the panel in two.
-            '.mya-composer-box{background:linear-gradient(180deg,rgba(255,255,255,0) 0%,#ffffff 22%);',
-            'padding:10px 16px 14px;position:relative;}',
+            // One raised surface: an attachment rail that only exists while
+            // something is attached, above a single row of
+            // [+] [draft] [primary action]. Quiet at rest; the primary button
+            // is the only control that changes (see updateComposerState).
+            '.mya-composer-box{position:relative;padding:8px 14px 14px;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,#ffffff 32%);}',
+            '.mya-composer{position:relative;background:#ffffff;border:1px solid rgba(34,35,35,0.13);border-radius:26px;',
+            'box-shadow:0 1px 2px rgba(34,35,35,0.04),0 12px 30px -14px rgba(34,35,35,0.2);',
+            'transition:border-color 0.2s ease,box-shadow 0.28s ease,background 0.2s ease;}',
+            '.mya-composer:focus-within{border-color:rgba(212,149,111,0.6);',
+            'box-shadow:0 0 0 4px rgba(231,166,144,0.15),0 14px 34px -14px rgba(34,35,35,0.24);}',
+            '.mya-composer.is-drop{border-color:' + COLORS.coralDark + ';box-shadow:0 0 0 5px rgba(231,166,144,0.24);}',
+            '.mya-composer[data-mode="recording"],.mya-composer[data-mode="transcribing"]{border-color:rgba(212,149,111,0.6);background:#fffaf7;}',
 
-            '.mya-input-wrapper{background:#ffffff;border:1.5px solid ' + COLORS.borderInput + ';border-radius:22px;',
-            'padding:7px 8px 7px 10px;',
-            'box-shadow:0 1px 2px rgba(34,35,35,0.04), 0 6px 18px rgba(34,35,35,0.05);',
-            'display:flex;flex-direction:row;align-items:center;gap:4px;}',
-            '.mya-input-wrapper:hover{border-color:' + COLORS.borderHover + ';}',
-            '.mya-input-wrapper:focus-within{border-color:' + COLORS.coral + ';',
-            'box-shadow:0 0 0 4px rgba(231,166,144,0.16), 0 8px 24px rgba(34,35,35,0.07);}',
+            // Attachment rail: one horizontal row, no visible scrollbar, edge
+            // fades only on the side that has more to scroll to.
+            '.mya-attach-rail{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:10px 12px 2px;',
+            'scroll-snap-type:x proximity;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;',
+            'max-height:92px;transition:max-height 0.26s cubic-bezier(0.22,1,0.36,1),padding 0.26s cubic-bezier(0.22,1,0.36,1),opacity 0.2s ease;}',
+            '.mya-attach-rail::-webkit-scrollbar{display:none;}',
+            '.mya-attach-rail.is-empty{max-height:0;padding-top:0;padding-bottom:0;opacity:0;}',
+            '.mya-attach-rail.fade-right{-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent);}',
+            '.mya-attach-rail.fade-left{-webkit-mask-image:linear-gradient(90deg,transparent,#000 20%);mask-image:linear-gradient(90deg,transparent,#000 20%);}',
+            '.mya-attach-rail.fade-left.fade-right{-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);}',
+            '.mya-attach-chip{position:relative;flex:0 0 auto;width:68px;height:68px;border-radius:20px;scroll-snap-align:start;',
+            'background:' + COLORS.stone + ';animation:myaChipIn 0.26s cubic-bezier(0.22,1,0.36,1) both;',
+            'transition:width 0.2s ease,margin 0.2s ease,opacity 0.18s ease,transform 0.18s ease;}',
+            '.mya-attach-chip img{width:100%;height:100%;object-fit:cover;border-radius:20px;display:block;}',
+            '.mya-attach-chip::after{content:"";position:absolute;inset:0;border-radius:20px;box-shadow:inset 0 0 0 1px rgba(34,35,35,0.08);pointer-events:none;}',
+            '.mya-attach-chip.is-leaving{width:0!important;margin-right:-8px;opacity:0;transform:scale(0.85);}',
+            '.mya-attach-chip.is-processing img{filter:blur(2px) saturate(0.6);opacity:0.75;}',
+            '.mya-attach-chip.is-processing::before{content:"";position:absolute;inset:0;z-index:1;border-radius:20px;pointer-events:none;',
+            'background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,0.7) 50%,transparent 70%);background-size:220% 100%;animation:myaShimmer 1.2s linear infinite;}',
+            '.mya-attach-chip.is-error{width:auto;min-width:92px;max-width:150px;padding:0 30px 0 12px;display:flex;align-items:center;',
+            'background:#fdf1ee;color:#9a4a34;font-size:11px;font-weight:600;line-height:1.25;}',
+            '.mya-attach-chip.is-error::after{box-shadow:inset 0 0 0 1px rgba(154,74,52,0.25);}',
+            // 22px visual, 44px touch target via the ::before halo.
+            '.mya-attach-remove{position:absolute;top:5px;right:5px;z-index:2;width:22px;height:22px;border-radius:50%;border:none;padding:0;',
+            'background:rgba(24,25,26,0.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#ffffff;',
+            'display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.16s ease,background 0.16s ease;}',
+            '.mya-attach-remove::before{content:"";position:absolute;inset:-11px;border-radius:50%;}',
+            '.mya-attach-remove svg{width:11px;height:11px;stroke-width:3;}',
+            '.mya-attach-remove:hover{background:' + COLORS.onyx + ';}',
+            '.mya-attach-remove:active{transform:scale(0.88);}',
+            '.mya-attach-chip.is-error .mya-attach-remove{top:50%;margin-top:-11px;background:rgba(154,74,52,0.85);}',
 
-            // Expanded: the draft gets the full width and the controls move
-            // underneath it. Only entered once the draft is genuinely multi-line
-            // (see autosizeComposer) so a one-line question stays compact.
-            '.mya-input-wrapper.is-expanded{flex-direction:column;align-items:stretch;gap:6px;',
-            'padding:12px 12px 8px;border-radius:20px;}',
-            '.mya-input-wrapper.is-expanded .mya-textarea{width:100%;padding:0 2px;}',
-            // At rest the controls wrapper is transparent to layout, so the
-            // tools / textarea / send lay out as one row exactly as before;
-            // `order` restores the left tools to the front of that row.
-            '.mya-composer-controls{display:contents;}',
-            '.mya-action-group-left{order:-1;}',
-            '.mya-input-wrapper.is-expanded .mya-composer-controls{display:flex;width:100%;',
-            'align-items:center;justify-content:space-between;}',
-            '.mya-input-wrapper.is-expanded .mya-action-group-left{order:0;}',
+            // The row. Controls sit at the bottom so a growing draft extends
+            // upward and the buttons never move.
+            '.mya-composer-row{display:flex;align-items:flex-end;gap:2px;padding:6px;}',
+            '.mya-cmp-btn{flex:0 0 auto;position:relative;width:44px;height:44px;border-radius:50%;border:none;padding:0;background:transparent;',
+            'color:' + COLORS.onyxSoft + ';display:flex;align-items:center;justify-content:center;cursor:pointer;',
+            'transition:background 0.18s ease,color 0.18s ease,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);}',
+            '.mya-cmp-btn svg{width:21px;height:21px;transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);}',
+            '.mya-cmp-btn:hover{background:' + COLORS.stone + ';}',
+            '.mya-cmp-btn:active{transform:scale(0.92);}',
+            '.mya-cmp-btn:disabled{opacity:0.4;cursor:not-allowed;}',
+            '.mya-cmp-btn[aria-expanded="true"]{background:' + COLORS.lightCoral + ';color:' + COLORS.coralDark + ';}',
+            '.mya-cmp-btn[aria-expanded="true"] svg{transform:rotate(45deg);}',
 
-            '.mya-textarea.is-scrolling{overflow-y:auto;}',
-            '.mya-textarea{flex:1;min-width:0;height:24px;min-height:24px;max-height:132px;background:transparent;border:none;outline:none;',
-            'overflow-y:hidden;display:block;padding:4px 2px;',
-            'font-family:Archivo,-apple-system,sans-serif;font-size:14px;line-height:1.5;color:' + COLORS.onyx + ';resize:none;}',
-            '.mya-textarea::placeholder{color:' + COLORS.muted + ';opacity:1;}',
+            '.mya-textarea{flex:1 1 auto;min-width:0;height:24px;min-height:24px;max-height:144px;margin:10px 4px;padding:0;',
+            'border:none;outline:none;background:transparent;resize:none;overflow-y:hidden;display:block;',
+            'font-family:Archivo,-apple-system,BlinkMacSystemFont,sans-serif;font-size:15px;line-height:24px;color:' + COLORS.onyx + ';',
+            'transition:height 0.14s cubic-bezier(0.22,1,0.36,1);}',
+            // The panel reset (.mya-panel textarea{margin:0}) outranks a bare
+            // .mya-textarea rule, which dropped the draft 10px below the button
+            // centres. Scoping to the row restores the margin that centres it.
+            '.mya-composer-row .mya-textarea{margin:10px 4px;min-height:24px;}',
+            '.mya-textarea.is-scrolling{overflow-y:auto;scrollbar-width:thin;}',
+            // One line, always: a wrapped placeholder made the empty composer
+            // taller than a composer with a one-line draft in it.
+            '.mya-textarea::placeholder{color:#8b8b90;opacity:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
 
-            // Composer Action Bar
-            '.mya-action-bar{display:flex;align-items:center;justify-content:space-between;}',
-            '.mya-action-group-left{display:flex;align-items:center;gap:1px;flex-shrink:0;}',
-            '.mya-action-group-right{display:flex;align-items:center;gap:4px;flex-shrink:0;}',
+            // Dictation replaces the draft area in place - same row, same height.
+            '.mya-voice-status{flex:1 1 auto;display:none;align-items:center;gap:10px;min-height:44px;padding:0 6px;',
+            'color:' + COLORS.onyxSoft + ';font-size:14px;font-weight:600;}',
+            '.mya-composer[data-mode="recording"] .mya-voice-status,.mya-composer[data-mode="transcribing"] .mya-voice-status{display:flex;}',
+            '.mya-composer[data-mode="recording"] .mya-textarea,.mya-composer[data-mode="transcribing"] .mya-textarea{display:none;}',
+            '.mya-voice-bars{display:flex;align-items:center;gap:3px;height:18px;}',
+            '.mya-voice-bars i{display:block;width:3px;height:100%;border-radius:3px;background:' + COLORS.coralDark + ';transform:scaleY(0.35);animation:myaVoiceBar 1s ease-in-out infinite;}',
+            '.mya-voice-bars i:nth-child(2){animation-delay:0.12s;}.mya-voice-bars i:nth-child(3){animation-delay:0.24s;}',
+            '.mya-voice-bars i:nth-child(4){animation-delay:0.36s;}.mya-voice-bars i:nth-child(5){animation-delay:0.48s;}',
+            '.mya-composer[data-mode="transcribing"] .mya-voice-bars i{animation-duration:1.8s;opacity:0.55;}',
+            '.mya-voice-timer{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:500;color:' + COLORS.muted + ';font-size:12.5px;}',
 
-            '.mya-tool-btn{background:transparent;border:none;color:' + COLORS.muted + ';width:34px;height:34px;border-radius:12px;',
-            'display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s ease;}',
-            '.mya-tool-btn:hover{background:' + COLORS.stone + ';color:' + COLORS.onyx + ';}',
-            '.mya-tool-btn.active{color:' + COLORS.coralDark + ';background:' + COLORS.lightCoral + ';}',
+            // Primary action: every icon is stacked in the one button and the
+            // mode decides which is visible, so changing state crossfades
+            // instead of re-rendering the control.
+            '.mya-primary-btn{flex:0 0 auto;position:relative;width:44px;height:44px;border-radius:50%;border:none;padding:0;cursor:pointer;',
+            'background:transparent;color:' + COLORS.onyxSoft + ';',
+            'transition:background 0.22s ease,color 0.22s ease,box-shadow 0.22s ease,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);}',
+            '.mya-primary-btn:active:not(:disabled){transform:scale(0.9);}',
+            '.mya-primary-btn .ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;',
+            'opacity:0;transform:scale(0.55) rotate(-25deg);transition:opacity 0.18s ease,transform 0.28s cubic-bezier(0.22,1,0.36,1);}',
+            '.mya-primary-btn .ic svg{width:21px;height:21px;}',
+            '.mya-primary-btn .ic-send svg{width:19px;height:19px;}',
+            '.mya-primary-btn .ic-stop svg{width:13px;height:13px;fill:currentColor;}',
+            '.mya-primary-btn .mya-status-dots i{background:' + COLORS.coralDark + ';width:4px;height:4px;}',
+            '.mya-composer[data-mode="empty"] .ic-mic,',
+            '.mya-composer[data-mode="ready"] .ic-send,.mya-composer[data-mode="processing"] .ic-send,.mya-composer[data-mode="idle"] .ic-send,',
+            '.mya-composer[data-mode="streaming"] .ic-stop,.mya-composer[data-mode="recording"] .ic-stop,',
+            '.mya-composer[data-mode="transcribing"] .ic-busy{opacity:1;transform:none;}',
+            '.mya-composer[data-mode="empty"] .mya-primary-btn:hover{background:' + COLORS.stone + ';}',
+            '.mya-composer[data-mode="ready"] .mya-primary-btn{background:' + COLORS.onyx + ';color:#ffffff;box-shadow:0 5px 14px -4px rgba(34,35,35,0.45);}',
+            '.mya-composer[data-mode="ready"] .mya-primary-btn:hover{background:' + COLORS.coralDark + ';box-shadow:0 7px 18px -5px rgba(212,149,111,0.7);}',
+            '.mya-composer[data-mode="streaming"] .mya-primary-btn{background:' + COLORS.onyx + ';color:#ffffff;}',
+            '.mya-composer[data-mode="recording"] .mya-primary-btn{background:' + COLORS.coralDark + ';color:#ffffff;animation:myaRecPulse 1.6s ease-out infinite;}',
+            '.mya-composer[data-mode="processing"] .mya-primary-btn,.mya-composer[data-mode="idle"] .mya-primary-btn{background:' + COLORS.stone + ';color:#9d9da3;cursor:default;}',
+            '.mya-composer[data-mode="transcribing"] .mya-primary-btn{cursor:progress;}',
+            '.mya-composer[data-mode="idle"] .ic-send{opacity:0.5;}',
 
-            // The one committed action in the composer: larger, darker, and the
-            // only filled element, so the eye lands on it without a label.
-            '.mya-send-btn{width:38px;height:38px;border-radius:50%;border:none;flex-shrink:0;color:#ffffff;',
-            'background:linear-gradient(145deg,' + COLORS.onyxSoft + ' 0%,' + COLORS.onyx + ' 100%);',
-            'box-shadow:0 2px 6px rgba(34,35,35,0.22);',
-            'display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;}',
-            '.mya-send-btn:hover:not(:disabled){background:linear-gradient(145deg,' + COLORS.coral + ' 0%,' + COLORS.coralDark + ' 100%);',
-            'box-shadow:0 4px 14px rgba(231,166,144,0.45);transform:translateY(-1px);}',
-            '.mya-send-btn:disabled{background:' + COLORS.stone + ';color:' + COLORS.muted + ';cursor:not-allowed;',
-            'transform:none;box-shadow:none;}',
+            // Inline, non-blocking notes (photo limit, mic permission, failed send).
+            '.mya-composer-note{display:flex;align-items:center;gap:8px;margin:0 4px 8px;padding:9px 13px;border-radius:14px;',
+            'background:#fdf1ee;color:#8a4431;font-size:12.5px;line-height:1.4;animation:myaChipIn 0.24s cubic-bezier(0.22,1,0.36,1) both;}',
+            '.mya-composer-note[hidden]{display:none!important;}',
 
-            // Attachment Drawer Menu
-            '.mya-drawer{position:absolute;bottom:78px;left:16px;background:#ffffff;border:1px solid ' + COLORS.border + ';',
-            'border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.14);padding:8px 0;width:240px;display:none;z-index:20;animation:myaFadeIn 0.18s ease;}',
-            '.mya-drawer-item{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:12.5px;font-weight:500;',
-            'color:' + COLORS.onyx + ';cursor:pointer;transition:background 0.14s ease;user-select:none;}',
-            '.mya-drawer-item:hover{background:' + COLORS.stone + ';}',
+            // "Add to Mya" bottom sheet
+            '.mya-add-sheet{position:absolute;inset:0;z-index:45;display:none;}',
+            '.mya-add-sheet.is-mounted{display:block;}',
+            '.mya-add-sheet-backdrop{position:absolute;inset:0;background:rgba(24,25,26,0.34);opacity:0;transition:opacity 0.3s ease;',
+            '-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}',
+            '.mya-add-sheet.is-open .mya-add-sheet-backdrop{opacity:1;}',
+            '.mya-add-sheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;background:#ffffff;',
+            'border-radius:28px 28px 0 0;padding:4px 14px calc(16px + env(safe-area-inset-bottom, 0px));',
+            'box-shadow:0 -14px 44px -10px rgba(34,35,35,0.25);transform:translateY(105%);',
+            'transition:transform 0.44s cubic-bezier(0.32,0.72,0,1);will-change:transform;}',
+            '.mya-add-sheet.is-open .mya-add-sheet-panel{transform:translateY(0);}',
+            '.mya-add-sheet-panel.is-dragging{transition:none;}',
+            '.mya-add-sheet-head{touch-action:none;cursor:grab;padding-top:8px;}',
+            '.mya-add-sheet-grab{display:block;width:38px;height:5px;margin:0 auto 14px;border-radius:9999px;background:rgba(34,35,35,0.16);}',
+            '.mya-add-sheet-title{font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:' + COLORS.muted + ';margin:0 6px 10px;}',
+            '.mya-add-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:18px;}',
+            '.mya-add-tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;min-height:96px;padding:14px;',
+            'border-radius:20px;border:none;cursor:pointer;background:' + COLORS.stone + ';color:' + COLORS.onyx + ';text-align:left;',
+            'font:600 13.5px/1.2 Archivo,-apple-system,BlinkMacSystemFont,sans-serif;',
+            'transition:background 0.18s ease,transform 0.22s cubic-bezier(0.34,1.56,0.64,1);}',
+            '.mya-add-tile:hover:not(:disabled){background:' + COLORS.lightCoral + ';}',
+            '.mya-add-tile:active:not(:disabled){transform:scale(0.97);}',
+            '.mya-add-tile small{display:block;margin-top:3px;font-weight:500;font-size:11.5px;color:' + COLORS.muted + ';}',
+            '.mya-add-tile-ico{width:38px;height:38px;border-radius:13px;background:#ffffff;color:' + COLORS.coralDark + ';',
+            'display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(34,35,35,0.07);}',
+            '.mya-add-tile-ico svg{width:19px;height:19px;}',
+            '.mya-add-list{display:flex;flex-direction:column;gap:2px;}',
+            '.mya-add-row{display:flex;align-items:center;gap:14px;min-height:48px;padding:0 10px;border:none;border-radius:14px;',
+            'background:transparent;color:' + COLORS.onyx + ';cursor:pointer;text-align:left;',
+            'font:500 14.5px/1.3 Archivo,-apple-system,BlinkMacSystemFont,sans-serif;transition:background 0.16s ease;}',
+            '.mya-add-row:hover:not(:disabled){background:' + COLORS.stone + ';}',
+            '.mya-add-row svg{width:18px;height:18px;color:' + COLORS.muted + ';flex-shrink:0;}',
+            '.mya-add-tile:disabled,.mya-add-row:disabled{opacity:0.45;cursor:not-allowed;}',
+
+            // Sent photos in the thread
+            '.mya-msg-photos{display:grid;gap:4px;margin:2px 0 6px;grid-template-columns:repeat(2,minmax(0,1fr));max-width:240px;}',
+            '.mya-msg-photos.count-1{grid-template-columns:1fr;}',
+            '.mya-msg-photos img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;}',
+            '.mya-msg-photos.count-1 img{aspect-ratio:auto;max-height:280px;}',
+            '.mya-msg-stopped{display:block;margin:4px 0 12px;font-size:11.5px;font-weight:600;color:' + COLORS.muted + ';}',
+
+            '.mya-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}',
+
+            // With the on-screen keyboard up, the home-indicator inset no longer
+            // applies - keeping it left a gap between the composer and the keys.
+            '.mya-panel.mya-kb-open .mya-composer-box{padding-bottom:8px!important;}',
+
+            '.mya-cmp-btn:focus-visible,.mya-primary-btn:focus-visible,.mya-attach-remove:focus-visible,',
+            '.mya-add-tile:focus-visible,.mya-add-row:focus-visible{outline:2px solid ' + COLORS.coralDark + ';outline-offset:2px;}',
+
+            '@keyframes myaChipIn{from{opacity:0;transform:scale(0.86) translateY(4px);}to{opacity:1;transform:none;}}',
+            '@keyframes myaVoiceBar{0%,100%{transform:scaleY(0.35);}50%{transform:scaleY(1);}}',
+            '@keyframes myaRecPulse{0%{box-shadow:0 0 0 0 rgba(212,149,111,0.5);}100%{box-shadow:0 0 0 12px rgba(212,149,111,0);}}',
+
+            '@media (prefers-reduced-motion: reduce){',
+            '  .mya-composer,.mya-attach-rail,.mya-attach-chip,.mya-cmp-btn,.mya-cmp-btn svg,.mya-primary-btn,.mya-primary-btn .ic,',
+            '  .mya-textarea,.mya-add-sheet-backdrop,.mya-add-sheet-panel,.mya-add-tile,.mya-composer-note{transition:none!important;animation:none!important;}',
+            '  .mya-voice-bars i{animation:none!important;transform:scaleY(0.7);}',
+            '  .mya-attach-chip.is-processing::before{animation:none!important;}',
+            '}',
 
             // Gemini Live Voice Chat Overlay
             '.mya-live-overlay{position:absolute;inset:0;z-index:50;background:radial-gradient(circle at 50% 25%, #25262c 0%, #17181b 70%, #101012 100%);',
@@ -840,7 +966,7 @@
             '  .mya-msg.assistant{margin-left:0!important;margin-right:auto!important;}',
             '  .mya-msg.user{margin-right:0!important;margin-left:auto!important;}',
             '  .mya-btn-icon.expand-btn{display:none;}',
-            '  .mya-textarea{font-size:16px!important;line-height:1.4!important;}',
+            '  .mya-textarea{font-size:16px!important;line-height:24px!important;}',
             '  .mya-composer-box{padding-bottom:max(14px, env(safe-area-inset-bottom, 14px));}',
             '  .mya-launcher{bottom:max(16px, env(safe-area-inset-bottom, 16px));left:16px;}',
             '  .mya-profile-sheet-content{border-radius:24px 24px 0 0;}',
@@ -986,157 +1112,129 @@
         viewsContainer.appendChild(storiesView);
         viewsContainer.appendChild(historyView);
 
-        // Composer Box (Active in Chat View)
+        // ---- Composer ----
+        // One adaptive surface: an attachment rail that only exists while
+        // something is attached, then a single row of [+] [draft] [primary].
+        // The primary button is the only control that changes - mic when the
+        // draft is empty, send once there is something to send, stop while
+        // Mya replies or while dictating. See updateComposerState().
         var composerBox = document.createElement('div');
         composerBox.className = 'mya-composer-box';
-
-        var photoStage = document.createElement('div');
-        photoStage.className = 'mya-photo-stage';
-        photoStage.style.display = 'none';
 
         var cameraInput = document.createElement('input');
         cameraInput.type = 'file';
         cameraInput.accept = 'image/*';
-        cameraInput.capture = 'environment';
-        cameraInput.style.display = 'none';
+        cameraInput.setAttribute('capture', 'environment');
+        cameraInput.hidden = true;
         cameraInput.addEventListener('change', handleFileInput);
 
         var fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
-        fileInput.style.display = 'none';
+        fileInput.multiple = true;
+        fileInput.hidden = true;
         fileInput.addEventListener('change', handleFileInput);
 
-        var drawer = document.createElement('div');
-        drawer.className = 'mya-drawer';
-        drawer.innerHTML = [
-            '<div class="mya-drawer-item" data-action="camera">' + ICONS.camera + '<span>Take journey photo</span></div>',
-            '<div class="mya-drawer-item" data-action="goal">' + ICONS.goal + '<span>Review active goals</span></div>',
-            '<div class="mya-drawer-item" data-action="routine">' + ICONS.routine + '<span>Show today\'s routine</span></div>',
-            '<div class="mya-drawer-item" data-action="product">' + ICONS.leaf + '<span>Check product match</span></div>',
-            '<div class="mya-drawer-item" data-action="weather">' + ICONS.weather + '<span>Today\'s hair weather</span></div>'
-        ].join('');
+        var composerNote = el('div', 'mya-composer-note');
+        composerNote.setAttribute('role', 'status');
+        composerNote.hidden = true;
 
-        drawer.addEventListener('click', function (e) {
-            var item = e.target.closest('.mya-drawer-item');
-            if (!item) return;
-            var action = item.getAttribute('data-action');
-            toggleDrawer(false);
-            if (action === 'camera') cameraInput.click();
-            else if (action === 'upload') fileInput.click();
-            else if (action === 'goal') sendMessage('What are my current hair goals?');
-            else if (action === 'routine') sendMessage('Show today\'s routine checklist');
-            else if (action === 'product') sendMessage('Does my current product regimen match my hair porosity and texture?');
-            else if (action === 'weather') sendMessage('What is the hair weather forecast and humidity recommendation for my hair today?');
-            else if (action === 'journal') sendMessage('I would like to record a hair journey journal entry');
+        var composer = el('div', 'mya-composer');
+        composer.setAttribute('data-mode', 'empty');
+
+        var attachRail = el('div', 'mya-attach-rail is-empty');
+        attachRail.setAttribute('role', 'list');
+        attachRail.setAttribute('aria-label', 'Attached photos');
+        attachRail.addEventListener('scroll', updateRailFade, { passive: true });
+
+        var composerRow = el('div', 'mya-composer-row');
+
+        var plusBtn = el('button', 'mya-cmp-btn');
+        plusBtn.type = 'button';
+        plusBtn.innerHTML = ICONS.plus;
+        plusBtn.setAttribute('aria-label', 'Add photos and more');
+        plusBtn.setAttribute('aria-haspopup', 'dialog');
+        plusBtn.setAttribute('aria-expanded', 'false');
+        plusBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleAddSheet();
         });
-
-        var inputWrapper = document.createElement('div');
-        inputWrapper.className = 'mya-input-wrapper';
 
         var textarea = document.createElement('textarea');
         textarea.className = 'mya-textarea';
         textarea.rows = 1;
-        textarea.placeholder = 'Ask Mya about your hair journey...';
-
+        textarea.placeholder = COMPOSER_PLACEHOLDER;
+        textarea.setAttribute('aria-label', 'Message Mya');
+        if (!isCoarsePointer()) textarea.setAttribute('enterkeyhint', 'send');
         textarea.addEventListener('input', function () {
             autosizeComposer();
-            sendBtn.disabled = this.value.trim().length === 0 && !state.stagedPhoto;
+            updateComposerState();
         });
-
-        // Collapse on blur when there's nothing to keep it open for, so an
-        // abandoned draft doesn't leave the composer tall.
-        textarea.addEventListener('blur', function () {
-            if (!this.value.trim()) autosizeComposer();
-        });
-
         textarea.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            // Enter sends with a hardware keyboard. On touch keyboards Enter is
+            // a newline and the send button sends, as members expect there.
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !isCoarsePointer()) {
                 e.preventDefault();
                 submitComposer();
             }
         });
+        textarea.addEventListener('paste', handleComposerPaste);
 
-        var actionBar = document.createElement('div');
-        actionBar.className = 'mya-action-bar';
+        var voiceStatus = el('div', 'mya-voice-status');
+        voiceStatus.setAttribute('aria-hidden', 'true');
+        voiceStatus.innerHTML = '<span class="mya-voice-bars"><i></i><i></i><i></i><i></i><i></i></span>' +
+            '<span class="mya-voice-label">Listening</span><span class="mya-voice-timer">0:00</span>';
 
-        var leftGroup = document.createElement('div');
-        leftGroup.className = 'mya-action-group-left';
+        var primaryBtn = el('button', 'mya-primary-btn');
+        primaryBtn.type = 'button';
+        primaryBtn.innerHTML = '<span class="ic ic-mic">' + ICONS.mic + '</span>' +
+            '<span class="ic ic-send">' + ICONS.send + '</span>' +
+            '<span class="ic ic-stop">' + ICONS.stop + '</span>' +
+            '<span class="ic ic-busy"><span class="mya-status-dots"><i></i><i></i><i></i></span></span>';
+        primaryBtn.addEventListener('click', handlePrimaryAction);
 
-        var plusBtn = document.createElement('button');
-        plusBtn.className = 'mya-tool-btn';
-        plusBtn.innerHTML = ICONS.plus;
-        plusBtn.setAttribute('title', 'Add to conversation');
-        plusBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            toggleDrawer();
+        // Tapping a control must not steal focus from the draft - on a phone
+        // that would drop the keyboard mid-sentence.
+        [plusBtn, primaryBtn].forEach(function (b) {
+            b.addEventListener('mousedown', function (e) {
+                if (document.activeElement === textarea) e.preventDefault();
+            });
         });
 
-        var quickCameraBtn = document.createElement('button');
-        quickCameraBtn.className = 'mya-tool-btn';
-        quickCameraBtn.innerHTML = ICONS.camera;
-        quickCameraBtn.setAttribute('title', 'Document journey photo');
-        quickCameraBtn.addEventListener('click', function () {
-            cameraInput.click();
+        composerRow.appendChild(plusBtn);
+        composerRow.appendChild(textarea);
+        composerRow.appendChild(voiceStatus);
+        composerRow.appendChild(primaryBtn);
+
+        composer.appendChild(attachRail);
+        composer.appendChild(composerRow);
+
+        var liveRegion = el('div', 'mya-sr-only');
+        liveRegion.setAttribute('aria-live', 'polite');
+
+        // Drag photos straight onto the composer on desktop.
+        composerBox.addEventListener('dragover', function (e) {
+            if (!dragHasFiles(e)) return;
+            e.preventDefault();
+            composer.classList.add('is-drop');
+        });
+        composerBox.addEventListener('dragleave', function (e) {
+            if (!composerBox.contains(e.relatedTarget)) composer.classList.remove('is-drop');
+        });
+        composerBox.addEventListener('drop', function (e) {
+            if (!dragHasFiles(e)) return;
+            e.preventDefault();
+            composer.classList.remove('is-drop');
+            addAttachmentFiles(Array.prototype.slice.call(e.dataTransfer.files || []));
         });
 
-        var quickClipBtn = document.createElement('button');
-        quickClipBtn.className = 'mya-tool-btn';
-        quickClipBtn.innerHTML = ICONS.paperclip;
-        quickClipBtn.setAttribute('title', 'Upload image');
-        quickClipBtn.addEventListener('click', function () {
-            fileInput.click();
-        });
-
-        leftGroup.appendChild(plusBtn);
-        leftGroup.appendChild(quickCameraBtn);
-        leftGroup.appendChild(quickClipBtn);
-
-        var rightGroup = document.createElement('div');
-        rightGroup.className = 'mya-action-group-right';
-
-        var audioWave = document.createElement('div');
-        audioWave.className = 'mya-audio-wave';
-        audioWave.innerHTML = '<div class="mya-audio-bar"></div><div class="mya-audio-bar"></div><div class="mya-audio-bar"></div>';
-
-        var micBtn = document.createElement('button');
-        micBtn.className = 'mya-tool-btn';
-        micBtn.innerHTML = ICONS.mic;
-        micBtn.setAttribute('title', 'Voice dictation');
-        micBtn.addEventListener('click', toggleVoiceInput);
-
-        var sendBtn = document.createElement('button');
-        sendBtn.className = 'mya-send-btn';
-        sendBtn.innerHTML = ICONS.send;
-        sendBtn.disabled = true;
-        sendBtn.setAttribute('aria-label', 'Send message');
-        sendBtn.addEventListener('click', submitComposer);
-
-        rightGroup.appendChild(audioWave);
-        rightGroup.appendChild(micBtn);
-        rightGroup.appendChild(sendBtn);
-
-        // actionBar is retained only so nothing downstream that queries it
-        // breaks; the groups are parented directly to the wrapper below.
-
-        // Compact single row at rest - stacking the textarea above a full-width
-        // button bar costs ~38px of conversation space on every turn, even for a
-        // one-line question. The controls wrapper is display:contents until the
-        // draft actually goes multi-line, at which point it becomes its own row
-        // and the textarea takes the full width (see .is-expanded).
-        var composerControls = document.createElement('div');
-        composerControls.className = 'mya-composer-controls';
-        composerControls.appendChild(leftGroup);
-        composerControls.appendChild(rightGroup);
-
-        inputWrapper.appendChild(textarea);
-        inputWrapper.appendChild(composerControls);
-
-        composerBox.appendChild(photoStage);
-        composerBox.appendChild(drawer);
-        composerBox.appendChild(inputWrapper);
+        composerBox.appendChild(composerNote);
+        composerBox.appendChild(composer);
+        composerBox.appendChild(liveRegion);
         composerBox.appendChild(cameraInput);
         composerBox.appendChild(fileInput);
+
+        var addSheet = buildAddSheet();
 
         // Profile Bottom Sheet / Modal
         var profileSheet = buildProfileSheet();
@@ -1149,6 +1247,7 @@
         panel.appendChild(viewsContainer);
         panel.appendChild(composerBox);
         panel.appendChild(profileSheet);
+        panel.appendChild(addSheet);
         panel.appendChild(liveOverlay);
 
         document.body.appendChild(launcher);
@@ -1169,12 +1268,16 @@
             jumpBtn: jumpBtn,
             composerBox: composerBox,
             textarea: textarea,
-            inputWrapper: inputWrapper,
-            sendBtn: sendBtn,
-            drawer: drawer,
-            photoStage: photoStage,
-            micBtn: micBtn,
-            audioWave: audioWave,
+            composer: composer,
+            composerNote: composerNote,
+            attachRail: attachRail,
+            plusBtn: plusBtn,
+            primaryBtn: primaryBtn,
+            voiceStatus: voiceStatus,
+            liveRegion: liveRegion,
+            addSheet: addSheet,
+            cameraInput: cameraInput,
+            fileInput: fileInput,
             liveOverlay: liveOverlay,
             liveTimer: liveOverlay.querySelector('.mya-live-timer'),
             liveDot: liveOverlay.querySelector('.mya-live-dot'),
@@ -1185,6 +1288,8 @@
             liveMuteBtn: liveOverlay.querySelector('.mya-live-btn-icon-only'),
             atBottom: true
         };
+
+        updateComposerState();
 
         // Render initial views
         applyLocalPlatformNav();
@@ -2499,10 +2604,13 @@
     }
 
     function updateMobileViewport() {
+        // Width changes (rotation, resize) can change which placeholder fits.
+        if (state.els.composer) updateComposerState();
         if (!state.els.panel || typeof window === 'undefined' || window.innerWidth > 640) {
             if (state.els.panel) {
                 state.els.panel.style.height = '';
                 state.els.panel.style.top = '';
+                state.els.panel.classList.remove('mya-kb-open');
             }
             if (document.body) document.body.classList.remove('mya-open-mobile');
             if (document.documentElement) document.documentElement.classList.remove('mya-open-mobile');
@@ -2516,13 +2624,20 @@
                 var vv = window.visualViewport;
                 state.els.panel.style.height = vv.height + 'px';
                 state.els.panel.style.top = (vv.offsetTop || 0) + 'px';
+                // A visual viewport well short of the layout viewport means the
+                // on-screen keyboard is up.
+                state.els.panel.classList.toggle('mya-kb-open', window.innerHeight - vv.height > 140);
             }
-            if (state.els.stream) {
+            // Keep the latest message in view as the keyboard opens - but only
+            // for a reader already at the bottom. Yanking someone who scrolled
+            // up to re-read something was the "conversation jumps" bug.
+            if (state.els.stream && state.els.atBottom) {
                 scrollToBottom(state.els.stream);
             }
         } else {
             if (document.body) document.body.classList.remove('mya-open-mobile');
             if (document.documentElement) document.documentElement.classList.remove('mya-open-mobile');
+            state.els.panel.classList.remove('mya-kb-open');
             state.els.panel.style.height = '';
             state.els.panel.style.top = '';
         }
@@ -2544,30 +2659,71 @@
 
         if (state.open) {
             autosizeComposer();
+            updateComposerState();
             if (state.els.stream.children.length === 0) {
                 renderEmptyState();
             }
-            state.els.textarea.focus();
+            // Don't pop the on-screen keyboard over the welcome the moment Mya
+            // opens on a phone; with a hardware keyboard, focus is expected.
+            if (!isCoarsePointer()) state.els.textarea.focus({ preventScroll: true });
+        } else if (state.addSheetOpen) {
+            toggleAddSheet(false);
         }
     }
 
     function toggleDrawer(force) {
-        state.drawerOpen = typeof force === 'boolean' ? force : !state.drawerOpen;
-        state.els.drawer.style.display = state.drawerOpen ? 'block' : 'none';
+        toggleAddSheet(force);
     }
 
     // ---- Voice Input / Dictation via Gemini 3.5 Transcribe ----
 
     function toggleVoiceInput() {
-        if (state.audioListening) {
-            stopDictation();
-        } else {
-            startDictation();
+        if (state.dictationPhase === 'recording') stopDictation();
+        else if (!state.dictationPhase) startDictation();
+    }
+
+    var DICTATION_MAX_SECONDS = 120;
+
+    /** Drive the composer's dictation UI from one place. */
+    function setDictationPhase(phase) {
+        state.dictationPhase = phase;
+        state.audioListening = phase === 'recording';
+        var status = state.els.voiceStatus;
+        var label = status && status.querySelector('.mya-voice-label');
+        var timer = status && status.querySelector('.mya-voice-timer');
+        clearInterval(state.dictationTimer);
+        state.dictationTimer = null;
+
+        if (phase === 'recording') {
+            var started = Date.now();
+            if (label) label.textContent = 'Listening';
+            if (timer) { timer.textContent = '0:00'; timer.style.visibility = ''; }
+            state.dictationTimer = setInterval(function () {
+                var secs = Math.floor((Date.now() - started) / 1000);
+                if (timer) timer.textContent = Math.floor(secs / 60) + ':' + (secs % 60 < 10 ? '0' : '') + (secs % 60);
+                if (secs >= DICTATION_MAX_SECONDS) stopDictation();
+            }, 250);
+            announce('Listening. Tap stop when you are done.');
+        } else if (phase === 'transcribing') {
+            if (label) label.textContent = 'Transcribing…';
+            if (timer) timer.style.visibility = 'hidden';
         }
+        updateComposerState();
+    }
+
+    function insertDictatedText(text) {
+        var ta = state.els.textarea;
+        if (!ta || !text) return;
+        var existing = ta.value.trim();
+        ta.value = existing ? existing + ' ' + text : text;
+        autosizeComposer();
+        updateComposerState();
+        if (!isCoarsePointer()) ta.focus({ preventScroll: true });
     }
 
     function startDictation() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (state.dictationPhase || state.isStreaming) return;
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
             fallbackSpeechRecognition();
             return;
         }
@@ -2578,21 +2734,16 @@
                 state.dictationChunks = [];
 
                 var mimeType = 'audio/webm';
-                if (window.MediaRecorder && !MediaRecorder.isTypeSupported('audio/webm')) {
-                    if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
-                    else mimeType = '';
+                if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                    mimeType = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
                 }
 
-                var options = mimeType ? { mimeType: mimeType } : {};
-                var recorder = new MediaRecorder(stream, options);
+                var recorder = new MediaRecorder(stream, mimeType ? { mimeType: mimeType } : {});
                 state.dictationRecorder = recorder;
 
                 recorder.ondataavailable = function (e) {
-                    if (e.data && e.data.size > 0) {
-                        state.dictationChunks.push(e.data);
-                    }
+                    if (e.data && e.data.size > 0) state.dictationChunks.push(e.data);
                 };
-
                 recorder.onstop = function () {
                     if (state.dictationStream) {
                         state.dictationStream.getTracks().forEach(function (t) { t.stop(); });
@@ -2602,35 +2753,33 @@
                 };
 
                 recorder.start(250);
-                state.audioListening = true;
-                state.els.micBtn.classList.add('active');
-                state.els.audioWave.style.display = 'flex';
-                state.els.textarea.placeholder = 'Listening to your voice... (tap mic to finish)';
+                setDictationPhase('recording');
             })
             .catch(function (err) {
-                console.warn('[Mya Voice] Mic access failed, falling back:', err);
-                fallbackSpeechRecognition();
+                console.warn('[Mya Voice] Mic access failed:', err);
+                if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+                    setDictationPhase(null);
+                    showComposerNote('Microphone access is off. Allow it in your browser settings to dictate.');
+                } else {
+                    fallbackSpeechRecognition();
+                }
             });
     }
 
     function stopDictation() {
         if (state.dictationRecorder && state.dictationRecorder.state !== 'inactive') {
-            state.audioListening = false;
-            state.els.micBtn.classList.remove('active');
-            state.els.audioWave.style.display = 'none';
-            state.els.textarea.placeholder = 'Transcribing with Gemini 3.5...';
+            setDictationPhase('transcribing');
             state.dictationRecorder.stop();
+        } else if (state.dictationRecognition) {
+            try { state.dictationRecognition.stop(); } catch (e) { /* already ended */ }
         } else {
-            state.audioListening = false;
-            state.els.micBtn.classList.remove('active');
-            state.els.audioWave.style.display = 'none';
-            state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
+            setDictationPhase(null);
         }
     }
 
     function processDictationAudio() {
         if (!state.dictationChunks || state.dictationChunks.length === 0) {
-            state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
+            setDictationPhase(null);
             return;
         }
 
@@ -2642,7 +2791,7 @@
         reader.onload = function () {
             var base64Data = (reader.result || '').split(',')[1];
             if (!base64Data) {
-                state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
+                setDictationPhase(null);
                 return;
             }
 
@@ -2657,58 +2806,52 @@
             })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
-                    state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
+                    setDictationPhase(null);
                     if (data && data.success && data.text) {
-                        var existing = state.els.textarea.value.trim();
-                        state.els.textarea.value = existing ? (existing + ' ' + data.text) : data.text;
-                        state.els.textarea.style.height = 'auto';
-                        autosizeComposer();
-                        state.els.sendBtn.disabled = false;
+                        insertDictatedText(data.text);
+                    } else {
+                        showComposerNote("Couldn't make that out. Try again?");
                     }
                 })
                 .catch(function (err) {
                     console.error('[Mya Voice] Transcription error:', err);
-                    state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
+                    setDictationPhase(null);
+                    showComposerNote("Couldn't transcribe that. Try again?");
                 });
         };
         reader.readAsDataURL(audioBlob);
     }
 
     function fallbackSpeechRecognition() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            var recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            state.audioListening = true;
-            state.els.micBtn.classList.add('active');
-            state.els.audioWave.style.display = 'flex';
-            state.els.textarea.placeholder = 'Listening to your voice...';
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            setDictationPhase(null);
+            showComposerNote("Voice dictation isn't supported in this browser.");
+            return;
+        }
+        var recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        state.dictationRecognition = recognition;
 
-            recognition.onresult = function (event) {
-                var transcript = event.results[0][0].transcript;
-                var existing = state.els.textarea.value.trim();
-                state.els.textarea.value = existing ? (existing + ' ' + transcript) : transcript;
-                state.els.textarea.style.height = 'auto';
-                autosizeComposer();
-                state.els.sendBtn.disabled = false;
-                state.audioListening = false;
-                state.els.micBtn.classList.remove('active');
-                state.els.audioWave.style.display = 'none';
-                state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
-            };
-            recognition.onerror = function () {
-                state.audioListening = false;
-                state.els.micBtn.classList.remove('active');
-                state.els.audioWave.style.display = 'none';
-                state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
-            };
+        recognition.onresult = function (event) {
+            insertDictatedText(event.results[0][0].transcript);
+        };
+        recognition.onerror = function (event) {
+            if (event && event.error !== 'aborted' && event.error !== 'no-speech') {
+                showComposerNote("Couldn't hear that. Try again?");
+            }
+        };
+        recognition.onend = function () {
+            state.dictationRecognition = null;
+            setDictationPhase(null);
+        };
+        try {
             recognition.start();
-        } else {
-            state.els.textarea.placeholder = 'Microphone not supported in this browser';
-            setTimeout(function () {
-                state.els.textarea.placeholder = 'Ask Mya about your hair journey...';
-            }, 2000);
+            setDictationPhase('recording');
+        } catch (e) {
+            state.dictationRecognition = null;
+            setDictationPhase(null);
         }
     }
 
@@ -3188,115 +3331,516 @@
         }
     }
 
-    // ---- Photo Journey Staging ----
+    // ---- Composer attachments ----
+    //
+    // Photos are prepared on the device (downscaled, re-encoded as JPEG) and
+    // sent to Mya inline with the message, so she can actually see them.
+    // This replaces a staging flow that showed "I've saved this as a visual
+    // progress entry" after a timer without sending or saving anything.
+    // Saving to the journal is the host platform's own entry composer.
+
+    var MAX_ATTACHMENTS = 4;
+    var MAX_IMAGE_EDGE = 1600;
+    var MAX_ENCODED_CHARS = 2 * 1024 * 1024; // per photo, as a data URL; 4 stay under the 10MB request limit
 
     function handleFileInput(e) {
-        var file = e.target.files && e.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function (evt) {
-            stagePhoto({
-                file: file,
-                previewUrl: evt.target.result,
-                category: 'Journal entry',
-                caption: 'Wash day — ' + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            });
-        };
-        reader.readAsDataURL(file);
+        var input = e.target;
+        var files = Array.prototype.slice.call((input && input.files) || []);
+        // Reset so the same photo can be picked again after removing it.
+        if (input) input.value = '';
+        addAttachmentFiles(files);
     }
 
-    function stagePhoto(photoData) {
-        state.stagedPhoto = photoData;
-        var container = state.els.photoStage;
-        container.innerHTML = '';
-        container.style.display = 'block';
-
-        var removeBtn = document.createElement('button');
-        removeBtn.className = 'mya-btn-icon';
-        removeBtn.style.cssText = 'position:absolute;top:6px;right:6px;width:22px;height:22px;background:rgba(0,0,0,0.4);color:#fff;';
-        removeBtn.innerHTML = ICONS.close;
-        removeBtn.addEventListener('click', function () {
-            state.stagedPhoto = null;
-            container.style.display = 'none';
-            state.els.sendBtn.disabled = state.els.textarea.value.trim().length === 0;
-        });
-
-        var previewWrap = document.createElement('div');
-        previewWrap.style.cssText = 'display:flex;gap:10px;align-items:center;';
-
-        var img = document.createElement('img');
-        img.src = photoData.previewUrl;
-        img.style.cssText = 'width:56px;height:56px;border-radius:8px;object-fit:cover;border:1px solid ' + COLORS.border + ';';
-
-        var info = document.createElement('div');
-        info.innerHTML = '<div style="font-size:12px;font-weight:700;color:' + COLORS.onyx + ';">Document Your Journey</div>' +
-            '<div style="font-size:10.5px;color:' + COLORS.muted + ';">Visual progress entry</div>';
-
-        previewWrap.appendChild(img);
-        previewWrap.appendChild(info);
-
-        var captionInput = document.createElement('input');
-        captionInput.style.cssText = 'width:100%;margin-top:8px;padding:6px 10px;border-radius:8px;border:1px solid ' + COLORS.border + ';font-size:12px;outline:none;';
-        captionInput.value = photoData.caption;
-        captionInput.addEventListener('input', function () {
-            if (state.stagedPhoto) state.stagedPhoto.caption = this.value;
-        });
-
-        container.appendChild(removeBtn);
-        container.appendChild(previewWrap);
-        container.appendChild(captionInput);
-
-        state.els.sendBtn.disabled = false;
-        state.els.textarea.focus();
-    }
-
-    function submitComposer() {
-        var text = state.els.textarea.value.trim();
-        var photo = state.stagedPhoto;
-        if (!text && !photo) return;
-
-        state.els.textarea.value = '';
-        autosizeComposer();
-        state.els.sendBtn.disabled = true;
-
-        var empty = state.els.stream.querySelector('.mya-empty-state');
-        if (empty) empty.remove();
-
-        if (photo) {
-            state.stagedPhoto = null;
-            state.els.photoStage.style.display = 'none';
-            appendUserPhotoMessage(photo, text);
-            executePhotoUpload(photo, text);
-        } else {
-            sendMessage(text);
+    function handleComposerPaste(e) {
+        var files = (e.clipboardData && e.clipboardData.files) ? Array.prototype.slice.call(e.clipboardData.files) : [];
+        var images = files.filter(function (f) { return /^image\//.test(f.type || ''); });
+        if (images.length) {
+            e.preventDefault();
+            addAttachmentFiles(images);
         }
     }
 
-    function appendUserPhotoMessage(photo, caption) {
-        var row = document.createElement('div');
-        row.className = 'mya-msg-row';
-        row.innerHTML = '<div class="mya-msg-header" style="justify-content:flex-end;">You</div>';
+    function dragHasFiles(e) {
+        var types = e.dataTransfer && e.dataTransfer.types;
+        return !!types && Array.prototype.indexOf.call(types, 'Files') !== -1;
+    }
 
+    function readyAttachments() {
+        return state.attachments.filter(function (a) { return a.status === 'ready'; });
+    }
+
+    function isAttached(att) {
+        return state.attachments.indexOf(att) !== -1;
+    }
+
+    function addAttachmentFiles(files) {
+        if (!files || !files.length) return;
+        if (state.activeView !== 'chat') switchView('chat');
+
+        var room = MAX_ATTACHMENTS - state.attachments.length;
+        if (room <= 0) {
+            showComposerNote('You can add up to ' + MAX_ATTACHMENTS + ' photos to a message.');
+            return;
+        }
+        if (files.length > room) {
+            showComposerNote('Added ' + room + ' of ' + files.length + ' — up to ' + MAX_ATTACHMENTS + ' photos per message.');
+        }
+
+        files.slice(0, room).forEach(function (file) {
+            var att = {
+                id: 'att_' + uuid(),
+                name: file.name || 'Photo',
+                status: 'processing',
+                dataUrl: null,
+                mimeType: 'image/jpeg',
+                previewUrl: window.URL && URL.createObjectURL ? URL.createObjectURL(file) : '',
+                error: null
+            };
+            state.attachments.push(att);
+            renderAttachmentChip(att);
+
+            prepareImage(file)
+                .then(function (result) {
+                    if (!isAttached(att)) return;
+                    att.dataUrl = result.dataUrl;
+                    att.mimeType = result.mimeType;
+                    att.status = 'ready';
+                    renderAttachmentChip(att);
+                    announce('Photo added');
+                })
+                .catch(function (err) {
+                    if (!isAttached(att)) return;
+                    att.status = 'error';
+                    att.error = (err && err.userMessage) || "Couldn't read this photo";
+                    renderAttachmentChip(att);
+                    announce(att.error);
+                })
+                .then(updateComposerState);
+        });
+        updateComposerState();
+    }
+
+    /**
+     * Decode and downscale a photo to at most MAX_IMAGE_EDGE px on its long
+     * edge. Phone photos are 3-8MB; sent raw, two of them could exceed the
+     * request limit, and Mya doesn't need 12 megapixels to see curl pattern.
+     */
+    function prepareImage(file) {
+        return new Promise(function (resolve, reject) {
+            var type = file.type || '';
+            if (type && !/^image\//.test(type)) return reject({ userMessage: 'Not a photo' });
+
+            var url = URL.createObjectURL(file);
+            var img = new Image();
+            img.onload = function () {
+                try {
+                    var w = img.naturalWidth;
+                    var h = img.naturalHeight;
+                    var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(w, h));
+                    var canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round(w * scale));
+                    canvas.height = Math.max(1, Math.round(h * scale));
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    URL.revokeObjectURL(url);
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    if (dataUrl.length > MAX_ENCODED_CHARS) dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    if (dataUrl.length > MAX_ENCODED_CHARS) return reject({ userMessage: 'Photo too large' });
+                    resolve({ dataUrl: dataUrl, mimeType: 'image/jpeg' });
+                } catch (e) {
+                    URL.revokeObjectURL(url);
+                    reject({ userMessage: "Couldn't read this photo" });
+                }
+            };
+            img.onerror = function () {
+                URL.revokeObjectURL(url);
+                reject({ userMessage: "Can't open this format" });
+            };
+            img.src = url;
+        });
+    }
+
+    function renderAttachmentChip(att) {
+        var rail = state.els.attachRail;
+        if (!rail) return;
+        var chip = rail.querySelector('[data-att-id="' + att.id + '"]');
+        var isNew = !chip;
+        if (isNew) {
+            chip = el('div', 'mya-attach-chip');
+            chip.setAttribute('data-att-id', att.id);
+            chip.setAttribute('role', 'listitem');
+            rail.appendChild(chip);
+        }
+
+        var position = state.attachments.indexOf(att) + 1;
+        chip.className = 'mya-attach-chip' +
+            (att.status === 'processing' ? ' is-processing' : '') +
+            (att.status === 'error' ? ' is-error' : '');
+        chip.innerHTML = att.status === 'error'
+            ? '<span>' + esc(att.error) + '</span>'
+            : '<img alt="" src="' + esc(att.previewUrl || att.dataUrl || '') + '">';
+        chip.setAttribute('aria-label', att.status === 'error'
+            ? 'Photo could not be added: ' + att.error
+            : 'Photo ' + position + (att.status === 'processing' ? ', preparing' : ''));
+
+        var remove = el('button', 'mya-attach-remove');
+        remove.type = 'button';
+        remove.innerHTML = ICONS.close;
+        remove.setAttribute('aria-label', att.status === 'error' ? 'Dismiss photo that could not be added' : 'Remove photo ' + position);
+        remove.addEventListener('mousedown', function (e) {
+            if (document.activeElement === state.els.textarea) e.preventDefault();
+        });
+        remove.addEventListener('click', function () { removeAttachment(att.id); });
+        chip.appendChild(remove);
+
+        rail.classList.remove('is-empty');
+        if (isNew) {
+            requestAnimationFrame(function () {
+                rail.scrollTo({ left: rail.scrollWidth, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+                updateRailFade();
+            });
+        }
+        updateRailFade();
+    }
+
+    function removeAttachment(id) {
+        var index = -1;
+        for (var i = 0; i < state.attachments.length; i++) {
+            if (state.attachments[i].id === id) { index = i; break; }
+        }
+        if (index === -1) return;
+        var att = state.attachments.splice(index, 1)[0];
+        if (att.previewUrl && att.previewUrl.indexOf('blob:') === 0) URL.revokeObjectURL(att.previewUrl);
+
+        var rail = state.els.attachRail;
+        var chip = rail.querySelector('[data-att-id="' + id + '"]');
+        var hadFocus = chip && chip.contains(document.activeElement);
+
+        function finish() {
+            if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
+            if (!state.attachments.length) rail.classList.add('is-empty');
+            // Positions shift after a removal; keep the spoken labels right.
+            state.attachments.forEach(function (a, n) {
+                var c = rail.querySelector('[data-att-id="' + a.id + '"]');
+                if (!c || a.status === 'error') return;
+                c.setAttribute('aria-label', 'Photo ' + (n + 1) + (a.status === 'processing' ? ', preparing' : ''));
+                var r = c.querySelector('.mya-attach-remove');
+                if (r) r.setAttribute('aria-label', 'Remove photo ' + (n + 1));
+            });
+            updateRailFade();
+            if (hadFocus) {
+                var next = rail.querySelector('.mya-attach-remove');
+                (next || state.els.textarea).focus({ preventScroll: true });
+            }
+        }
+
+        if (chip && !prefersReducedMotion()) {
+            chip.style.width = chip.offsetWidth + 'px';
+            void chip.offsetWidth;
+            chip.classList.add('is-leaving');
+            setTimeout(finish, 200);
+        } else {
+            finish();
+        }
+        announce('Photo removed');
+        updateComposerState();
+    }
+
+    function clearAttachments() {
+        state.attachments.forEach(function (a) {
+            if (a.previewUrl && a.previewUrl.indexOf('blob:') === 0) URL.revokeObjectURL(a.previewUrl);
+        });
+        state.attachments = [];
+        var rail = state.els.attachRail;
+        if (rail) {
+            rail.innerHTML = '';
+            rail.classList.add('is-empty');
+        }
+        updateRailFade();
+        updateComposerState();
+    }
+
+    function updateRailFade() {
+        var rail = state.els.attachRail;
+        if (!rail) return;
+        var overflow = rail.scrollWidth - rail.clientWidth;
+        rail.classList.toggle('fade-left', rail.scrollLeft > 4);
+        rail.classList.toggle('fade-right', overflow - rail.scrollLeft > 4);
+    }
+
+    /** Put an unsent message back so a retry is one tap, not a retype. */
+    function restoreDraft(draft) {
+        var ta = state.els.textarea;
+        if (!draft || !ta || ta.value.trim() || state.attachments.length) return false;
+        ta.value = draft.text || '';
+        (draft.attachments || []).slice(0, MAX_ATTACHMENTS).forEach(function (p) {
+            var att = {
+                id: 'att_' + uuid(), name: p.name || 'Photo', status: 'ready',
+                dataUrl: p.dataUrl, mimeType: p.mimeType, previewUrl: p.dataUrl, error: null
+            };
+            state.attachments.push(att);
+            renderAttachmentChip(att);
+        });
+        autosizeComposer();
+        updateComposerState();
+        return true;
+    }
+
+    function submitComposer() {
+        if (state.isStreaming || state.dictationPhase) return;
+        if (state.attachments.some(function (a) { return a.status === 'processing'; })) return;
+
+        var ta = state.els.textarea;
+        var text = ta.value.trim();
+        var photos = readyAttachments();
+        if (!text && !photos.length) return;
+
+        // Snapshot before clearing, so a failed send can be put back.
+        var draft = { text: ta.value, attachments: photos.slice() };
+        hideComposerNote();
+
+        ta.value = '';
+        clearAttachments();
+        autosizeComposer();
+
+        var message = text || (photos.length > 1
+            ? 'What can you tell me about my hair from these photos?'
+            : 'What can you tell me about my hair from this photo?');
+        sendMessage(message, { attachments: photos, displayText: text, draft: draft });
+    }
+
+    function appendUserPhotosMessage(photos, text) {
+        var row = buildMessageRow('user', '<span>You</span>');
         var bubble = document.createElement('div');
         bubble.className = 'mya-msg user';
-        bubble.innerHTML = [
-            '<div style="font-size:11px;font-weight:700;color:' + COLORS.lightCoral + ';text-transform:uppercase;margin-bottom:4px;">' + photo.category + '</div>',
-            '<img src="' + photo.previewUrl + '" style="width:100%;max-width:220px;border-radius:10px;object-fit:cover;margin:4px 0;" />',
-            caption ? '<div style="margin-top:4px;">' + caption + '</div>' : ''
-        ].join('');
+
+        var grid = el('div', 'mya-msg-photos count-' + Math.min(photos.length, 4));
+        photos.forEach(function (p, i) {
+            var img = document.createElement('img');
+            img.src = p.dataUrl;
+            img.alt = 'Photo ' + (i + 1) + ' you shared';
+            grid.appendChild(img);
+        });
+        bubble.appendChild(grid);
+
+        if (text) {
+            var caption = document.createElement('div');
+            caption.textContent = text;
+            bubble.appendChild(caption);
+        }
 
         row.appendChild(bubble);
         state.els.stream.appendChild(row);
         scrollToBottom(state.els.stream);
+        return row;
     }
 
-    function executePhotoUpload(photo, caption) {
-        var statusEl = appendStatusIndicator('Recording visual progress to Hair Journey…');
-        setTimeout(function () {
-            statusEl.remove();
-            appendAssistantMessage("I've saved this as a visual progress entry for " + (photo.caption || 'your wash day') + ". Would you like to add a note about how your hair felt today?");
-        }, 1200);
+    // ---- "Add to Mya" sheet ----
+
+    function buildAddSheet() {
+        var sheet = el('div', 'mya-add-sheet');
+        sheet.setAttribute('role', 'dialog');
+        sheet.setAttribute('aria-modal', 'true');
+        sheet.setAttribute('aria-labelledby', 'mya-add-sheet-title');
+
+        var backdrop = el('div', 'mya-add-sheet-backdrop');
+        backdrop.addEventListener('click', function () { toggleAddSheet(false); });
+
+        var sheetPanel = el('div', 'mya-add-sheet-panel');
+
+        var head = el('div', 'mya-add-sheet-head');
+        head.innerHTML = '<span class="mya-add-sheet-grab"></span>' +
+            '<div class="mya-add-sheet-title" id="mya-add-sheet-title">Add to Mya</div>';
+
+        var tiles = el('div', 'mya-add-tiles');
+        var askTitle = el('div', 'mya-add-sheet-title');
+        askTitle.textContent = 'Ask Mya';
+        var list = el('div', 'mya-add-list');
+
+        sheetPanel.appendChild(head);
+        sheetPanel.appendChild(tiles);
+        sheetPanel.appendChild(askTitle);
+        sheetPanel.appendChild(list);
+        sheet.appendChild(backdrop);
+        sheet.appendChild(sheetPanel);
+
+        sheet.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                toggleAddSheet(false);
+            } else if (e.key === 'Tab') {
+                trapFocus(e, sheetPanel);
+            }
+        });
+
+        enableSheetDrag(head, sheetPanel);
+        return sheet;
+    }
+
+    /**
+     * Options are rebuilt on every open: the host platform registers its
+     * adapter after the widget is built, and photo tiles depend on how many
+     * photos are already attached. Only capabilities that actually exist are
+     * offered.
+     */
+    function renderAddSheetOptions() {
+        var sheet = state.els.addSheet;
+        var tiles = sheet.querySelector('.mya-add-tiles');
+        var list = sheet.querySelector('.mya-add-list');
+        tiles.innerHTML = '';
+        list.innerHTML = '';
+
+        var full = state.attachments.length >= MAX_ATTACHMENTS;
+        var limitHint = 'Up to ' + MAX_ATTACHMENTS + ' photos';
+        var touch = isCoarsePointer();
+
+        if (touch) {
+            addSheetTile(tiles, ICONS.camera, 'Camera', full ? limitHint : 'Show Mya your hair', full, function () {
+                state.els.cameraInput.click();
+            });
+        }
+        addSheetTile(tiles, ICONS.image, 'Photos', full ? limitHint : (touch ? 'From your library' : 'From your computer'), full, function () {
+            state.els.fileInput.click();
+        });
+        if (state.localPlatform && typeof state.localPlatform.openEntryComposer === 'function') {
+            addSheetTile(tiles, ICONS.journal, 'Journal entry', 'Log it to your diary', false, openLocalComposer);
+        }
+
+        [
+            [ICONS.goal, 'Review my active goals', 'What are my current hair goals?'],
+            [ICONS.routine, "Show today's routine", "Show today's routine checklist"],
+            [ICONS.leaf, 'Check my product match', 'Does my current product regimen match my hair porosity and texture?'],
+            [ICONS.weather, "Today's hair weather", 'What is the hair weather forecast and humidity recommendation for my hair today?']
+        ].forEach(function (q) {
+            addSheetRow(list, q[0], q[1], function () { sendMessage(q[2]); });
+        });
+    }
+
+    function addSheetTile(container, icon, label, hint, disabled, action) {
+        var b = el('button', 'mya-add-tile');
+        b.type = 'button';
+        b.disabled = !!disabled;
+        b.innerHTML = '<span class="mya-add-tile-ico">' + icon + '</span>' +
+            '<span>' + esc(label) + '<small>' + esc(hint) + '</small></span>';
+        b.addEventListener('click', function () {
+            toggleAddSheet(false);
+            // Still inside the click, so the browser treats the file picker
+            // as user-initiated.
+            action();
+        });
+        container.appendChild(b);
+    }
+
+    function addSheetRow(container, icon, label, action) {
+        var b = el('button', 'mya-add-row');
+        b.type = 'button';
+        b.disabled = state.isStreaming;
+        b.innerHTML = icon + '<span>' + esc(label) + '</span>';
+        b.addEventListener('click', function () {
+            toggleAddSheet(false);
+            action();
+        });
+        container.appendChild(b);
+    }
+
+    function toggleAddSheet(force) {
+        var sheet = state.els.addSheet;
+        if (!sheet) return;
+        var open = typeof force === 'boolean' ? force : !state.addSheetOpen;
+        if (open === state.addSheetOpen) return;
+        state.addSheetOpen = open;
+
+        var sheetPanel = sheet.querySelector('.mya-add-sheet-panel');
+        state.els.plusBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        clearTimeout(state.addSheetTimer);
+
+        if (open) {
+            state.addSheetReturnFocus = document.activeElement;
+            renderAddSheetOptions();
+            sheetPanel.style.transform = '';
+            sheet.classList.add('is-mounted');
+            void sheet.offsetHeight; // start from off-screen so the entrance animates
+            sheet.classList.add('is-open');
+            document.addEventListener('pointerdown', handleOutsideSheetPointer, true);
+            var first = sheet.querySelector('button:not([disabled])');
+            if (first) first.focus({ preventScroll: true });
+        } else {
+            sheet.classList.remove('is-open');
+            document.removeEventListener('pointerdown', handleOutsideSheetPointer, true);
+            sheetPanel.style.transform = '';
+            state.addSheetTimer = setTimeout(function () {
+                sheet.classList.remove('is-mounted');
+            }, prefersReducedMotion() ? 0 : 340);
+            // Hand focus back where it came from on keyboard/mouse devices; on a
+            // phone, refocusing the draft would reopen the keyboard unasked.
+            var back = state.addSheetReturnFocus;
+            state.addSheetReturnFocus = null;
+            if (!isCoarsePointer() && back && document.body.contains(back)) {
+                back.focus({ preventScroll: true });
+            }
+        }
+    }
+
+    /**
+     * Any press outside the sheet closes it - the backdrop, but also the host
+     * page around a floating desktop panel, where the backdrop doesn't reach.
+     * The + button is left to toggle the sheet itself.
+     */
+    function handleOutsideSheetPointer(e) {
+        if (!state.addSheetOpen) return;
+        var sheetPanel = state.els.addSheet && state.els.addSheet.querySelector('.mya-add-sheet-panel');
+        if (sheetPanel && sheetPanel.contains(e.target)) return;
+        if (state.els.plusBtn && state.els.plusBtn.contains(e.target)) return;
+        toggleAddSheet(false);
+    }
+
+    function trapFocus(e, container) {
+        var items = Array.prototype.filter.call(container.querySelectorAll('button:not([disabled])'), function (b) {
+            return b.offsetParent !== null;
+        });
+        if (!items.length) return;
+        var first = items[0];
+        var last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+
+    /** Drag the sheet's header down to dismiss it; a short or slow drag springs back. */
+    function enableSheetDrag(handle, sheetPanel) {
+        var startY = null;
+        var offset = 0;
+        var startedAt = 0;
+
+        handle.addEventListener('pointerdown', function (e) {
+            if (e.button !== undefined && e.button !== 0) return;
+            startY = e.clientY;
+            offset = 0;
+            startedAt = Date.now();
+            sheetPanel.classList.add('is-dragging');
+            try { handle.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
+        });
+        handle.addEventListener('pointermove', function (e) {
+            if (startY === null) return;
+            offset = Math.max(0, e.clientY - startY);
+            sheetPanel.style.transform = 'translateY(' + offset + 'px)';
+        });
+        function release() {
+            if (startY === null) return;
+            var velocity = offset / Math.max(1, Date.now() - startedAt);
+            startY = null;
+            sheetPanel.classList.remove('is-dragging');
+            if (offset > sheetPanel.offsetHeight * 0.28 || (offset > 24 && velocity > 0.6)) {
+                toggleAddSheet(false);
+            } else {
+                sheetPanel.style.transform = '';
+            }
+        }
+        handle.addEventListener('pointerup', release);
+        handle.addEventListener('pointercancel', release);
     }
 
     // ---- Markdown & Message Rendering ----
@@ -3624,7 +4168,24 @@
      * on the id alone would make two different routines share progress.
      */
     function checklistKey(block, data) {
-        return 'routine_' + (slugify(data.title) || slugify(block && block.id) || 'today');
+        // Per day: a routine ticked off yesterday must not open as "Routine
+        // complete" today. Keyed by the member's local date.
+        return 'routine_' + (slugify(data.title) || slugify(block && block.id) || 'today') + '_' + localDateKey();
+    }
+
+    function localDateKey(date) {
+        var d = date || new Date();
+        return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+
+    /** Drop routine progress older than two weeks (and pre-date-keyed entries). */
+    function pruneChecklistState(all) {
+        var cutoff = localDateKey(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000));
+        Object.keys(all).forEach(function (key) {
+            var m = /_(\d{4}-\d{2}-\d{2})$/.exec(key);
+            if (!m || m[1] < cutoff) delete all[key];
+        });
+        return all;
     }
 
     function renderChecklist(block) {
@@ -3679,7 +4240,7 @@
         card.appendChild(listContainer);
 
         function persist() {
-            var current = loadChecklistState();
+            var current = pruneChecklistState(loadChecklistState());
             var next = {};
             normalized.forEach(function (s) { next[s.id] = s.completed; });
             current[routineKey] = next;
@@ -3963,6 +4524,14 @@
      * alt text - the card title - directly under the heading, so a dead image
      * URL made every such card show its title twice.
      */
+    /** Card copy as text: a list renders "a \u00b7 b \u00b7 c", not "a,b,c". */
+    function listText(value) {
+        if (Array.isArray(value)) {
+            return value.map(function (v) { return String(v == null ? '' : v).trim(); }).filter(Boolean).join(' \u00b7 ');
+        }
+        return typeof value === 'string' ? value : '';
+    }
+
     function hideOnImageError(card) {
         var imgs = card.querySelectorAll('img');
         for (var i = 0; i < imgs.length; i++) {
@@ -3982,7 +4551,7 @@
         var rawHeading = String(data.name || data.title || 'this product');
         var brand = esc(data.brand || 'MYAVANA Recommended');
         var category = esc(data.category || 'Targeted Hair Care');
-        var reason = esc(data.reason || data.description || '');
+        var reason = esc(listText(data.reason) || listText(data.benefits) || listText(data.description));
         var price = data.price ? esc(typeof data.price === 'number' ? '$' + data.price.toFixed(2) : data.price) : '';
         var imgUrl = esc(data.image || data.imageUrl || '');
 
@@ -4033,7 +4602,17 @@
         card.className = 'mya-card mya-journal-card';
         var title = esc(data.title || 'Hair Diary Entry');
         var notes = esc(data.notes || data.summary || data.text || '');
-        var date = esc(data.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        var rawDate = data.date;
+        var formattedDate = '';
+        if (rawDate) {
+            try {
+                var parsedDate = new Date(typeof rawDate === 'string' ? rawDate.replace(' ', 'T') : rawDate);
+                if (!isNaN(parsedDate.getTime())) {
+                    formattedDate = parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+            } catch (e) {}
+        }
+        var date = esc(formattedDate || (typeof rawDate === 'string' && rawDate.length <= 15 ? rawDate : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })));
         var photos = Array.isArray(data.photos) ? data.photos : (data.photo ? [data.photo] : []);
 
         var html = [
@@ -4249,8 +4828,90 @@
         scrollToBottom(state.els.stream);
     }
 
+    function getBlockSig(block) {
+        if (!block) return { type: '', id: '', dataId: '', title: '', notes: '' };
+        var type = block.type || '';
+        var data = block.data || {};
+        var id = block.id ? String(block.id) : '';
+        var dataId = data.id !== undefined && data.id !== null ? String(data.id) : '';
+        var title = String(data.title || data.heading || data.name || data.label || '').trim().toLowerCase();
+        var notes = String(data.notes || data.summary || data.description || data.caption || data.text || data.body || '').trim().toLowerCase().slice(0, 60);
+        return { type: type, id: id, dataId: dataId, title: title, notes: notes };
+    }
+
+    function isDuplicateBlockCard(block) {
+        if (!block || !state.els.stream) return false;
+        var sig = getBlockSig(block);
+        if (!sig.type) return false;
+
+        // If the block is quick replies, check if .mya-qr-row was already added in the current turn
+        if (sig.type === 'quick_replies' || sig.type === 'confirmation') {
+            var lastUserRow = state.els.stream.querySelector('.mya-msg-row.user:last-of-type');
+            var existingQr = lastUserRow
+                ? state.els.stream.querySelector('.mya-msg-row.user:last-of-type ~ .mya-qr-row')
+                : state.els.stream.querySelector('.mya-qr-row');
+            if (existingQr) return true;
+            return false;
+        }
+
+        // Within the current turn (since the last user turn):
+        var lastUserMsg = state.els.stream.querySelector('.mya-msg-row.user:last-of-type');
+        var recentCards = [];
+        if (lastUserMsg) {
+            var sibling = lastUserMsg.nextElementSibling;
+            while (sibling) {
+                if (sibling.classList && sibling.classList.contains('mya-card')) {
+                    recentCards.push(sibling);
+                }
+                sibling = sibling.nextElementSibling;
+            }
+        } else {
+            var allCards = state.els.stream.querySelectorAll('.mya-card');
+            for (var k = 0; k < allCards.length; k++) {
+                recentCards.push(allCards[k]);
+            }
+        }
+
+        for (var i = 0; i < recentCards.length; i++) {
+            var el = recentCards[i];
+            var elType = el.getAttribute('data-block-type');
+            if (!elType || elType !== sig.type) continue;
+
+            var elId = el.getAttribute('data-block-id');
+            if (sig.id && elId && sig.id === elId) return true;
+
+            var elDataId = el.getAttribute('data-block-data-id');
+            if (sig.dataId && elDataId && sig.dataId === elDataId) return true;
+
+            var elTitle = el.getAttribute('data-block-title');
+            if (sig.title && elTitle && sig.title === elTitle) return true;
+
+            var elNotes = el.getAttribute('data-block-notes');
+            if (sig.notes && elNotes && sig.notes === elNotes) return true;
+        }
+
+        return false;
+    }
+
+    function tagBlockCard(card, block) {
+        if (!card || !card.setAttribute || !block) return;
+        var sig = getBlockSig(block);
+        card.setAttribute('data-block-type', sig.type);
+        if (sig.id) card.setAttribute('data-block-id', sig.id);
+        if (sig.dataId) card.setAttribute('data-block-data-id', sig.dataId);
+        if (sig.title) card.setAttribute('data-block-title', sig.title);
+        if (sig.notes) card.setAttribute('data-block-notes', sig.notes);
+    }
+
     function renderBlock(block) {
         if (!block || !block.type) return;
+        if (isDuplicateBlockCard(block)) {
+            console.log('[Mya Widget] Suppressed duplicate card in stream:', block.type, block.data?.title || '');
+            return;
+        }
+
+        var prevLastChild = state.els.stream ? state.els.stream.lastElementChild : null;
+
         switch (block.type) {
             case 'goal_card':
             case 'goal_progress':
@@ -4303,6 +4964,11 @@
                 renderGenericCard(block);
                 break;
         }
+
+        var newLastChild = state.els.stream ? state.els.stream.lastElementChild : null;
+        if (newLastChild && newLastChild !== prevLastChild && newLastChild.classList && newLastChild.classList.contains('mya-card')) {
+            tagBlockCard(newLastChild, block);
+        }
     }
 
     // ---- Transport & NDJSON Streaming ----
@@ -4316,54 +4982,165 @@
     }
 
     var COMPOSER_MIN_H = 24;
-    var COMPOSER_MAX_H = 132;
+    var COMPOSER_MAX_H = 144; // six lines, then the draft scrolls inside
+    var COMPOSER_PLACEHOLDER = 'Ask Mya anything about your hair\u2026';
+
+    function isCoarsePointer() {
+        return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    }
+
+    function prefersReducedMotion() {
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    function canDictate() {
+        return !!((navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder) ||
+            window.SpeechRecognition || window.webkitSpeechRecognition);
+    }
+
+    var placeholderMeasure = null;
+
+    /** The long placeholder if it fits the draft's current width, else the short one. */
+    function placeholderThatFits(longText, shortText) {
+        var ta = state.els.textarea;
+        if (!ta || !ta.clientWidth) return longText;
+        try {
+            if (!placeholderMeasure) placeholderMeasure = document.createElement('canvas').getContext('2d');
+            var cs = window.getComputedStyle(ta);
+            placeholderMeasure.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+            return placeholderMeasure.measureText(longText).width <= ta.clientWidth ? longText : shortText;
+        } catch (e) {
+            return longText;
+        }
+    }
+
+    function announce(text) {
+        var region = state.els.liveRegion;
+        if (!region) return;
+        region.textContent = '';
+        setTimeout(function () { region.textContent = text; }, 40);
+    }
+
+    function hideComposerNote() {
+        clearTimeout(state.composerNoteTimer);
+        if (state.els.composerNote) state.els.composerNote.hidden = true;
+    }
+
+    function showComposerNote(message) {
+        var note = state.els.composerNote;
+        if (!note) return;
+        note.textContent = message;
+        note.hidden = false;
+        clearTimeout(state.composerNoteTimer);
+        state.composerNoteTimer = setTimeout(function () { note.hidden = true; }, 5000);
+    }
 
     /**
-     * Size the composer to its content, both directions.
+     * Size the draft to its content, both directions, animating from the
+     * current height rather than snapping.
      *
-     * Measuring requires collapsing to 0 first — reading scrollHeight at the
-     * current height only ever reports the same or more, which is why a
-     * composer that grows never shrinks back on its own.
+     * Measuring requires collapsing to 0 first - scrollHeight at the current
+     * height only ever reports the same or more. Transitions are suspended for
+     * the measurement and the old height is committed before the new one is
+     * set, so the change animates from where it was.
      */
     function autosizeComposer() {
         var ta = state.els.textarea;
         if (!ta) return;
 
+        var previous = ta.style.height || (COMPOSER_MIN_H + 'px');
+        var caretAtEnd = ta.selectionEnd === ta.value.length;
+
+        ta.style.transition = 'none';
         ta.style.height = '0px';
-        var needed = ta.scrollHeight;
+        // An empty draft is always one line. Chrome's scrollHeight counts a
+        // wrapped placeholder, which grew the idle composer to two lines on
+        // narrow phones.
+        var needed = ta.value ? ta.scrollHeight : COMPOSER_MIN_H;
         var height = Math.max(COMPOSER_MIN_H, Math.min(needed, COMPOSER_MAX_H));
+        ta.style.height = previous;
+        void ta.offsetHeight;
+        ta.style.transition = prefersReducedMotion() ? 'none' : '';
         ta.style.height = height + 'px';
 
-        // Only scroll once it has actually hit the ceiling, so there's no
-        // stray scrollbar on a one-line draft.
-        ta.classList.toggle('is-scrolling', needed > COMPOSER_MAX_H);
+        var scrolling = needed > COMPOSER_MAX_H;
+        ta.classList.toggle('is-scrolling', scrolling);
+        if (scrolling && caretAtEnd) ta.scrollTop = ta.scrollHeight;
 
-        // Adaptive layout: compact single row while the draft still fits on one
-        // line (keeps the ~38px that stacking would permanently cost the
-        // conversation), and expands to a full-width composer with the controls
-        // beneath once the member is actually writing something.
-        var wrapper = state.els.inputWrapper;
-        if (wrapper) {
-            var multiline = needed > COMPOSER_MIN_H + 6 || ta.value.indexOf('\n') !== -1;
-            wrapper.classList.toggle('is-expanded', multiline);
-        }
+        // The composer grew into the thread: keep the latest message in view
+        // for a reader who was already at the bottom.
+        if (state.els.atBottom && state.els.stream) scrollToBottom(state.els.stream);
+    }
+
+    var PRIMARY_LABELS = {
+        empty: 'Dictate a message',
+        idle: 'Send message',
+        ready: 'Send message',
+        processing: 'Preparing photos',
+        streaming: 'Stop Mya\'s reply',
+        recording: 'Stop dictating',
+        transcribing: 'Transcribing your voice'
+    };
+
+    function computeComposerMode() {
+        if (state.isStreaming) return 'streaming';
+        if (state.dictationPhase === 'recording') return 'recording';
+        if (state.dictationPhase === 'transcribing') return 'transcribing';
+        if (state.attachments.some(function (a) { return a.status === 'processing'; })) return 'processing';
+        var hasText = !!(state.els.textarea && state.els.textarea.value.trim());
+        if (hasText || readyAttachments().length) return 'ready';
+        return canDictate() ? 'empty' : 'idle';
     }
 
     /**
-     * While a reply streams, the send button reads as busy rather than
-     * inviting another message that would be dropped by the isStreaming guard.
+     * The single place the composer's controls are derived from state. Every
+     * event that could change what the member can do next calls this.
      */
-    function setComposerStreaming(on) {
-        var btn = state.els.sendBtn;
-        if (!btn) return;
-        btn.disabled = !!on;
-        btn.setAttribute('aria-label', on ? 'Mya is replying' : 'Send message');
-        btn.innerHTML = on
-            ? '<span class="mya-status-dots" style="--d:#fff"><i></i><i></i><i></i></span>'
-            : ICONS.send;
-        if (state.els.textarea) {
-            state.els.textarea.setAttribute('placeholder', on ? 'Mya is replying…' : 'Ask Mya about your hair journey...');
+    function updateComposerState() {
+        var els = state.els;
+        if (!els.composer) return;
+        var mode = computeComposerMode();
+        state.composerMode = mode;
+        els.composer.setAttribute('data-mode', mode);
+
+        var btn = els.primaryBtn;
+        btn.setAttribute('aria-label', PRIMARY_LABELS[mode] || 'Send message');
+        btn.disabled = mode === 'processing' || mode === 'transcribing' || mode === 'idle';
+        btn.setAttribute('aria-busy', mode === 'processing' || mode === 'transcribing' ? 'true' : 'false');
+
+        var photos = readyAttachments().length;
+        // Long form when it fits, short form when it doesn't. Chrome ignores
+        // text-overflow on textarea placeholders, so a long one was cut off
+        // mid-word on 320-360px phones.
+        els.textarea.placeholder = state.isStreaming
+            ? 'Mya is replying…'
+            : photos > 1 ? placeholderThatFits('Ask Mya about these photos…', 'Ask about these…')
+            : photos === 1 ? placeholderThatFits('Ask Mya about this photo…', 'Ask about this photo…')
+            : placeholderThatFits(COMPOSER_PLACEHOLDER, 'Ask Mya anything…');
+
+        els.plusBtn.disabled = mode === 'recording' || mode === 'transcribing';
+    }
+
+    function handlePrimaryAction() {
+        switch (state.composerMode) {
+            case 'streaming': stopStreaming(); break;
+            case 'recording': stopDictation(); break;
+            case 'ready': submitComposer(); break;
+            case 'empty': startDictation(); break;
+            default: break;
         }
+    }
+
+    function stopStreaming() {
+        if (state.activeRequest && typeof state.activeRequest.stop === 'function') {
+            state.activeRequest.stop();
+        }
+    }
+
+    /** Kept for existing callers; the composer derives everything from state. */
+    function setComposerStreaming(on) {
+        updateComposerState();
+        if (on) announce('Mya is replying');
     }
 
     function getContextPayload() {
@@ -4379,40 +5156,81 @@
         });
     }
 
-    function sendMessage(text) {
+    function sendMessage(text, options) {
+        options = options || {};
         if (!text || state.isStreaming) return;
 
         if (state.activeView !== 'chat') {
             switchView('chat');
         }
+        if (state.addSheetOpen) toggleAddSheet(false);
 
         var empty = state.els.stream.querySelector('.mya-empty-state');
         if (empty) empty.remove();
 
-        appendUserMessage(text);
-        var statusEl = appendStatusIndicator('Checking your Hair Journey…');
+        var photos = options.attachments || [];
+        var userRow = photos.length
+            ? appendUserPhotosMessage(photos, options.displayText)
+            : appendUserMessage(text).parentNode;
+        var statusEl = appendStatusIndicator(photos.length
+            ? (photos.length > 1 ? 'Looking at your photos…' : 'Looking at your photo…')
+            : 'Checking your Hair Journey…');
         var assistantBubble = null;
         var accumulatedRaw = '';
+        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var request = { stopped: false };
+
+        function finishStream() {
+            state.isStreaming = false;
+            if (state.activeRequest === request) state.activeRequest = null;
+            setStreamingCaret(assistantBubble, false);
+            if (statusEl) { statusEl.remove(); statusEl = null; }
+            setComposerStreaming(false);
+        }
+
+        // Stop: abort the request and keep whatever Mya had already said.
+        request.stop = function () {
+            if (request.stopped || !state.isStreaming) return;
+            request.stopped = true;
+            if (controller) {
+                try { controller.abort(); } catch (e) { /* already settled */ }
+            }
+            finishStream();
+            var note = el('div', 'mya-msg-stopped');
+            note.textContent = assistantBubble ? 'Reply stopped' : 'Stopped before Mya replied';
+            state.els.stream.appendChild(note);
+            scrollToBottom(state.els.stream);
+            announce('Reply stopped');
+        };
 
         state.isStreaming = true;
+        state.activeRequest = request;
         setComposerStreaming(true);
+
+        var body = {
+            message: text,
+            from: state.userId,
+            groupId: state.conversationId,
+            experienceContext: getContextPayload()
+        };
+        if (photos.length) {
+            body.attachments = photos.map(function (p) { return { url: p.dataUrl, mimeType: p.mimeType }; });
+        }
 
         // Wait (briefly, bounded) for a pending wpUserId upgrade so the
         // request reads the member's real identity, not the throwaway guest
         // id init() started with - see waitForIdentity() above.
         waitForIdentity().then(function () {
+        if (request.stopped) return;
+        body.from = state.userId;
         return fetch(state.apiBase + '/chat/stream', {
             method: 'POST',
+            signal: controller ? controller.signal : undefined,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/x-ndjson, text/plain;q=0.9'
             },
-            body: JSON.stringify({
-                message: text,
-                from: state.userId,
-                groupId: state.conversationId,
-                experienceContext: getContextPayload()
-            })
+            body: JSON.stringify(body)
         })
             .then(function (res) {
                 if (!res.ok || !res.body) throw new Error('Stream failed: ' + res.status);
@@ -4422,11 +5240,9 @@
 
                 function pump() {
                     return reader.read().then(function (result) {
+                        if (request.stopped) return;
                         if (result.done) {
-                            state.isStreaming = false;
-                            setStreamingCaret(assistantBubble, false);
-                            setComposerStreaming(false);
-                            if (statusEl) statusEl.remove();
+                            finishStream();
                             return;
                         }
 
@@ -4470,12 +5286,18 @@
                 return pump();
             })
             .catch(function (err) {
+                if (request.stopped || (err && err.name === 'AbortError')) return;
                 console.error('[Mya Widget] Stream error:', err);
-                state.isStreaming = false;
-                setStreamingCaret(assistantBubble, false);
-                setComposerStreaming(false);
-                if (statusEl) statusEl.remove();
-                if (!assistantBubble) {
+                finishStream();
+                if (assistantBubble) return; // partial reply stays as it is
+
+                // Nothing reached Mya. Take the unsent message back out of the
+                // thread and return it to the composer, so trying again is one
+                // tap instead of retyping (or re-picking photos).
+                if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
+                if (restoreDraft(options.draft || { text: text, attachments: photos })) {
+                    showComposerNote("Couldn't reach Mya. Your message is back in the box — send it again when you're ready.");
+                } else {
                     appendAssistantMessage("I'm having a little trouble connecting to your Hair Journey right now. Please try again in a moment.");
                 }
             });
@@ -4623,9 +5445,15 @@
         },
         openHistory: function () { if (!state.open) togglePanel(); switchView('history'); },
         sendMessage: sendMessage,
+        renderBlock: renderBlock,
         startLiveVoice: startLiveVoice,
-        endLiveVoice: endLiveVoice,
-        openProfile: openProfileSheet
+        openProfile: openProfileSheet,
+        hideLauncher: function () {
+            if (state.els && state.els.launcher) state.els.launcher.classList.add('is-morphed');
+        },
+        showLauncher: function () {
+            if (state.els && state.els.launcher && !state.open) state.els.launcher.classList.remove('is-morphed');
+        }
     };
 
 })(window, document);

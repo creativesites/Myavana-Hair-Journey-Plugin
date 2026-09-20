@@ -534,6 +534,9 @@
             if (!data || !data.success) {
                 throw new Error((data && data.data) || 'Failed to save check-in');
             }
+            if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.invalidateJourney === 'function') {
+                window.MyavanaNext.Mya.invalidateJourney();
+            }
             try { window.sessionStorage.setItem('myavanaGoalFeedback', 'Check-in saved.'); } catch (error) {}
             window.location.reload();
         } catch (error) {
@@ -574,6 +577,9 @@
             const data = await parseAjaxResponse(response);
             if (!data || !data.success) {
                 throw new Error((data && data.data) || 'Unable to update goal status');
+            }
+            if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.invalidateJourney === 'function') {
+                window.MyavanaNext.Mya.invalidateJourney();
             }
             try { window.sessionStorage.setItem('myavanaGoalFeedback', nextStatus === 'paused' ? 'Goal paused.' : 'Goal resumed.'); } catch (error) {}
             window.location.reload();
@@ -618,6 +624,9 @@
             const data = await parseAjaxResponse(response);
             if (!data || !data.success) {
                 throw new Error((data && data.data) || 'Unable to delete goal');
+            }
+            if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.invalidateJourney === 'function') {
+                window.MyavanaNext.Mya.invalidateJourney();
             }
             try { window.sessionStorage.setItem('myavanaGoalFeedback', 'Goal deleted.'); } catch (error) {}
             window.location.reload();

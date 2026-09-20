@@ -420,33 +420,6 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
                 </div>
             </div>
 
-            <div class="section-divider-hjn"><span>Measurement</span></div>
-
-            <div class="form-row-hjn">
-                <div class="float-field-hjn">
-                    <input type="number" id="goal_baseline_value" name="goal_baseline_value"
-                           class="form-input-hjn" placeholder=" " min="0" step="0.1">
-                    <label for="goal_baseline_value" class="float-label-hjn">Baseline Value</label>
-                </div>
-                <div class="float-field-hjn">
-                    <input type="number" id="goal_target_value" name="goal_target_value"
-                           class="form-input-hjn" placeholder=" " min="0" step="0.1">
-                    <label for="goal_target_value" class="float-label-hjn">Target Value</label>
-                </div>
-            </div>
-
-            <div class="form-group-hjn">
-                <label for="goal_measure_unit" class="form-label-hjn">Measure Unit</label>
-                <div class="select-wrapper-hjn">
-                    <select id="goal_measure_unit" name="goal_measure_unit" class="form-select-hjn">
-                        <option value="">Select unit…</option>
-                        <?php foreach (['cm'=>'Centimeters (cm)','in'=>'Inches (in)','score'=>'Score','%'=>'Percent (%)','sessions'=>'Sessions','days'=>'Days'] as $val=>$label): ?>
-                        <option value="<?php echo esc_attr($val); ?>"><?php echo esc_html($label); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-
             <!-- Progress -->
             <div class="form-group-hjn">
                 <label class="form-label-hjn">Current Progress</label>
@@ -723,7 +696,9 @@ const HJN = window.HJN = {
             ov.classList.add('is-open');
             ov.classList.add('active');
         }
+        document.body.classList.add('has-active-offcanvas');
         document.body.style.overflow = 'hidden';
+        try { window.MyavanaWidget && typeof window.MyavanaWidget.hideLauncher === 'function' && window.MyavanaWidget.hideLauncher(); } catch (e) {}
 
         if (type === 'entry') {
             this._entryTabIndex = 0;
@@ -757,7 +732,9 @@ const HJN = window.HJN = {
             overlay.classList.remove('is-open');
             overlay.classList.remove('active');
         }
+        document.body.classList.remove('has-active-offcanvas');
         document.body.style.overflow = '';
+        try { window.MyavanaWidget && typeof window.MyavanaWidget.showLauncher === 'function' && window.MyavanaWidget.showLauncher(); } catch (e) {}
         this._currentOffcanvas = null;
         const returnFocus = this._returnFocus;
         this._returnFocus = null;
@@ -996,9 +973,9 @@ const HJN = window.HJN = {
         document.getElementById('goal_end_date').value = '';
         document.getElementById('goal_priority').value = 'Medium';
         document.getElementById('goal_checkin_frequency').value = 'Weekly';
-        document.getElementById('goal_baseline_value').value = '';
-        document.getElementById('goal_target_value').value = '';
-        document.getElementById('goal_measure_unit').value = '';
+        const bVal = document.getElementById('goal_baseline_value'); if (bVal) bVal.value = '';
+        const tVal = document.getElementById('goal_target_value'); if (tVal) tVal.value = '';
+        const mUnit = document.getElementById('goal_measure_unit'); if (mUnit) mUnit.value = '';
         document.getElementById('goal_progress').value = '0';
         document.getElementById('goal_progress_value').textContent = '0%';
         document.getElementById('goal_motivation').value = '';
@@ -1432,7 +1409,13 @@ const HJN = window.HJN = {
         if (form.dataset.submitting === 'true') return;
         form.dataset.submitting = 'true';
         submitButton?.setAttribute('aria-busy', 'true');
-        if (submitButton) submitButton.disabled = true;
+        if (submitButton) {
+            submitButton.disabled = true;
+            if (formId === 'goalForm') {
+                submitButton.dataset.originalText = submitButton.textContent;
+                submitButton.textContent = 'Saving goal...';
+            }
+        }
         loader && (loader.style.display = 'flex');
 
         const entryId = String(document.getElementById('entry_id')?.value || '').trim();
@@ -1517,27 +1500,105 @@ const HJN = window.HJN = {
         })
         .then(res => {
             loader && (loader.style.display = 'none');
-            delete form.dataset.submitting;
-            submitButton?.removeAttribute('aria-busy');
-            if (submitButton) submitButton.disabled = false;
             if (res.success) {
+                // Permanently keep submit button disabled to prevent duplicate submissions
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.setAttribute('aria-busy', 'false');
+                    submitButton.textContent = 'Saved! Loading goals...';
+                }
                 const successMessage = typeof res.data === 'string'
                     ? res.data
                     : (res.data?.message || 'Saved successfully!');
                 this.toast(successMessage, 'success');
                 this.closeOffcanvas();
-                const shouldReloadForCollections =
-                    (formId === 'goalForm' && document.getElementById('myavanaGoalsV2Root')) ||
-                    (formId === 'routineForm' && document.getElementById('myavanaRoutinesV2Root'));
 
-                if (isEntryCreate || shouldReloadForCollections) {
-                    if (formId === 'routineForm' || formId === 'goalForm') {
-                        try { window.sessionStorage.setItem(formId === 'routineForm' ? 'myavanaRoutineFeedback' : 'myavanaGoalFeedback', successMessage); } catch (error) {}
-                    }
+                // Invalidate Mya AI's cached journey so chatbot immediately knows about new goals and routines
+                if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.invalidateJourney === 'function') {
+                    window.MyavanaNext.Mya.invalidateJourney();
+                }
+
+                if (formId === 'goalForm') {
+                    try { window.sessionStorage.setItem('myavanaGoalFeedback', successMessage); } catch (error) {}
                     setTimeout(() => {
-                        const url = new URL(window.location.href);
-                        url.searchParams.delete('create');
-                        url.searchParams.delete('category');
+                        const isInSpaShell = !!document.getElementById('myavana-next-root');
+                        if (isInSpaShell) {
+                            if (window.MyavanaNext && window.MyavanaNext.App && typeof window.MyavanaNext.App.navigate === 'function') {
+                                window.MyavanaNext.App.navigate('routine');
+                            }
+                            if (window.MyavanaNext && window.MyavanaNext.Routine && typeof window.MyavanaNext.Routine.selectTab === 'function') {
+                                window.MyavanaNext.Routine.selectTab('goals');
+                            }
+                            if (window.MyavanaNext && window.MyavanaNext.Today && typeof window.MyavanaNext.Today.refresh === 'function') {
+                                window.MyavanaNext.Today.refresh();
+                            }
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('tab', 'goals');
+                            url.searchParams.delete('create');
+                            url.searchParams.delete('category');
+                            url.searchParams.delete('template');
+                            url.searchParams.delete('title');
+                            url.hash = '#routine';
+                            window.location.href = url.toString();
+                        } else {
+                            const currentPath = window.location.pathname;
+                            const isGoalsUrl = currentPath.includes('/goals');
+                            if (isGoalsUrl) {
+                                const url = new URL(window.location.href);
+                                url.searchParams.delete('create');
+                                url.searchParams.delete('category');
+                                url.searchParams.delete('template');
+                                url.searchParams.delete('title');
+                                window.location.href = url.toString();
+                            } else {
+                                const baseGoalsUrl = settings.goalsUrl || (window.location.origin + '/routine?tab=goals');
+                                const targetUrl = new URL(baseGoalsUrl, window.location.origin);
+                                targetUrl.searchParams.set('tab', 'goals');
+                                targetUrl.searchParams.delete('create');
+                                targetUrl.searchParams.delete('category');
+                                targetUrl.searchParams.delete('template');
+                                targetUrl.searchParams.delete('title');
+                                window.location.href = targetUrl.toString();
+                            }
+                        }
+                    }, 280);
+                    return;
+                }
+
+                if (formId === 'routineForm') {
+                    try { window.sessionStorage.setItem('myavanaRoutineFeedback', successMessage); } catch (error) {}
+                    setTimeout(() => {
+                        const isInSpaShell = !!document.getElementById('myavana-next-root');
+                        if (isInSpaShell) {
+                            if (window.MyavanaNext && window.MyavanaNext.App && typeof window.MyavanaNext.App.navigate === 'function') {
+                                window.MyavanaNext.App.navigate('routine');
+                            }
+                            if (window.MyavanaNext && window.MyavanaNext.Routine && typeof window.MyavanaNext.Routine.selectTab === 'function') {
+                                window.MyavanaNext.Routine.selectTab('routine');
+                            }
+                            if (window.MyavanaNext && window.MyavanaNext.Today && typeof window.MyavanaNext.Today.refresh === 'function') {
+                                window.MyavanaNext.Today.refresh();
+                            }
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('create');
+                            url.searchParams.delete('category');
+                            url.searchParams.delete('template');
+                            url.searchParams.delete('title');
+                            url.hash = '#routine';
+                            window.location.href = url.toString();
+                        } else {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('create');
+                            url.searchParams.delete('category');
+                            url.searchParams.delete('template');
+                            url.searchParams.delete('title');
+                            window.location.href = url.toString();
+                        }
+                    }, 280);
+                    return;
+                }
+
+                if (isEntryCreate) {
                         url.searchParams.delete('template');
                         url.searchParams.delete('title');
                         window.location.href = url.toString();
@@ -1547,6 +1608,14 @@ const HJN = window.HJN = {
                 // Optionally refresh the journey view
                 if (typeof window.hjnRefresh === 'function') window.hjnRefresh();
             } else {
+                delete form.dataset.submitting;
+                submitButton?.removeAttribute('aria-busy');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    if (submitButton.dataset.originalText) {
+                        submitButton.textContent = submitButton.dataset.originalText;
+                    }
+                }
                 const errorMessage = typeof res.data === 'string'
                     ? res.data
                     : (res.data?.message || 'Something went wrong.');
@@ -1557,7 +1626,12 @@ const HJN = window.HJN = {
             loader && (loader.style.display = 'none');
             delete form.dataset.submitting;
             submitButton?.removeAttribute('aria-busy');
-            if (submitButton) submitButton.disabled = false;
+            if (submitButton) {
+                submitButton.disabled = false;
+                if (submitButton.dataset.originalText) {
+                    submitButton.textContent = submitButton.dataset.originalText;
+                }
+            }
             this.toast(error?.message || 'Connection error. Please try again.', 'error');
         });
     },

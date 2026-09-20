@@ -71,7 +71,7 @@ if ($is_logged_in) {
             <!-- Header Utilities -->
             <div class="myavana-next-header-actions">
                 <!-- Chat Support Trigger (Launches Mya AI) -->
-                <button type="button" class="myavana-next-concierge-btn btn-open-mya btn-open-kommunicate" data-action="open-mya-chat" aria-label="<?php esc_attr_e('Open Hair Care Chat with Mya', 'myavana-hair-journey-next'); ?>">
+                <button type="button" class="myavana-next-concierge-btn btn-open-mya" data-action="open-mya-chat" aria-label="<?php esc_attr_e('Open Hair Care Chat with Mya', 'myavana-hair-journey-next'); ?>">
                     <span class="myavana-next-concierge-badge"></span>
                     <span><?php esc_html_e('Chat with Mya', 'myavana-hair-journey-next'); ?></span>
                 </button>

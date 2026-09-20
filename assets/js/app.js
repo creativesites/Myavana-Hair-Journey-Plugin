@@ -20,6 +20,7 @@ MyavanaNext.App = (function() {
         if (MyavanaNext.Community) MyavanaNext.Community.init();
         if (MyavanaNext.Profile) MyavanaNext.Profile.init();
         if (MyavanaNext.Auth) MyavanaNext.Auth.init();
+        if (MyavanaNext.Onboarding) MyavanaNext.Onboarding.init();
 
         bindNavigation();
         bindGlobalActions();
@@ -155,16 +156,14 @@ MyavanaNext.App = (function() {
     }
 
     function bindGlobalActions() {
-        // Primary Myavana Chat triggers (Repointed to Mya per G1 directive)
-        document.querySelectorAll('.btn-open-mya, .btn-open-kommunicate').forEach(btn => {
+        // Primary Myavana Chat triggers
+        document.querySelectorAll('.btn-open-mya').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (window.MyavanaWidget && typeof window.MyavanaWidget.open === 'function') {
                     window.MyavanaWidget.open();
                 } else if (window.MyavanaNext && window.MyavanaNext.Mya && typeof window.MyavanaNext.Mya.open === 'function') {
                     window.MyavanaNext.Mya.open();
-                } else if (MyavanaNext.Kommunicate) {
-                    MyavanaNext.Kommunicate.open();
                 }
             });
         });

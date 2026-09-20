@@ -819,8 +819,8 @@
 }
 
 .myavana-post-avatar {
-    width: 48px;
-    height: 48px;
+    width: 48px !important;
+    height: 48px !important;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--myavana-coral);

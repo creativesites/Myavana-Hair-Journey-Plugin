@@ -36,7 +36,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
 
     <div class="myavana-today-quick-row">
         <button type="button" class="myavana-btn myavana-btn-dark btn-open-smart-entry"><?php esc_html_e('+ Log an entry', 'myavana-hair-journey-next'); ?></button>
-        <button type="button" class="myavana-btn myavana-btn-outline btn-open-kommunicate"><?php esc_html_e('Ask an expert', 'myavana-hair-journey-next'); ?></button>
+        <button type="button" class="myavana-btn myavana-btn-outline btn-open-mya"><?php esc_html_e('Ask an expert', 'myavana-hair-journey-next'); ?></button>
     </div>
 
     <div class="myavana-today-layout">
@@ -130,7 +130,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                     <strong><?php esc_html_e('Need hair-care help?', 'myavana-hair-journey-next'); ?></strong>
                     <p><?php esc_html_e('Chat with Mya whenever you need a little guidance.', 'myavana-hair-journey-next'); ?></p>
                 </div>
-                <button type="button" class="myavana-btn myavana-btn-outline btn-open-mya btn-open-kommunicate">
+                <button type="button" class="myavana-btn myavana-btn-outline btn-open-mya">
                     <?php esc_html_e('Chat with Mya', 'myavana-hair-journey-next'); ?>
                 </button>
             </aside>

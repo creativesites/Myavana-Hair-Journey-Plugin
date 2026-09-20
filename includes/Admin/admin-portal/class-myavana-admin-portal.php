@@ -55,7 +55,8 @@ class Myavana_Admin_Portal
         }
 
         ob_start();
-        $template = MYAVANA_DIR . 'templates/pages/admin-portal.php';
+        $plugin_dir = defined('MYAVANA_NEXT_PATH') ? MYAVANA_NEXT_PATH : plugin_dir_path(dirname(__DIR__, 2));
+        $template = $plugin_dir . 'templates/pages/admin-portal.php';
         if (file_exists($template)) {
             include $template;
         }
@@ -88,13 +89,15 @@ class Myavana_Admin_Portal
             $sections[] = ['id' => 'audit', 'label' => 'Audit'];
         }
 
-        $css_path = MYAVANA_DIR . 'assets/css/admin-portal.css';
-        $js_path = MYAVANA_DIR . 'assets/js/admin-portal.js';
+        $plugin_dir = defined('MYAVANA_NEXT_PATH') ? MYAVANA_NEXT_PATH : plugin_dir_path(dirname(__DIR__, 2));
+        $plugin_url = defined('MYAVANA_NEXT_URL') ? MYAVANA_NEXT_URL : plugin_dir_url(dirname(__DIR__, 2));
+        $css_path = $plugin_dir . 'assets/css/admin-portal.css';
+        $js_path = $plugin_dir . 'assets/js/admin-portal.js';
         $css_version = file_exists($css_path) ? (string) filemtime($css_path) : '1.0.0';
         $js_version = file_exists($js_path) ? (string) filemtime($js_path) : '1.0.0';
 
-        wp_enqueue_style('myavana-admin-portal', MYAVANA_URL . 'assets/css/admin-portal.css', [], $css_version);
-        wp_enqueue_script('myavana-admin-portal', MYAVANA_URL . 'assets/js/admin-portal.js', [], $js_version, true);
+        wp_enqueue_style('myavana-admin-portal', $plugin_url . 'assets/css/admin-portal.css', [], $css_version);
+        wp_enqueue_script('myavana-admin-portal', $plugin_url . 'assets/js/admin-portal.js', [], $js_version, true);
 
         wp_localize_script('myavana-admin-portal', 'myavanaAdminPortal', [
             'restRoot' => esc_url_raw(rest_url(self::REST_NAMESPACE . '/')),

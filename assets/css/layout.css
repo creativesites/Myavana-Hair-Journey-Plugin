@@ -496,16 +496,16 @@ body:has(.myavana-next-shell) #footer {
     }
 }
 
-/* Kommunicate's own floating launcher bubble sits bottom-right and covers
-   the mobile tab bar/FAB. Our own "Chat with Mya" trigger already opens
-   the same widget, so the vendor's floating bubble is redundant on mobile. */
-@media (max-width: 767px) {
-    #kommunicate-widget-iframe,
-    #chat-popup-widget-container,
-    .km-chat-widget-button,
-    .km-custom-widget-launcher {
-        display: none !important;
-    }
+/* Decommissioned: legacy Kommunicate widgets are suppressed everywhere */
+#kommunicate-widget-iframe,
+#chat-popup-widget-container,
+.km-chat-widget-button,
+.km-custom-widget-launcher,
+.kommunicate-custom-iframe {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
 }
 
 /* Home ends in a dark final-CTA band; the app shell's normal breathing

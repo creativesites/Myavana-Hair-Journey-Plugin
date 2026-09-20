@@ -376,7 +376,7 @@ function myavana_luxury_home_view() {
                                     <i class="fas fa-camera"></i>
                                     My Hair Timeline
                                 </a>
-                                <button type="button" class="myavana-luxury-btn-secondary btn-open-mya btn-open-kommunicate" data-action="open-mya-chat">
+                                <button type="button" class="myavana-luxury-btn-secondary btn-open-mya" data-action="open-mya-chat">
                                     <i class="fas fa-comment-dots"></i>
                                     Chat with Mya
                                 </button>

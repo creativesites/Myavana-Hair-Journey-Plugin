@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
 
         <div class="myavana-next-footer-support">
             <span class="myavana-next-footer-label"><?php esc_html_e('Need a hand?', 'myavana-hair-journey-next'); ?></span>
-            <button type="button" class="myavana-next-footer-chat btn-open-mya btn-open-kommunicate" data-action="open-mya-chat"><?php esc_html_e('Chat with Mya', 'myavana-hair-journey-next'); ?> <span aria-hidden="true">↗</span></button>
+            <button type="button" class="myavana-next-footer-chat btn-open-mya" data-action="open-mya-chat"><?php esc_html_e('Chat with Mya', 'myavana-hair-journey-next'); ?> <span aria-hidden="true">↗</span></button>
             <div class="myavana-next-footer-legal">
                 <a href="<?php echo esc_url(home_url('/privacy/')); ?>"><?php esc_html_e('Privacy', 'myavana-hair-journey-next'); ?></a>
                 <a href="<?php echo esc_url(home_url('/terms/')); ?>"><?php esc_html_e('Terms', 'myavana-hair-journey-next'); ?></a>
