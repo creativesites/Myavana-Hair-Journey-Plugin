@@ -161,6 +161,12 @@
         liveTurns: [],
         liveBlocks: [],
         bargeInFrames: 0,
+        liveTurnToken: 0,
+        liveStreamDone: false,
+        liveSpeechQueue: [],
+        liveSpeaking: false,
+        liveActiveController: null,
+        liveThinkingReassureTimer: null,
         // Local platform bridge (WordPress Hair Journey supplies these surfaces)
         localPlatform: null,
         journeyData: null,
@@ -768,6 +774,7 @@
             '.mya-live-top-bar{display:flex;align-items:center;justify-content:space-between;}',
             '.mya-live-status-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);padding:4px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,0.12);font-size:11.5px;font-weight:600;}',
             '.mya-live-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 8px #4caf50;animation:myaPulse 2s infinite;}',
+            '.mya-live-dot.connecting{background:#9a9a9a;box-shadow:0 0 6px #9a9a9a;}',
             '.mya-live-dot.thinking{background:' + COLORS.coral + ';box-shadow:0 0 8px ' + COLORS.coral + ';}',
             '.mya-live-dot.speaking{background:' + COLORS.coral + ';box-shadow:0 0 10px ' + COLORS.coral + ';}',
             '.mya-live-canvas-wrap{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0 auto;}',
@@ -2127,8 +2134,11 @@
                     if (role === 'user') {
                         appendUserMessage(content, at);
                     } else {
+                        var parsedMsg = extractStoredBlocks(content);
                         var b = appendAssistantMessage('', at);
-                        b.innerHTML = parseMarkdown(content);
+                        b.innerHTML = parseMarkdown(parsedMsg.text);
+                        parsedMsg.blocks.forEach(function (block) { renderBlock(block); });
+                        if (parsedMsg.quickReplies.length) renderQuickReplies(parsedMsg.quickReplies);
                     }
                 });
                 scrollToBottom(state.els.stream);
@@ -2948,9 +2958,15 @@
         state.liveVoiceState = newState;
         if (!state.els.liveDot || !state.els.liveStateBanner) return;
 
-        state.els.liveDot.className = 'mya-live-dot' + (newState === 'thinking' ? ' thinking' : (newState === 'speaking' ? ' speaking' : ''));
+        state.els.liveDot.className = 'mya-live-dot' + (newState === 'connecting' ? ' connecting' : newState === 'thinking' ? ' thinking' : (newState === 'speaking' ? ' speaking' : ''));
 
-        if (newState === 'listening') {
+        if (newState === 'connecting') {
+            // Mic permission + speech recognition are still being set up here.
+            // Recognition hasn't started yet, so anything said now would
+            // otherwise be lost with no sign it wasn't heard - say so plainly
+            // instead of showing "Listening" before Mya can actually hear.
+            state.els.liveStateBanner.innerHTML = '<span>● Connecting</span> <span style="opacity:0.7;font-weight:400;">• Setting up your microphone...</span>';
+        } else if (newState === 'listening') {
             state.els.liveStateBanner.innerHTML = '<span>● Listening</span> <span style="opacity:0.7;font-weight:400;">• Speak naturally</span>';
         } else if (newState === 'thinking') {
             state.els.liveStateBanner.innerHTML = '<span>● Thinking</span> <span style="opacity:0.7;font-weight:400;">• Checking your Hair Journey...</span>';
@@ -3070,7 +3086,13 @@
         recognition.lang = 'en-US';
 
         recognition.onresult = function (event) {
-            if (state.liveVoiceState === 'speaking') interruptMya();
+            // Talking while Mya is still "thinking" used to be silently
+            // dropped (handleLiveUserUtterance bailed out whenever the state
+            // was already 'thinking'), so a member who spoke again before
+            // the first reply arrived just lost that utterance with no sign
+            // anything went wrong. Barge-in now covers both states: it cancels
+            // whatever is pending and lets the new utterance become the turn.
+            if (state.liveVoiceState === 'speaking' || state.liveVoiceState === 'thinking') interruptMya();
             var interim = '';
             var final = '';
             for (var i = event.resultIndex; i < event.results.length; ++i) {
@@ -3096,100 +3118,228 @@
         return recognition;
     }
 
-    function handleLiveUserUtterance(text) {
-        if (!text || state.liveVoiceState === 'thinking') return;
-        state.liveTurns.push({ role: 'user', content: text, timestamp: new Date().toISOString() });
-        setLiveVoiceState('thinking');
+    /**
+     * Splits streamed text on completed sentences, holding back whatever
+     * trails the last ./!/? so we never queue a fragment before its closing
+     * punctuation has actually arrived. Walks the buffer manually rather
+     * than with a single regex + String.match(): a regex that requires
+     * whitespace after the terminator (so it doesn't split "e.g." or "10.5")
+     * fails to match at all around a false terminator like the first "." in
+     * "e.g.", and match() silently omits whatever text surrounded that
+     * failed attempt - the words right before an abbreviation were being
+     * dropped from speech outright, not just mis-split. A manual scan can
+     * only ever move text between "spoken" and "still buffered"; it can't
+     * lose it.
+     */
+    function splitCompleteSentences(buffer) {
+        var complete = [];
+        var start = 0;
+        for (var i = 0; i < buffer.length; i++) {
+            var ch = buffer[i];
+            if (ch !== '.' && ch !== '!' && ch !== '?') continue;
 
-        var accumulated = '';
-        waitForIdentity().then(function () {
-        return fetch(state.apiBase + '/chat/stream', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/x-ndjson, text/plain;q=0.9'
-            },
-            body: JSON.stringify({
-                message: text,
-                from: state.userId,
-                groupId: state.conversationId,
-                experienceContext: getContextPayload()
-            })
-        })
-            .then(function (res) {
-                if (!res.ok || !res.body) throw new Error('Stream error');
-                var reader = res.body.getReader();
-                var decoder = new TextDecoder();
-                var lineBuffer = '';
+            // Absorb a run of terminators ("?!", "...") as one boundary.
+            var j = i;
+            while (j + 1 < buffer.length && (buffer[j + 1] === '.' || buffer[j + 1] === '!' || buffer[j + 1] === '?')) j++;
 
-                function pump() {
-                    return reader.read().then(function (result) {
-                        if (result.done) {
-                            speakLiveAssistantResponse(accumulated);
-                            return;
-                        }
-                        var chunk = decoder.decode(result.value, { stream: true });
-                        lineBuffer += chunk;
-                        var newlineIdx;
-                        while ((newlineIdx = lineBuffer.indexOf('\n')) !== -1) {
-                            var line = lineBuffer.slice(0, newlineIdx).trim();
-                            lineBuffer = lineBuffer.slice(newlineIdx + 1);
-                            if (line) {
-                                try {
-                                    var frame = JSON.parse(line);
-                                    if (frame.t === 'delta' && frame.text) {
-                                        accumulated += frame.text;
-                                        state.els.liveTickerRole.textContent = 'MYA';
-                                        state.els.liveTickerText.textContent = accumulated;
-                                    } else if (frame.t === 'block' && frame.block) {
-                                        state.liveBlocks.push(frame.block);
-                                    }
-                                } catch (e) {
-                                    accumulated += line;
-                                }
-                            }
-                        }
-                        return pump();
-                    });
+            var nextChar = buffer[j + 1];
+            var isBoundary = nextChar === undefined || /\s/.test(nextChar);
+            if (isBoundary) {
+                var sentence = buffer.slice(start, j + 1);
+                // A single trailing initial ("e.g." / "i.e.") is almost
+                // never really the end of the sentence - leave it buffered
+                // for the next chunk instead of speaking a stray fragment.
+                var lastToken = sentence.trim().split(/\s+/).pop() || '';
+                var looksLikeAbbreviation = /^[a-z]\.$/i.test(lastToken) || /^([a-z]\.){2,}$/i.test(lastToken);
+                if (!looksLikeAbbreviation) {
+                    complete.push(sentence.trim());
+                    start = j + 1;
                 }
-                return pump();
-            })
-            .catch(function () {
-                speakLiveAssistantResponse("I'm here with you. What would you like to explore next in your Hair Journey?");
-            });
-        });
+            }
+            i = j;
+        }
+        return { complete: complete.filter(Boolean), remainder: buffer.slice(start) };
     }
 
-    function speakLiveAssistantResponse(text) {
-        if (!text || state.liveVoiceState === 'idle') return;
-        state.liveTurns.push({ role: 'assistant', content: text, timestamp: new Date().toISOString() });
-        setLiveVoiceState('speaking');
-        state.els.liveTickerRole.textContent = 'MYA';
-        state.els.liveTickerText.textContent = text;
+    /**
+     * A slow reply used to sit silently in "Thinking" for its entire
+     * duration, then speak the whole thing as one utterance the moment it
+     * finished - the wait was invisible and every response landed as a
+     * wall of speech. This queues and speaks sentence-by-sentence as they
+     * stream in instead, so Mya starts talking as soon as her first
+     * sentence is ready rather than after the full reply is done.
+     * Every entry carries the turn token it belongs to, so a stale queue
+     * left over from an interrupted turn plays nothing.
+     */
+    function enqueueLiveSpeech(text, token) {
+        var clean = (text || '').replace(/[*#_`]/g, '').replace(/https?:\/\/\S+/g, '').trim();
+        if (!clean) return;
+        state.liveSpeechQueue.push({ text: clean, token: token });
+        processLiveSpeechQueue();
+    }
 
-        var clean = text.replace(/[*#_`]/g, '').replace(/https?:\/\/\S+/g, '').trim();
+    function processLiveSpeechQueue() {
+        if (state.liveSpeaking) return;
 
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            var utt = new SpeechSynthesisUtterance(clean);
-            utt.rate = 1.05;
-            utt.pitch = 1.0;
-            utt.onend = function () {
-                if (state.liveVoiceState === 'speaking') setLiveVoiceState('listening');
-            };
-            utt.onerror = function () {
-                if (state.liveVoiceState === 'speaking') setLiveVoiceState('listening');
-            };
-            window.speechSynthesis.speak(utt);
-        } else {
-            setTimeout(function () {
-                if (state.liveVoiceState === 'speaking') setLiveVoiceState('listening');
-            }, 3000);
+        var next = state.liveSpeechQueue.shift();
+        if (!next) {
+            if (state.liveStreamDone && state.liveVoiceState === 'speaking') setLiveVoiceState('listening');
+            return;
         }
+        if (next.token !== state.liveTurnToken) {
+            // Superseded by a barge-in or a new turn - drop it and keep draining.
+            processLiveSpeechQueue();
+            return;
+        }
+        if (!('speechSynthesis' in window)) {
+            processLiveSpeechQueue();
+            return;
+        }
+
+        if (state.liveVoiceState !== 'speaking') setLiveVoiceState('speaking');
+        state.liveSpeaking = true;
+        state.els.liveTickerRole.textContent = 'MYA';
+
+        var utt = new SpeechSynthesisUtterance(next.text);
+        utt.rate = 1.05;
+        utt.pitch = 1.0;
+        utt.onend = function () { state.liveSpeaking = false; processLiveSpeechQueue(); };
+        utt.onerror = function () { state.liveSpeaking = false; processLiveSpeechQueue(); };
+        window.speechSynthesis.speak(utt);
+    }
+
+    function handleLiveUserUtterance(text) {
+        if (!text) return;
+
+        // Talking while Mya is thinking or speaking is a barge-in: the caller
+        // (onresult) already interrupted her and bumped the turn token before
+        // reaching here, so this always starts a fresh turn rather than
+        // silently losing whatever the member just said.
+        state.liveTurns.push({ role: 'user', content: text, timestamp: new Date().toISOString() });
+        var myToken = ++state.liveTurnToken;
+        state.liveStreamDone = false;
+        state.liveSpeechQueue = [];
+        state.liveSpeaking = false;
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        if (state.liveActiveController) { try { state.liveActiveController.abort(); } catch (e) {} }
+        setLiveVoiceState('thinking');
+
+        // Responses can take a while - say so rather than leaving the member
+        // staring at an unchanging "Thinking" banner with no sense of progress.
+        clearTimeout(state.liveThinkingReassureTimer);
+        state.liveThinkingReassureTimer = setTimeout(function () {
+            if (state.liveVoiceState === 'thinking' && state.liveTurnToken === myToken) {
+                state.els.liveStateBanner.innerHTML = '<span>● Thinking</span> <span style="opacity:0.7;font-weight:400;">• Still working on it, almost there...</span>';
+            }
+        }, 6000);
+
+        var accumulated = '';
+        var speechBuffer = '';
+        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        state.liveActiveController = controller;
+
+        function finishTurn() {
+            if (state.liveTurnToken !== myToken) return;
+            var split = splitCompleteSentences(speechBuffer);
+            var remainder = split.remainder.trim();
+            split.complete.forEach(function (s) { enqueueLiveSpeech(s, myToken); });
+            if (remainder) enqueueLiveSpeech(remainder, myToken);
+            speechBuffer = '';
+            state.liveStreamDone = true;
+            clearTimeout(state.liveThinkingReassureTimer);
+            if (accumulated.trim()) {
+                state.liveTurns.push({ role: 'assistant', content: accumulated, timestamp: new Date().toISOString() });
+            } else {
+                enqueueLiveSpeech("I'm here with you. What would you like to explore next in your Hair Journey?", myToken);
+            }
+            processLiveSpeechQueue();
+        }
+
+        waitForIdentity().then(function () {
+            if (state.liveTurnToken !== myToken) return;
+            return fetch(state.apiBase + '/chat/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/x-ndjson, text/plain;q=0.9'
+                },
+                body: JSON.stringify({
+                    message: text,
+                    from: state.userId,
+                    groupId: state.conversationId,
+                    experienceContext: getContextPayload()
+                }),
+                signal: controller ? controller.signal : undefined
+            })
+                .then(function (res) {
+                    if (state.liveTurnToken !== myToken) return;
+                    if (!res.ok || !res.body) throw new Error('Stream error');
+                    var reader = res.body.getReader();
+                    var decoder = new TextDecoder();
+                    var lineBuffer = '';
+
+                    function pump() {
+                        return reader.read().then(function (result) {
+                            if (state.liveTurnToken !== myToken) return;
+                            if (result.done) {
+                                finishTurn();
+                                return;
+                            }
+                            var chunk = decoder.decode(result.value, { stream: true });
+                            lineBuffer += chunk;
+                            var newlineIdx;
+                            while ((newlineIdx = lineBuffer.indexOf('\n')) !== -1) {
+                                var line = lineBuffer.slice(0, newlineIdx).trim();
+                                lineBuffer = lineBuffer.slice(newlineIdx + 1);
+                                if (line) {
+                                    try {
+                                        var frame = JSON.parse(line);
+                                        if (frame.t === 'delta' && frame.text) {
+                                            accumulated += frame.text;
+                                            speechBuffer += frame.text;
+                                            state.els.liveTickerRole.textContent = 'MYA';
+                                            state.els.liveTickerText.textContent = accumulated;
+                                            var split = splitCompleteSentences(speechBuffer);
+                                            if (split.complete.length) {
+                                                split.complete.forEach(function (s) { enqueueLiveSpeech(s, myToken); });
+                                                speechBuffer = split.remainder;
+                                            }
+                                        } else if (frame.t === 'block' && frame.block) {
+                                            state.liveBlocks.push(frame.block);
+                                        }
+                                    } catch (e) {
+                                        accumulated += line;
+                                        speechBuffer += line;
+                                    }
+                                }
+                            }
+                            return pump();
+                        });
+                    }
+                    return pump();
+                })
+                .catch(function (err) {
+                    if (state.liveTurnToken !== myToken) return;
+                    if (err && err.name === 'AbortError') return;
+                    clearTimeout(state.liveThinkingReassureTimer);
+                    state.liveStreamDone = true;
+                    enqueueLiveSpeech("I'm here with you. What would you like to explore next in your Hair Journey?", myToken);
+                });
+        });
     }
 
     function interruptMya() {
         if (state.liveVoiceState === 'speaking' || state.liveVoiceState === 'thinking') {
+            // Bump the turn token first so anything already in flight for the
+            // interrupted turn - a pending fetch, its queued sentences, a
+            // reassurance-text timeout - is stale the moment it lands and is
+            // dropped rather than resurfacing after the member has moved on.
+            state.liveTurnToken++;
+            state.liveSpeechQueue = [];
+            state.liveSpeaking = false;
+            state.liveStreamDone = true;
+            clearTimeout(state.liveThinkingReassureTimer);
+            if (state.liveActiveController) { try { state.liveActiveController.abort(); } catch (e) {} }
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             setLiveVoiceState('listening');
             state.els.liveTickerRole.textContent = 'Mya Live';
@@ -3207,6 +3357,22 @@
         state.els.liveMuteBtn.innerHTML = state.liveVoiceMuted ? ICONS.micMute : ICONS.mic;
     }
 
+    /**
+     * Mic setup used to be invisible: the overlay opened straight into
+     * "Listening" while getUserMedia() and speech recognition were still
+     * spinning up in the background, so anything said in that window was
+     * lost with no sign it wasn't heard. This puts a real "Connecting"
+     * state in front of "Listening" and only flips over once recognition
+     * has actually started - and says so plainly if it never can.
+     */
+    function showLiveMicUnavailable(message) {
+        setLiveVoiceState('listening');
+        state.els.liveDot.className = 'mya-live-dot connecting';
+        state.els.liveStateBanner.innerHTML = '<span>● Voice input unavailable</span>';
+        state.els.liveTickerRole.textContent = 'Mya Live';
+        state.els.liveTickerText.textContent = message;
+    }
+
     function startLiveVoice() {
         if (!state.open) togglePanel();
         state.liveTurns = [];
@@ -3214,12 +3380,18 @@
         state.liveVoiceDuration = 0;
         state.liveVoiceMuted = false;
         state.bargeInFrames = 0;
+        state.liveTurnToken++;
+        state.liveStreamDone = false;
+        state.liveSpeechQueue = [];
+        state.liveSpeaking = false;
+        state.liveActiveController = null;
+        clearTimeout(state.liveThinkingReassureTimer);
 
         state.els.liveOverlay.style.display = 'flex';
         state.els.liveTimer.textContent = '00:00';
         state.els.liveTickerRole.textContent = 'Mya Live';
-        state.els.liveTickerText.textContent = 'Say something to Mya to start live voice chat...';
-        setLiveVoiceState('listening');
+        state.els.liveTickerText.textContent = 'Setting things up...';
+        setLiveVoiceState('connecting');
 
         state.liveVoiceTimer = setInterval(function () {
             state.liveVoiceDuration += 1;
@@ -3237,9 +3409,16 @@
             }
         } catch (e) {}
 
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            showLiveMicUnavailable("This browser doesn't support voice input. Close this and use text chat instead - Mya will still speak her replies out loud here.");
+            drawLiveOrb();
+            return;
+        }
+
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
+                    if (state.liveVoiceState === 'idle') { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
                     state.liveVoiceStream = stream;
                     if (state.liveVoiceAudioCtx && state.liveVoiceAnalyser) {
                         var source = state.liveVoiceAudioCtx.createMediaStreamSource(stream);
@@ -3247,20 +3426,40 @@
                     }
                     state.liveVoiceRecognition = initLiveSpeechRecognition();
                     if (state.liveVoiceRecognition) {
-                        try { state.liveVoiceRecognition.start(); } catch (e) {}
+                        try {
+                            state.liveVoiceRecognition.start();
+                            state.els.liveTickerText.textContent = 'Say something to Mya to start live voice chat...';
+                            setLiveVoiceState('listening');
+                        } catch (e) {
+                            showLiveMicUnavailable("Voice recognition couldn't start. Close this and use text chat instead.");
+                        }
+                    } else {
+                        showLiveMicUnavailable("This browser doesn't support voice input. Close this and use text chat instead - Mya will still speak her replies out loud here.");
                     }
                     drawLiveOrb();
                 })
                 .catch(function () {
+                    if (state.liveVoiceState === 'idle') return;
+                    showLiveMicUnavailable("Mya can't hear you without microphone access. Allow it in your browser's address-bar permissions, then reopen Live Voice.");
                     drawLiveOrb();
                 });
         } else {
+            showLiveMicUnavailable("This browser doesn't support microphone access. Close this and use text chat instead.");
             drawLiveOrb();
         }
     }
 
     function endLiveVoice() {
         if (state.liveVoiceState === 'idle') return;
+        // Invalidate anything still in flight for this call (a pending fetch,
+        // its queued sentences, the reassurance-text timeout) so none of it
+        // can act - abort a request, speak, or reopen the overlay's text -
+        // after the member has already closed the call.
+        state.liveTurnToken++;
+        state.liveSpeechQueue = [];
+        state.liveSpeaking = false;
+        clearTimeout(state.liveThinkingReassureTimer);
+        if (state.liveActiveController) { try { state.liveActiveController.abort(); } catch (e) {} }
         if (state.liveVoiceTimer) clearInterval(state.liveVoiceTimer);
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         if (state.liveVoiceStream) {
@@ -3844,6 +4043,47 @@
     }
 
     // ---- Markdown & Message Rendering ----
+
+    /**
+     * A live turn streams as separate NDJSON frames because the backend runs
+     * the raw model output through parseModelOutput() before it ever reaches
+     * the browser: prose as delta frames, each ```mya-blocks fence as its own
+     * block frame. What gets saved to chat_history is that same raw model
+     * output, fence and all, so resuming a conversation was handing the whole
+     * fenced JSON to parseMarkdown() and rendering it as a literal code
+     * block instead of a card. This mirrors just enough of the backend
+     * parser (packages/chat-protocol/src/responseParser.js) to split a
+     * stored message back into prose + blocks + quick replies here.
+     */
+    function extractStoredBlocks(content) {
+        var result = { text: content || '', blocks: [], quickReplies: [] };
+        if (!content) return result;
+
+        // Anchored on the "mya-blocks" language tag itself (not a bare ```),
+        // so a fence with only quickReplies and no blocks array - the
+        // porosity/elasticity style follow-up turns - still matches.
+        var fence = /```mya-blocks\s*([\s\S]*?)```/.exec(content);
+        if (!fence) return result;
+
+        var parsed;
+        try {
+            parsed = JSON.parse(fence[1]);
+        } catch (err) {
+            // Malformed fence: still drop it from the visible text rather
+            // than showing raw JSON.
+            result.text = (content.slice(0, fence.index) + content.slice(fence.index + fence[0].length)).trim();
+            return result;
+        }
+
+        result.text = content.slice(0, fence.index).trim();
+        if (Array.isArray(parsed.blocks)) {
+            result.blocks = parsed.blocks.filter(function (b) { return b && b.type; });
+        }
+        if (Array.isArray(parsed.quickReplies)) {
+            result.quickReplies = parsed.quickReplies;
+        }
+        return result;
+    }
 
     /**
      * Minimal, escape-first markdown. Lists matter here: hair guidance is

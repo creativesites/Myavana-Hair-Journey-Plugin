@@ -1,0 +1,403 @@
+/* ==========================================================================
+   Mobile bottom sheets + Mya launcher placement
+
+   Loaded last (see Assets.php). On phones every drawer, off-canvas panel,
+   modal, picker and confirm dialog becomes a bottom sheet that:
+     - sits above the mobile tab bar (which is z-index 99) so its action
+       buttons are never covered,
+     - keeps its action row clear of the home indicator (safe-area inset),
+     - and hides the Mya launcher underneath it.
+
+   The components being reshaped are styled by several older, page-scoped
+   stylesheets (".myavana-goals-v2-page #goalOffcanvas.offcanvas-hjn" etc.)
+   whose specificity a plain selector can't beat, so the geometry rules below
+   use !important. That is deliberate and limited to this file.
+   ========================================================================== */
+
+:root {
+    --myavana-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --myavana-tabbar-h: calc(72px + env(safe-area-inset-bottom, 0px));
+    --myavana-sheet-radius: 22px;
+    --myavana-sheet-max-h: min(92dvh, calc(100dvh - 16px));
+    --myavana-sheet-shadow: 0 -14px 48px rgba(34, 35, 35, 0.24);
+    --myavana-sheet-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* One stacking scheme for every sheet, all above the tab bar (99). */
+    --myavana-z-sheet-overlay: 10490;
+    --myavana-z-sheet: 10500;
+    --myavana-z-sheet-nested: 10600;
+    --myavana-z-sheet-confirm: 10700;
+}
+
+@keyframes myavanaSheetUp {
+    from { transform: translate3d(0, 100%, 0); }
+    to   { transform: translate3d(0, 0, 0); }
+}
+
+/* Tab bar: clear the home indicator. */
+@media (max-width: 991px) {
+    .myavana-next-mobile-nav {
+        height: var(--myavana-tabbar-h);
+        padding-bottom: var(--myavana-safe-bottom);
+    }
+}
+
+/* ==========================================================================
+   Mya launcher: a small, quiet round button above the tab bar instead of a
+   wide pill sitting on top of it. Hidden by the widget itself while a panel
+   is open; sheets also stack above it (z-index 98 < sheets).
+   ========================================================================== */
+@media (max-width: 991px) {
+    body .mya-launcher {
+        bottom: calc(var(--myavana-tabbar-h) + 12px) !important;
+        left: 12px !important;
+        right: auto !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        z-index: 98 !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+    }
+
+    body .mya-launcher.is-right {
+        left: auto !important;
+        right: 12px !important;
+    }
+
+    /* "Mya" label and "AI" badge: the logo alone is enough on a phone.
+       (The logo is itself a <span class="mya-logo-badge">, so keep that one.) */
+    body .mya-launcher > span:not(.mya-logo-badge) {
+        display: none !important;
+    }
+
+    body .mya-launcher:not(.is-morphed) {
+        opacity: 0.92;
+    }
+}
+
+/* ==========================================================================
+   Phones: everything becomes a bottom sheet
+   ========================================================================== */
+@media (max-width: 767px) {
+
+    /* ---- Drawers / off-canvas panels ------------------------------------ */
+    .offcanvas-hjn,
+    .myavana-goals-v2-page .myavana-gv2-drawer,
+    .myavana-routines-v2-page .myavana-rv2-drawer,
+    .myavana-drawer {
+        position: fixed !important;
+        top: auto !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        inset-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: var(--myavana-sheet-max-h) !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+        box-shadow: var(--myavana-sheet-shadow) !important;
+        z-index: var(--myavana-z-sheet) !important;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden !important;
+        /* Parked below the viewport with room for the upward shadow. */
+        transform: translate3d(0, calc(100% + 96px), 0) !important;
+        transition: transform 0.32s var(--myavana-sheet-ease),
+                    opacity 0.2s ease !important;
+    }
+
+    .offcanvas-hjn.is-open,
+    .offcanvas-hjn.active,
+    .myavana-goals-v2-page .myavana-gv2-drawer.is-open,
+    .myavana-routines-v2-page .myavana-rv2-drawer.is-open,
+    .myavana-drawer.active,
+    .myavana-drawer-backdrop.active + .myavana-drawer {
+        transform: translate3d(0, 0, 0) !important;
+    }
+
+    /* Detail drawers keep one height so switching tabs doesn't resize them. */
+    .myavana-goals-v2-page .myavana-gv2-drawer,
+    .myavana-routines-v2-page .myavana-rv2-drawer {
+        height: min(88dvh, 760px) !important;
+    }
+
+    /* Off-canvas drawers sit above their own overlay (999999). */
+    .offcanvas-hjn {
+        z-index: 1000000 !important;
+    }
+
+    /* Grab handle. */
+    .offcanvas-hjn::before,
+    .myavana-goals-v2-page .myavana-gv2-drawer::before,
+    .myavana-routines-v2-page .myavana-rv2-drawer::before,
+    .myavana-drawer::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 40px;
+        height: 4px;
+        margin-left: -20px;
+        border-radius: 2px;
+        background: rgba(128, 128, 128, 0.45);
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    /* Overlays behind the sheets. */
+    .myavana-goals-v2-page .myavana-gv2-overlay,
+    .myavana-routines-v2-page .myavana-rv2-overlay,
+    .myavana-drawer-backdrop {
+        z-index: var(--myavana-z-sheet-overlay) !important;
+    }
+
+    /* Scrollable regions inside sheets. */
+    .offcanvas-content-hjn,
+    .myavana-goals-v2-page .drawer-scroll,
+    .myavana-routines-v2-page .myavana-rv2-drawer-body,
+    .myavana-routines-v2-page .myavana-rv2-session-body,
+    .myavana-drawer-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    /* ---- Action rows: always clear of the home indicator ----------------- */
+    .myavana-goals-v2-page .drawer-foot,
+    .myavana-routines-v2-page .myavana-rv2-drawer-foot,
+    .myavana-routines-v2-page .myavana-rv2-session-foot,
+    .myavana-drawer-footer {
+        flex: 0 0 auto;
+        padding-bottom: calc(14px + var(--myavana-safe-bottom)) !important;
+    }
+
+    /* Composer forms (goal / routine / entry): the action row lives inside
+       the scrolling content, so pin it to the bottom of the sheet. */
+    .offcanvas-content-hjn {
+        padding: 20px 20px 0 !important;
+    }
+
+    .offcanvas-content-hjn .form-actions-hjn {
+        position: sticky;
+        bottom: 0;
+        z-index: 3;
+        margin: 8px -20px 0 !important;
+        padding: 14px 20px calc(14px + var(--myavana-safe-bottom)) !important;
+        background: #fdfbf9;
+        border-top: 1px solid #e5e2de;
+    }
+
+    /* ---- Nested sheets that open from inside a drawer -------------------- */
+    .myavana-routines-v2-page .myavana-rv2-session,
+    .myavana-routines-v2-page .myavana-rv2-picker,
+    .myavana-routines-v2-page .myavana-rv2-template-preview,
+    .myavana-goals-v2-page .myavana-gv2-checkin {
+        z-index: var(--myavana-z-sheet-nested) !important;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker-overlay {
+        z-index: var(--myavana-z-sheet-nested) !important;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker {
+        z-index: calc(var(--myavana-z-sheet-nested) + 1) !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        transform: none !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+        padding-bottom: calc(26px + var(--myavana-safe-bottom)) !important;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-picker.is-open {
+        bottom: 0 !important;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-session-sheet,
+    .myavana-routines-v2-page .myavana-rv2-picker-sheet,
+    .myavana-routines-v2-page .myavana-rv2-template-preview-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: var(--myavana-sheet-max-h) !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+    }
+
+    .myavana-routines-v2-page .myavana-rv2-picker-sheet {
+        padding-bottom: calc(30px + var(--myavana-safe-bottom)) !important;
+    }
+
+    /* Check-in: a centred card on desktop, a bottom sheet here. */
+    .myavana-goals-v2-page .myavana-gv2-checkin .box {
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: var(--myavana-sheet-max-h) !important;
+        margin: 0 !important;
+        overflow-y: auto !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+        padding-bottom: calc(20px + var(--myavana-safe-bottom)) !important;
+        animation: myavanaSheetUp 0.32s var(--myavana-sheet-ease);
+    }
+
+    /* ---- Confirm dialogs -------------------------------------------------- */
+    .myavana-gv2-confirm,
+    .myavana-rv2-confirm {
+        z-index: var(--myavana-z-sheet-confirm) !important;
+        place-items: end stretch !important;
+        padding: 0 !important;
+    }
+
+    .myavana-gv2-confirm-card,
+    .myavana-rv2-confirm-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+        padding-bottom: calc(24px + var(--myavana-safe-bottom)) !important;
+        animation: myavanaSheetUp 0.32s var(--myavana-sheet-ease);
+    }
+
+    .myavana-gv2-confirm-actions {
+        justify-content: stretch;
+    }
+
+    .myavana-gv2-confirm-actions button {
+        flex: 1;
+    }
+
+    /* ---- Modals (community, share, saved posts, insights, welcome...) ---- */
+    .myavana-modal,
+    .myavana-share-modal,
+    .myavana-ci-collections-modal,
+    .myavana-ci-analytics-modal,
+    .myavana-ci-report-modal,
+    .myavana-saved-posts-modal,
+    .myavana-entry-modal-overlay,
+    .myavana-modal-overlay,
+    .myavana-modal-backdrop {
+        align-items: flex-end !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    .myavana-welcome-modal {
+        place-items: end stretch !important;
+        padding: 0 !important;
+    }
+
+    .myavana-modal-content,
+    .myavana-share-modal-content,
+    .myavana-ci-collections-modal-content,
+    .myavana-ci-analytics-modal-content,
+    .myavana-ci-report-modal-content,
+    .myavana-saved-posts-modal-content,
+    .myavana-entry-modal-content,
+    .myavana-welcome-modal-card,
+    .myavana-modal-backdrop .myavana-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: var(--myavana-sheet-max-h) !important;
+        margin: 0 !important;
+        border-radius: var(--myavana-sheet-radius) var(--myavana-sheet-radius) 0 0 !important;
+        transform: none !important;
+        animation: myavanaSheetUp 0.32s var(--myavana-sheet-ease) !important;
+    }
+
+    /* The smart-entry dialog is a bare .myavana-modal inside a backdrop. */
+    .myavana-modal-backdrop .myavana-modal {
+        display: block;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding: 28px 20px calc(24px + var(--myavana-safe-bottom)) !important;
+    }
+
+    /* Bodies scroll inside the sheet; footers stay clear of the home indicator. */
+    .myavana-modal-body {
+        max-height: calc(var(--myavana-sheet-max-h) - 150px) !important;
+    }
+
+    .myavana-saved-posts-body {
+        max-height: calc(var(--myavana-sheet-max-h) - 74px) !important;
+    }
+
+    .myavana-modal-footer {
+        padding-bottom: calc(18px + var(--myavana-safe-bottom)) !important;
+    }
+
+    .myavana-entry-form-container {
+        padding-bottom: calc(24px + var(--myavana-safe-bottom)) !important;
+    }
+
+    .myavana-welcome-modal-card {
+        padding-bottom: calc(28px + var(--myavana-safe-bottom)) !important;
+    }
+
+    /* Grab handle on modal sheets. */
+    .myavana-modal-content,
+    .myavana-share-modal-content,
+    .myavana-ci-collections-modal-content,
+    .myavana-ci-analytics-modal-content,
+    .myavana-ci-report-modal-content,
+    .myavana-saved-posts-modal-content,
+    .myavana-entry-modal-content,
+    .myavana-welcome-modal-card {
+        position: relative;
+    }
+
+    .myavana-modal-content::before,
+    .myavana-share-modal-content::before,
+    .myavana-ci-collections-modal-content::before,
+    .myavana-ci-analytics-modal-content::before,
+    .myavana-ci-report-modal-content::before,
+    .myavana-saved-posts-modal-content::before,
+    .myavana-entry-modal-content::before,
+    .myavana-welcome-modal-card::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 40px;
+        height: 4px;
+        margin-left: -20px;
+        border-radius: 2px;
+        background: rgba(128, 128, 128, 0.45);
+        z-index: 5;
+        pointer-events: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .offcanvas-hjn,
+    .myavana-goals-v2-page .myavana-gv2-drawer,
+    .myavana-routines-v2-page .myavana-rv2-drawer,
+    .myavana-drawer {
+        transition-duration: 0.01ms !important;
+    }
+
+    .myavana-modal-content,
+    .myavana-share-modal-content,
+    .myavana-ci-collections-modal-content,
+    .myavana-ci-analytics-modal-content,
+    .myavana-ci-report-modal-content,
+    .myavana-saved-posts-modal-content,
+    .myavana-entry-modal-content,
+    .myavana-welcome-modal-card,
+    .myavana-modal-backdrop .myavana-modal,
+    .myavana-gv2-confirm-card,
+    .myavana-rv2-confirm-card,
+    .myavana-goals-v2-page .myavana-gv2-checkin .box {
+        animation: none !important;
+    }
+}

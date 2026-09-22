@@ -1398,6 +1398,20 @@ const HJN = window.HJN = {
         }, 3200);
     },
 
+    /* Assigning a URL that only differs by fragment (or not at all) never reloads the page,
+       and Routine.selectTab() has already rewritten the address bar by this point. */
+    _navigateOrReload(url) {
+        const target = url.toString();
+        if (target === window.location.href) {
+            window.location.reload();
+        } else {
+            window.location.assign(target);
+            if (target.split('#')[0] === window.location.href.split('#')[0]) {
+                window.location.reload();
+            }
+        }
+    },
+
     /* ── Form Submission ──────────────────────────*/
     _submitForm(formId, loaderId) {
         const form   = document.getElementById(formId);
@@ -1539,7 +1553,7 @@ const HJN = window.HJN = {
                             url.searchParams.delete('template');
                             url.searchParams.delete('title');
                             url.hash = '#routine';
-                            window.location.href = url.toString();
+                            this._navigateOrReload(url);
                         } else {
                             const currentPath = window.location.pathname;
                             const isGoalsUrl = currentPath.includes('/goals');
@@ -1549,7 +1563,7 @@ const HJN = window.HJN = {
                                 url.searchParams.delete('category');
                                 url.searchParams.delete('template');
                                 url.searchParams.delete('title');
-                                window.location.href = url.toString();
+                                this._navigateOrReload(url);
                             } else {
                                 const baseGoalsUrl = settings.goalsUrl || (window.location.origin + '/routine?tab=goals');
                                 const targetUrl = new URL(baseGoalsUrl, window.location.origin);
@@ -1558,7 +1572,7 @@ const HJN = window.HJN = {
                                 targetUrl.searchParams.delete('category');
                                 targetUrl.searchParams.delete('template');
                                 targetUrl.searchParams.delete('title');
-                                window.location.href = targetUrl.toString();
+                                this._navigateOrReload(targetUrl);
                             }
                         }
                     }, 280);
@@ -1585,23 +1599,27 @@ const HJN = window.HJN = {
                             url.searchParams.delete('template');
                             url.searchParams.delete('title');
                             url.hash = '#routine';
-                            window.location.href = url.toString();
+                            this._navigateOrReload(url);
                         } else {
                             const url = new URL(window.location.href);
                             url.searchParams.delete('create');
                             url.searchParams.delete('category');
                             url.searchParams.delete('template');
                             url.searchParams.delete('title');
-                            window.location.href = url.toString();
+                            this._navigateOrReload(url);
                         }
                     }, 280);
                     return;
                 }
 
                 if (isEntryCreate) {
+                    setTimeout(() => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('create');
+                        url.searchParams.delete('category');
                         url.searchParams.delete('template');
                         url.searchParams.delete('title');
-                        window.location.href = url.toString();
+                        this._navigateOrReload(url);
                     }, 280);
                     return;
                 }

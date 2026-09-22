@@ -60,6 +60,11 @@ if (!function_exists('myavana_normalize_routine_reminder_days')) {
 
 if (!function_exists('myavana_award_progress_milestones')) {
     function myavana_award_progress_milestones($user_id, $entity_type, $entity_key, $previous_progress, $current_progress, $reference_id = null) {
+        // Gamification hasn't been ported to this plugin yet; saving must not fatal without it.
+        if (!function_exists('myavana_award_points') || !class_exists('Myavana_Gamification')) {
+            return;
+        }
+
         $milestones = [25, 50, 75, 100];
 
         foreach ($milestones as $milestone) {
@@ -943,14 +948,16 @@ function myavana_add_goal() {
     error_log(sprintf('[MYAVANA] Goal added: User=%d, Title=%s', $user_id, $title));
 
     $goal_index = count($goals) - 1;
-    myavana_award_points(
-        $user_id,
-        Myavana_Gamification::get_reward_value('goal_created', 20),
-        'Hair goal created',
-        'goal',
-        $goal_index,
-        'goal_created:' . $new_goal['goal_key']
-    );
+    if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+        myavana_award_points(
+            $user_id,
+            Myavana_Gamification::get_reward_value('goal_created', 20),
+            'Hair goal created',
+            'goal',
+            $goal_index,
+            'goal_created:' . $new_goal['goal_key']
+        );
+    }
     if ($progress > 0) {
         myavana_award_progress_milestones($user_id, 'goal', $new_goal['goal_key'], 0, $progress, $goal_index);
     }
@@ -1138,14 +1145,16 @@ function myavana_add_routine() {
     error_log(sprintf('[MYAVANA] Routine added: User=%d, Name=%s', $user_id, $name));
 
     $routine_index = count($routines) - 1;
-    myavana_award_points(
-        $user_id,
-        Myavana_Gamification::get_reward_value('routine_created', 15),
-        'Hair routine created',
-        'routine',
-        $routine_index,
-        'routine_created:' . $new_routine['routine_key']
-    );
+    if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+        myavana_award_points(
+            $user_id,
+            Myavana_Gamification::get_reward_value('routine_created', 15),
+            'Hair routine created',
+            'routine',
+            $routine_index,
+            'routine_created:' . $new_routine['routine_key']
+        );
+    }
 
     wp_send_json_success([
         'message' => 'Routine added successfully!',

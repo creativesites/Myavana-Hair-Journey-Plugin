@@ -157,6 +157,17 @@ class Assets {
             'myavana-social-feed-css',
         ], self::ver('assets/css/legacy-harmony.css'));
 
+        // Phones: every drawer/modal becomes a bottom sheet above the tab bar,
+        // and the Mya launcher moves out of the way. Must load after every
+        // stylesheet whose components it reshapes.
+        wp_enqueue_style('myavana-mobile-sheets', MYAVANA_NEXT_URL . 'assets/css/mobile-sheets.css', [
+            'myavana-next-layout',
+            'myavana-next-components',
+            'myavana-legacy-harmony',
+            'myavana-entry-selector-css',
+            'myavana-onboarding-wizard',
+        ], self::ver('assets/css/mobile-sheets.css'));
+
         wp_enqueue_script('myavana-lucide', 'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js', [], '0.469.0', true);
         wp_enqueue_script('myavana-routines-page-redesign', MYAVANA_NEXT_URL . 'assets/js/routines-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/routines-page-redesign.js'), true);
         wp_enqueue_script('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/js/goals-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/goals-page-redesign.js'), true);
