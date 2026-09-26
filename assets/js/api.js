@@ -89,6 +89,7 @@ MyavanaNext.API = (function() {
             const json = await res.json();
 
             if (!res.ok || json.success === false) {
+                console.warn('[MYAVANA API Response]', { status: res.status, endpoint, json });
                 if ((res.status === 401 || res.status === 403) && !isPublicEndpoint(endpoint)) {
                     handleSessionExpired();
                     const expiredErr = new Error('Your session has expired — please sign in again.');
@@ -106,9 +107,13 @@ MyavanaNext.API = (function() {
                 throw err;
             }
 
+            if (!json.data) {
+                console.warn('[MYAVANA API] No data in response for endpoint:', endpoint, 'Response:', json);
+            }
+
             return json.data;
         } catch (err) {
-            console.error('[MYAVANA API Error]', err);
+            console.error('[MYAVANA API Error]', { endpoint, error: err.message, details: err });
             throw err;
         }
     }
