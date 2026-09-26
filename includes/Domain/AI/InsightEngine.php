@@ -28,8 +28,18 @@ class InsightEngine {
         $entries7d = (int) ($context['journal_entries_last_7_days'] ?? 0);
         $washDays = (int) ($context['wash_days_last_7_days'] ?? 0);
         $completion = (int) ($context['todays_routine_completion_percent'] ?? 0);
-        $streak = (int) ($context['current_streak_days'] ?? 0);
         $dayCount = (int) ($context['day_count_on_journey'] ?? 1);
+        $totalEntries = (int) ($context['total_journal_entries'] ?? $entries7d);
+
+        if ($totalEntries === 0 || ($dayCount <= 3 && $entries7d === 0)) {
+            return [
+                'title' => __('Welcome to Day 1 of your journey', 'myavana-hair-journey-next'),
+                'summary' => __("Welcome to MYAVANA! Start by capturing your Day 1 baseline photo and checking off today's routine.", 'myavana-hair-journey-next'),
+                'recommendation' => __('Snap a quick baseline photo to begin tracking your true curl health and length over time.', 'myavana-hair-journey-next'),
+                'confidence' => 'high',
+                'supporting_signals' => [__('Day 1 of your personalized journey', 'myavana-hair-journey-next')],
+            ];
+        }
 
         if ($entries7d === 0) {
             return [

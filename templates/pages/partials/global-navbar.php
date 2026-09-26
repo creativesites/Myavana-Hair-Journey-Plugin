@@ -30,7 +30,7 @@ $is_journey_page = $active_page === 'journey' && !$is_goals_page && !$is_routine
 <nav class="myavana-luxury-nav myavana-global-navbar" id="myavanaGlobalNavbar">
     <div class="myavana-luxury-nav-container">
         <a href="<?php echo esc_url($home_url); ?>" class="myavana-luxury-logo">
-            <img src="<?php echo esc_url(MYAVANA_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="Myavana" class="myavana-logo" />
+            <img src="<?php echo esc_url((defined('MYAVANA_NEXT_URL') ? MYAVANA_NEXT_URL : plugin_dir_url(dirname(__DIR__, 2))) . 'assets/images/myavana-primary-logo.png'); ?>" alt="Myavana" class="myavana-logo" />
         </a>
 
         <?php if (!$is_logged_in): ?>
@@ -55,8 +55,8 @@ $is_journey_page = $active_page === 'journey' && !$is_goals_page && !$is_routine
                 <?php endif; ?>
                 
                 <div style="display: flex; gap: 4px; margin-left: 12px; padding-left: 12px; border-left: 1px solid rgba(0,0,0,0.1);">
-                    <a href="#" class="myavana-luxury-nav-link myavana-nav-utility-link" onclick="createGoal(); return false;">+ Goal</a>
-                    <a href="#" class="myavana-luxury-nav-link myavana-nav-utility-link myavana-nav-smart-entry" onclick="createEntry();">+ New Entry</a>
+                    <button type="button" class="myavana-luxury-nav-link myavana-nav-utility-link" onclick="createGoal();">+ Goal</button>
+                    <button type="button" class="myavana-luxury-nav-link myavana-nav-utility-link myavana-nav-smart-entry" onclick="createEntry();">+ New Entry</button>
                 </div>
             </div>
 

@@ -113,7 +113,7 @@ MyavanaNext.Journey = (function() {
         const s = data.stats;
         el.innerHTML = [
             statCard(s.currentLength ? `${s.currentLength}"` : '—', 'Current length'),
-            statCard(`${s.healthScore}`, 'Health score', true),
+            statCard(`${s.careIndex !== undefined ? s.careIndex : s.healthScore}%`, 'Care consistency', true),
             statCard(`${s.totalEntries}`, 'Journey entries'),
             statCard(`${s.photoCount}`, 'Photos logged'),
         ].join('');
@@ -200,10 +200,16 @@ MyavanaNext.Journey = (function() {
 
                 ${entry.notes ? `<p data-role="notes-display">${escapeHtml(entry.notes)}</p>` : ''}
 
-                ${(entry.photos || []).length ? `
+                ${(() => {
+                    // Older entries used WordPress's post-thumbnail mechanism
+                    // instead of the entry_photos meta array — fall back to
+                    // it so those entries still show their photo here.
+                    const cardPhotos = (entry.photos || []).length ? entry.photos : (entry.featuredImage ? [entry.featuredImage] : []);
+                    return cardPhotos.length ? `
                 <div class="myavana-timeline-card-photos">
-                    ${entry.photos.map((p) => `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`).join('')}
-                </div>` : ''}
+                    ${cardPhotos.map((p) => `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`).join('')}
+                </div>` : '';
+                })()}
 
                 ${entry.changeDescription ? `
                 <div class="myavana-timeline-card-change">
@@ -558,16 +564,16 @@ MyavanaNext.Journey = (function() {
         preview.style.backgroundImage = img ? `url('${img}')` : 'none';
 
         const destinations = [
-            ['Copy link', 'copy_link'],
-            ['Download image', 'download'],
-            ['MYAVANA community', 'community'],
-            ['Instagram story', 'instagram'],
-            ['Send to my stylist', 'stylist'],
+            ['Copy link', 'copy_link', false],
+            ['Download image', 'download', false],
+            ['MYAVANA community', 'community', true],
+            ['Instagram story', 'instagram', true],
+            ['Send to my stylist', 'stylist', true],
         ];
-        container.querySelector('#journey-share-destinations').innerHTML = destinations.map(([label, key]) => `
-            <button type="button" data-dest="${key}">${escapeHtml(label)}<span>›</span></button>
+        container.querySelector('#journey-share-destinations').innerHTML = destinations.map(([label, key, comingSoon]) => `
+            <button type="button" data-dest="${key}"${comingSoon ? ' disabled aria-disabled="true"' : ''}>${escapeHtml(label)}<span>${comingSoon ? 'Soon' : '›'}</span></button>
         `).join('');
-        container.querySelectorAll('[data-dest]').forEach((btn) => {
+        container.querySelectorAll('[data-dest]:not(:disabled)').forEach((btn) => {
             btn.addEventListener('click', () => handleShareDestination(btn.getAttribute('data-dest')));
         });
 
@@ -625,15 +631,7 @@ MyavanaNext.Journey = (function() {
             a.download = 'myavana-entry.jpg';
             a.target = '_blank';
             a.click();
-            return;
         }
-
-        if (key === 'community') {
-            MyavanaNext.API.showToast('Sharing to the community feed is coming soon.', 'info');
-            return;
-        }
-
-        MyavanaNext.API.showToast('This destination is coming soon.', 'info');
     }
 
     function escapeHtml(str) {

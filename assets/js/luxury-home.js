@@ -579,6 +579,11 @@
         loadEntryForm: function() {
             const ajaxData = window.myavanaLuxuryData || {};
 
+            if (!ajaxData.isLoggedIn) {
+                this.showEntryFormFallback();
+                return;
+            }
+
             $.ajax({
                 url: ajaxData.ajaxUrl || window.ajaxurl || '/wp-admin/admin-ajax.php',
                 type: 'POST',
@@ -613,10 +618,10 @@
                         The entry form is currently loading. You can also access it through:
                     </p>
                     <div class="myavana-entry-form-fallback-actions">
-                        <a href="/members/admin/hair_profile/" class="myavana-luxury-btn-primary">
+                        <a href="#profile" class="myavana-luxury-btn-primary" data-tab="profile" data-home-nav>
                             <i class="fas fa-user"></i> Profile Page
                         </a>
-                        <a href="/hair-journey/" class="myavana-luxury-btn-secondary">
+                        <a href="#journey" class="myavana-luxury-btn-secondary" data-tab="journey" data-home-nav>
                             <i class="fas fa-book"></i> My Hair Timeline
                         </a>
                     </div>
@@ -667,11 +672,11 @@
 
         // Redirect functions
         redirectToTimeline: function() {
-            window.location.href = '/hair-journey/';
+            window.location.hash = '#journey';
         },
 
         redirectToAnalytics: function() {
-            window.location.href = '/members/admin/hair_insights/';
+            window.location.hash = '#routine';
         },
 
         // Check if user is logged in
@@ -690,24 +695,45 @@
 
         // Fallback modal system
         showModalFallback: function(modalType) {
-            let message = '';
-            switch (modalType) {
-                case 'register':
-                    message = 'Registration modal would open here. Please ensure the MYAVANA authentication system is loaded.';
-                    break;
-                case 'login':
-                    message = 'Login modal would open here. Please ensure the MYAVANA authentication system is loaded.';
-                    break;
-                case 'new-entry':
-                    message = 'New entry modal would open here. Please ensure the MYAVANA entry system is loaded.';
-                    break;
-                default:
-                    message = `${modalType} modal would open here.`;
+            if (modalType === 'register' || modalType === 'signup') {
+                if (window.MyavanaNext && window.MyavanaNext.Auth) {
+                    window.MyavanaNext.Auth.open('signup');
+                    return;
+                }
+                const signupBtn = document.querySelector('[data-open-auth="signup"]');
+                if (signupBtn) {
+                    signupBtn.click();
+                    return;
+                }
+                window.location.hash = '#auth';
+                return;
             }
 
-            // Create a simple notification
-            this.showNotification(message, 'info');
+            if (modalType === 'login' || modalType === 'signin') {
+                if (window.MyavanaNext && window.MyavanaNext.Auth) {
+                    window.MyavanaNext.Auth.open('signin');
+                    return;
+                }
+                const signinBtn = document.querySelector('[data-open-auth="signin"]');
+                if (signinBtn) {
+                    signinBtn.click();
+                    return;
+                }
+                window.location.hash = '#auth';
+                return;
+            }
+
+            if (modalType === 'new-entry') {
+                if (window.MyavanaNext && window.MyavanaNext.SmartEntry && typeof window.MyavanaNext.SmartEntry.open === 'function') {
+                    window.MyavanaNext.SmartEntry.open();
+                    return;
+                }
+            }
+
+            // If an unhandled modal type is requested, show a gentle toast instead of a debug placeholder
+            this.showNotification('Loading requested view...', 'info');
         },
+
 
         // Simple notification system
         showNotification: function(message, type = 'info') {
@@ -816,6 +842,11 @@
 
         // Load onboarding overlay
         loadOnboardingOverlay: function() {
+            if (!window.myavanaLuxuryData?.isLoggedIn) {
+                this.fallbackOnboarding();
+                return;
+            }
+
             $.ajax({
                 url: window.myavanaLuxuryData?.ajaxUrl || '/wp-admin/admin-ajax.php',
                 type: 'POST',
@@ -886,7 +917,11 @@
 
         // Skip onboarding
         skipOnboarding: function() {
-            // Mark as completed but skipped
+            if (!window.myavanaLuxuryData?.isLoggedIn) {
+                this.closeOnboarding();
+                return;
+            }
+
             $.ajax({
                 url: window.myavanaLuxuryData?.ajaxUrl || '/wp-admin/admin-ajax.php',
                 type: 'POST',
@@ -904,7 +939,11 @@
 
         // Complete onboarding
         completeOnboarding: function() {
-            // Mark as completed
+            if (!window.myavanaLuxuryData?.isLoggedIn) {
+                this.closeOnboarding();
+                return;
+            }
+
             $.ajax({
                 url: window.myavanaLuxuryData?.ajaxUrl || '/wp-admin/admin-ajax.php',
                 type: 'POST',

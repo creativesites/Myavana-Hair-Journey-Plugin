@@ -177,12 +177,14 @@ function myavana_luxury_home_view() {
         ];
     }
 
+    // These links stay inside Journey Next. The live legacy plugin remains a
+    // backup, rather than becoming an accidental destination from the new app.
     $home_urls = [
-        'timeline' => home_url('/hair-journey/'),
-        'goals' => home_url('/goals/'),
-        'routines' => home_url('/routines/'),
-        'community' => home_url('/community/'),
-        'insights' => home_url('/hair-insights/'),
+        'timeline' => '#journey',
+        'goals' => '#routine',
+        'routines' => '#routine',
+        'community' => '#community',
+        'insights' => '#journey',
     ];
 
     $goal_preview = array_slice($active_goals, 0, 3);
@@ -209,22 +211,37 @@ function myavana_luxury_home_view() {
 
     
     // Enqueue Luxury Home assets
-    $css_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.2.0';
-    $js_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.2.0';
+    $css_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.0.2';
+    $js_version = defined('MYAVANA_NEXT_VERSION') ? MYAVANA_NEXT_VERSION : '3.0.2';
     $next_url = defined('MYAVANA_NEXT_URL') ? MYAVANA_NEXT_URL : plugin_dir_url(dirname(dirname(dirname(__FILE__))));
 
     wp_enqueue_style('myavana-luxury-home', $next_url . 'assets/css/luxury-home.css', [], $css_version);
     wp_enqueue_script('myavana-luxury-home', $next_url . 'assets/js/luxury-home.js', ['jquery'], $js_version, true);
 
+    if (file_exists(MYAVANA_NEXT_PATH . 'assets/css/free-hair-analysis.css')) {
+        wp_enqueue_style('myavana-free-analysis', $next_url . 'assets/css/free-hair-analysis.css', [], $css_version);
+    }
+    if (file_exists(MYAVANA_NEXT_PATH . 'assets/js/free-hair-analysis.js')) {
+        wp_enqueue_script('myavana-free-analysis', $next_url . 'assets/js/free-hair-analysis.js', ['jquery'], $js_version, true);
+    }
+
+    // Enqueue AI Analysis Modal for logged-in users
+    if (is_user_logged_in()) {
+        $ai_modal_version = defined('WP_DEBUG') && WP_DEBUG ? time() : '1.0.2';
+        if (file_exists(MYAVANA_NEXT_PATH . 'assets/js/ai-analysis-modal.js')) {
+            wp_enqueue_script('myavana-ai-analysis-modal', $next_url . 'assets/js/ai-analysis-modal.js', ['jquery'], $ai_modal_version, true);
+            wp_localize_script('myavana-ai-analysis-modal', 'myavanaAjax', [
+                'ajaxurl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('myavana_profile_nonce')
+            ]);
+        }
+    }
+
     // Localize script with AJAX data
     wp_localize_script('myavana-luxury-home', 'myavanaLuxuryData', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('myavana_nonce'),
-        // Hair Journey doesn't do photo/AI hair analysis itself — that's a
-        // separate MYAVANA product. Single configurable destination for
-        // every "explore hair analysis" link on this page, so this URL
-        // never has to be hunted down and changed in multiple templates.
-        'hairAnalysisUrl' => get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer'),
+        'aiToolUrl' => get_option('myavana_next_hair_analysis_url', '#routine'),
         'isLoggedIn' => $is_logged_in,
         'currentUserId' => $is_logged_in ? $current_user->ID : 0,
         'currentUserName' => $is_logged_in ? $current_user->display_name : '',
@@ -244,7 +261,7 @@ function myavana_luxury_home_view() {
                     <!-- Non-logged-in Hero -->
                     <div class="myavana-luxury-hero-content">
                         <div class="myavana-luxury-hero-badge">
-                            ✨ Your Personalized Hair Care Journey
+                            Personalized Hair Care
                         </div>
                         <h1 class="myavana-luxury-hero-title">
                             Transform Your<br>
@@ -254,12 +271,10 @@ function myavana_luxury_home_view() {
                             Professional Hair Care, Personalized for You
                         </h2>
                         <p class="myavana-luxury-hero-description">
-                            Join thousands of women who've transformed their hair health with routines, tracking, and
-                            guidance built around their journey. Document your progress, follow a routine that fits
-                            your goals, and connect with a supportive community.
+                            Build a hair-care plan around your real goals, capture the changes you see, and learn what helps your hair thrive.
                         </p>
                         <div class="myavana-luxury-hero-actions">
-                            <a href="#" data-open-auth="signup" class="myavana-luxury-btn-primary">
+                            <a href="#auth" data-open-auth="signup" class="myavana-luxury-btn-primary">
                                 <i class="fas fa-sparkles"></i>
                                 Start Your Journey
                             </a>
@@ -278,16 +293,16 @@ function myavana_luxury_home_view() {
                         <!-- Global Stats -->
                         <div class="myavana-luxury-global-stats">
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">50K+</span>
-                                <span class="myavana-luxury-stat-label">Hair Journeys</span>
+                                <span class="myavana-luxury-stat-number">Your</span>
+                                <span class="myavana-luxury-stat-label">Personal Care Plan</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">98%</span>
-                                <span class="myavana-luxury-stat-label">Satisfaction Rate</span>
+                                <span class="myavana-luxury-stat-number">Private</span>
+                                <span class="myavana-luxury-stat-label">Progress Tracking</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <span class="myavana-luxury-stat-number">Daily</span>
-                                <span class="myavana-luxury-stat-label">Personalized Guidance</span>
+                                <span class="myavana-luxury-stat-number">Real</span>
+                                <span class="myavana-luxury-stat-label">Community Support</span>
                             </div>
                         </div>
                     </div>
@@ -297,14 +312,13 @@ function myavana_luxury_home_view() {
                         <?php if ($is_new_user && $user_stats['entries'] == 0): ?>
                             <!-- New User with No Entries -->
                             <div class="myavana-luxury-hero-badge">
-                                Welcome to MYAVANA, <?php echo esc_html($current_user->display_name); ?>! 🎉
-                            </div>
+                                Welcome to MYAVANA, <?php echo esc_html($current_user->display_name); ?></div>
                             <h1 class="myavana-luxury-hero-title">
                                 Let's Start Your<br>
                                 <span class="gradient-text">Hair Journey</span>
                             </h1>
                             <h2 class="myavana-luxury-hero-subtitle">
-                                Ready to start your personalized hair journey?
+                                Ready to transform your hair with personalized AI insights?
                             </h2>
                             <p class="myavana-luxury-hero-description">
                                 Let's get you started with a quick setup to understand your hair goals and create your first entry.
@@ -315,10 +329,10 @@ function myavana_luxury_home_view() {
                                     <i class="fas fa-rocket"></i>
                                     Start My Journey
                                 </button> -->
-                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['timeline']); ?>">
+                                <a class="myavana-luxury-btn-primary" href="#today" data-tab="today" data-home-nav>
                                     <i class="fas fa-rocket"></i>
                                     Start My Journey
-                                </a>
+                                </a> 
                                 <!-- <button class="myavana-luxury-btn-secondary" onclick="showMyavanaModal('new-entry')">
                                     <i class="fas fa-camera"></i>
                                     Quick Entry
@@ -327,7 +341,7 @@ function myavana_luxury_home_view() {
                         <?php else: ?>
                             <!-- Existing User -->
                             <div class="myavana-luxury-hero-badge">
-                                Welcome back, <?php echo esc_html($current_user->display_name); ?>! ✨
+                                Welcome back, <?php echo esc_html($current_user->display_name); ?>
                             </div>
                             <h1 class="myavana-luxury-hero-title">
                                 Your Hair<br>
@@ -358,13 +372,13 @@ function myavana_luxury_home_view() {
                                 <?php endif; ?>
                             </p>
                             <div class="myavana-luxury-hero-actions">
-                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['timeline']); ?>">
+                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['timeline']); ?>" data-tab="journey" data-home-nav>
                                     <i class="fas fa-camera"></i>
                                     My Hair Timeline
                                 </a>
-                                <button type="button" class="myavana-luxury-btn-secondary btn-open-kommunicate">
+                                <button type="button" class="myavana-luxury-btn-secondary btn-open-mya" data-action="open-mya-chat">
                                     <i class="fas fa-comment-dots"></i>
-                                    Chat with Concierge
+                                    Chat with Mya
                                 </button>
                             </div>
                         <?php endif; ?>
@@ -389,7 +403,7 @@ function myavana_luxury_home_view() {
 
                         <!-- Quick Actions Dashboard -->
                         <div class="myavana-luxury-quick-dashboard">
-                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['timeline']); ?>">
+                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['timeline']); ?>" data-tab="journey" data-home-nav>
                                 <div class="action-icon">
                                     <i class="fas fa-timeline"></i>
                                 </div>
@@ -398,7 +412,7 @@ function myavana_luxury_home_view() {
                                     <p>Review your latest entries</p>
                                 </div>
                             </a>
-                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['routines']); ?>">
+                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['routines']); ?>" data-tab="routine" data-routine-panel="routine" data-home-nav>
                                 <div class="action-icon">
                                     <i class="fas fa-repeat"></i>
                                 </div>
@@ -407,7 +421,7 @@ function myavana_luxury_home_view() {
                                     <p>Stay consistent with your plan</p>
                                 </div>
                             </a>
-                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['goals']); ?>">
+                            <a class="quick-action-card" href="<?php echo esc_url($home_urls['goals']); ?>" data-tab="routine" data-routine-panel="goals" data-home-nav>
                                 <div class="action-icon">
                                     <i class="fas fa-bullseye"></i>
                                 </div>
@@ -451,11 +465,11 @@ function myavana_luxury_home_view() {
                                 </div>
                             </div>
                             <div class="myavana-luxury-member-actions">
-                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['community']); ?>">
+                                <a class="myavana-luxury-btn-primary" href="<?php echo esc_url($home_urls['community']); ?>" data-tab="community" data-home-nav>
                                     <i class="fas fa-users"></i>
                                     Community
                                 </a>
-                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['insights']); ?>">
+                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['insights']); ?>" data-tab="journey" data-home-nav>
                                     <i class="fas fa-chart-line"></i>
                                     Hair Insights
                                 </a>
@@ -468,7 +482,7 @@ function myavana_luxury_home_view() {
                                     <span class="eyebrow">Goals</span>
                                     <h3>Active goals</h3>
                                 </div>
-                                <a href="<?php echo esc_url($home_urls['goals']); ?>">View all</a>
+                                <a href="<?php echo esc_url($home_urls['goals']); ?>" data-tab="routine" data-routine-panel="goals" data-home-nav>View all</a>
                             </div>
 
                             <?php if (!empty($goal_preview)): ?>
@@ -500,7 +514,7 @@ function myavana_luxury_home_view() {
                             <?php endif; ?>
 
                             <div class="myavana-luxury-member-card-actions">
-                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['goals']); ?>?create=goal">Add Goal</a>
+                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['goals']); ?>" data-tab="routine" data-routine-panel="goals" data-home-nav>Add Goal</a>
                             </div>
                         </article>
 
@@ -510,7 +524,7 @@ function myavana_luxury_home_view() {
                                     <span class="eyebrow">Routines</span>
                                     <h3>Current routines</h3>
                                 </div>
-                                <a href="<?php echo esc_url($home_urls['routines']); ?>">View all</a>
+                                <a href="<?php echo esc_url($home_urls['routines']); ?>" data-tab="routine" data-routine-panel="routine" data-home-nav>View all</a>
                             </div>
 
                             <?php if (!empty($routine_preview)): ?>
@@ -544,7 +558,7 @@ function myavana_luxury_home_view() {
                             <?php endif; ?>
 
                             <div class="myavana-luxury-member-card-actions">
-                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['routines']); ?>?create=routine">Add Routine</a>
+                                <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['routines']); ?>" data-tab="routine" data-routine-panel="routine" data-home-nav>Add Routine</a>
                             </div>
                         </article>
                     </div>
@@ -554,7 +568,8 @@ function myavana_luxury_home_view() {
 
 
 
-            <!-- Features Section (rendered for both logged-in and logged-out visitors) -->
+        <?php if (!$is_logged_in): ?>
+            <!-- Public product story -->
             <section class="myavana-luxury-features" id="features">
                 <div class="myavana-luxury-features-container">
                     <div class="myavana-luxury-section-header">
@@ -564,7 +579,7 @@ function myavana_luxury_home_view() {
                             <span class="gradient-text">Beautiful Hair</span>
                         </h2>
                         <p class="myavana-luxury-section-description">
-                            Our comprehensive platform combines thoughtful tracking with expert knowledge
+                            Our comprehensive platform combines cutting-edge AI technology with expert knowledge
                             to give you personalized hair care like never before.
                         </p>
                     </div>
@@ -572,15 +587,15 @@ function myavana_luxury_home_view() {
                     <div class="myavana-luxury-features-grid">
                         <div class="myavana-luxury-feature-card">
                             <div class="myavana-luxury-feature-icon">
-                                <i class="fas fa-book-open"></i>
+                                <i class="fas fa-magic"></i>
                             </div>
-                            <h3 class="myavana-luxury-feature-title">Daily Hair Journal</h3>
+                            <h3 class="myavana-luxury-feature-title">AI Hair Analysis</h3>
                             <p class="myavana-luxury-feature-description">
-                                Log quick daily check-ins or detailed wash-day notes in seconds, with photos when you
-                                want them, so you always know what you actually tried.
+                                Get instant, professional-grade analysis of your hair health, texture, and needs
+                                using our advanced AI vision technology.
                             </p>
-                            <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
-                                Start Journaling <i class="fas fa-arrow-right"></i>
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
+                                Try Analysis <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
 
@@ -593,7 +608,7 @@ function myavana_luxury_home_view() {
                                 Document your hair transformation with photos, notes, and progress tracking.
                                 See your beautiful journey unfold over time.
                             </p>
-                            <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 Start Tracking <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -607,7 +622,7 @@ function myavana_luxury_home_view() {
                                 Receive custom hair care routines tailored to your specific hair type, goals,
                                 and lifestyle preferences.
                             </p>
-                            <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 Get Routine <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -621,7 +636,7 @@ function myavana_luxury_home_view() {
                                 Connect with thousands of women on similar journeys. Share experiences,
                                 get advice, and celebrate wins together.
                             </p>
-                            <a href="#community" class="myavana-luxury-feature-link">
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 Join Community <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -635,7 +650,7 @@ function myavana_luxury_home_view() {
                                 Detailed insights and analytics to track your hair health improvements,
                                 routine effectiveness, and goal achievement.
                             </p>
-                            <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 View Analytics <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -649,7 +664,7 @@ function myavana_luxury_home_view() {
                                 Access your hair journey anywhere with our responsive design and
                                 progressive web app capabilities.
                             </p>
-                            <a href="#" class="myavana-luxury-feature-link" onclick="showMyavanaModal('register')">
+                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 Get Started <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -679,7 +694,7 @@ function myavana_luxury_home_view() {
                             <h3 class="myavana-luxury-step-title">Create Your Profile</h3>
                             <p class="myavana-luxury-step-description">
                                 Sign up and tell us about your hair type, goals, and current routine.
-                                This helps us personalize your experience from day one.
+                                This helps our AI understand your unique needs.
                             </p>
                         </div>
 
@@ -688,10 +703,10 @@ function myavana_luxury_home_view() {
                             <div class="myavana-luxury-step-icon">
                                 <i class="fas fa-camera"></i>
                             </div>
-                            <h3 class="myavana-luxury-step-title">Log Your First Entry</h3>
+                            <h3 class="myavana-luxury-step-title">Take Your First Photo</h3>
                             <p class="myavana-luxury-step-description">
-                                Snap a photo, note how your hair feels, and log what you used. That's it —
-                                one entry starts your timeline.
+                                Upload a photo of your hair for instant AI analysis. Get detailed insights
+                                about your hair health and personalized recommendations.
                             </p>
                         </div>
 
@@ -709,10 +724,10 @@ function myavana_luxury_home_view() {
                     </div>
 
                     <div class="myavana-luxury-cta-center">
-                        <button class="myavana-luxury-btn-primary" onclick="showMyavanaModal('register')">
+                        <a href="#auth" class="myavana-luxury-btn-primary" data-open-auth="signup">
                             <i class="fas fa-rocket"></i>
                             Start Your Transformation
-                        </button>
+                        </a>
                     </div>
                 </div>
             </section>
@@ -729,11 +744,11 @@ function myavana_luxury_home_view() {
                         Your beautiful hair journey starts here.
                     </p>
                     <div class="myavana-luxury-final-cta-actions">
-                        <a href="#" data-open-auth="signup" class="myavana-luxury-btn-primary">
+                        <a href="#auth" data-open-auth="signup" class="myavana-luxury-btn-primary">
                             <i class="fas fa-sparkles"></i>
                             Start Free Today
                         </a>
-                        <a href="#" data-open-auth="signin" class="myavana-luxury-btn-secondary">
+                        <a href="#auth" data-open-auth="signin" class="myavana-luxury-btn-secondary">
                             <i class="fas fa-sign-in-alt"></i>
                             Sign In
                         </a>
@@ -754,15 +769,10 @@ function myavana_luxury_home_view() {
                             <span>50K+ Happy Users</span>
                         </div>
                     </div>
-
-                    <p class="myavana-luxury-analysis-link">
-                        Want a deeper hair analysis?
-                        <a href="<?php echo esc_url(get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer')); ?>" target="_blank" rel="noopener noreferrer">
-                            Explore MYAVANA Hair Analysis <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </p>
                 </div>
             </section>
+        <?php endif; ?>
+
             <!-- Entry Form Modal -->
             <div class="myavana-modal-overlay" id="entryModal" style="display: none;">
                 <div class="mya-modal">
@@ -974,8 +984,8 @@ function myavana_luxury_home_view() {
             // Create dropdown if it doesn't exist
             const dropdownHTML = `
                 <div class="myavana-luxury-profile-dropdown-menu">
-                    <a href="/members/<?php echo $current_user->user_login; ?>/profile/">View Profile</a>
-                    <a href="/hair-journey/">My Timeline</a>
+                    <a href="#profile" data-tab="profile" data-home-nav>View Profile</a>
+                    <a href="#journey" data-tab="journey" data-home-nav>My Timeline</a>
                     <a href="<?php echo wp_logout_url(home_url()); ?>" class="logout">Logout</a>
                 </div>
             `;
@@ -995,20 +1005,38 @@ function myavana_luxury_home_view() {
         setTimeout(() => document.addEventListener('click', closeDropdown), 0);
     }
 
-    // Modal integration (assumes modal system exists)
-    if (typeof showMyavanaModal !== 'function') {
-        window.showMyavanaModal = function(modalType) {
-            console.log('Opening modal:', modalType);
-            // Fallback behavior if modal system isn't loaded
-            if (modalType === 'register') {
-                alert('Registration modal would open here');
-            } else if (modalType === 'login') {
-                alert('Login modal would open here');
-            } else if (modalType === 'ai-analysis') {
-                window.location.href = 'https://www.myavana.com/pages/consumer';
+    // Modal integration (connects to Myavana Next auth & assessment modal)
+    window.showMyavanaModal = function(modalType) {
+        console.log('Opening modal:', modalType);
+        if (modalType === 'register' || modalType === 'signup') {
+            const signupBtn = document.querySelector('[data-open-auth="signup"]');
+            if (signupBtn) {
+                signupBtn.click();
+            } else {
+                window.location.hash = '#auth';
             }
-        };
-    }
+        } else if (modalType === 'login' || modalType === 'signin') {
+            const signinBtn = document.querySelector('[data-open-auth="signin"]');
+            if (signinBtn) {
+                signinBtn.click();
+            } else {
+                window.location.hash = '#auth';
+            }
+        } else if (modalType === 'ai-analysis') {
+            // Direct to in-app Hair Assessment / Onboarding Blueprint instead of external Shopify
+            const authData = window.myavanaNextData || {};
+            if (authData.isLoggedIn) {
+                window.location.hash = '#routine';
+            } else {
+                const signupBtn = document.querySelector('[data-open-auth="signup"]');
+                if (signupBtn) {
+                    signupBtn.click();
+                } else {
+                    window.location.hash = '#auth';
+                }
+            }
+        }
+    };
     </script>
     <?php
     return ob_get_clean();

@@ -254,6 +254,15 @@ MyavanaNext.Onboarding = (function() {
             MyavanaNext.API?.showToast?.('Saved what we could — you can finish this anytime from your profile.', 'info');
         } finally {
             if (nextBtn) nextBtn.disabled = false;
+
+            // Populate Diagnostic Blueprint details
+            const typeEl = modal.querySelector('#myavana-blueprint-type');
+            const porosityEl = modal.querySelector('#myavana-blueprint-porosity');
+            const goalEl = modal.querySelector('#myavana-blueprint-goal');
+            if (typeEl) typeEl.textContent = selections.hairType ? 'Type ' + selections.hairType : 'Personalized Profile';
+            if (porosityEl) porosityEl.textContent = selections.porosity ? selections.porosity.charAt(0).toUpperCase() + selections.porosity.slice(1) + ' Porosity' : 'Balanced Porosity';
+            if (goalEl) goalEl.textContent = (selections.goals && selections.goals.length) ? selections.goals.join(' & ') : 'Optimal Curl Health';
+
             goToStep('complete');
         }
     }

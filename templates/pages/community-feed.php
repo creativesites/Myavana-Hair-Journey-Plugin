@@ -10,14 +10,201 @@
  */
 if (!function_exists('myavana_community_feed_shortcode')) {
 function myavana_community_feed_shortcode($atts = []) { 
-    // Check if user is logged in
+    // Public visitors can browse real, privacy-safe (public-only) posts.
+    // Creating and interacting with posts remains a member action, guarded
+    // by a contextual sign-up prompt rather than hiding the feed entirely.
     if (!is_user_logged_in()) {
-        return '<div class="myavana-community-container">
-                    <div class="myavana-community-empty">
-                        <h2 class="myavana-subheader">Join Our Community</h2>
-                        <p class="myavana-body">Please sign in to view and share hair journey inspiration.</p>
+        global $wpdb;
+        $member_count = (int) count_users()['total_users'];
+        $entries_count = (int) ($wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'hair_journey_entry' AND post_status = 'publish'"
+        ) ?: 0);
+        $public_posts_count = (int) ($wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}myavana_community_posts WHERE privacy_level = 'public'"
+        ) ?: 0);
+
+        ob_start();
+        ?>
+        <div class="myavana-community-guest">
+            <div class="myavana-community-guest-grid">
+
+                <!-- Feed column -->
+                <main class="myavana-guest-feed" aria-label="Public community posts">
+                    <div class="myavana-feed-filters">
+                        <button class="myavana-filter-btn active" data-filter="all">All Posts</button>
+                        <button class="myavana-filter-btn" data-filter="trending">Trending</button>
+                        <button class="myavana-filter-btn" data-filter="featured">Featured</button>
                     </div>
-                </div>';
+
+                    <div class="myavana-feed-content">
+                        <div class="myavana-feed-loading" id="myavana-feed-loading" role="status" aria-live="polite">
+                            <div class="myavana-loader-spinner"></div>
+                            <p class="myavana-body">Loading inspiring journeys...</p>
+                        </div>
+
+                        <div class="myavana-feed-grid" id="myavana-feed-grid" aria-live="polite" aria-busy="false"></div>
+
+                        <div class="myavana-feed-empty" id="myavana-feed-empty" style="display: none;">
+                            <div class="myavana-empty-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--myavana-coral)" stroke-width="1.5">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
+                            </div>
+                            <h3 class="myavana-subheader">No Public Posts Yet</h3>
+                            <p class="myavana-body">Be the first to share your hair journey with the community!</p>
+                            <a href="#auth" data-open-auth="signup" class="myavana-btn-primary">Create your free account</a>
+                        </div>
+
+                        <div class="myavana-feed-load-more" id="myavana-feed-load-more" style="display: none;">
+                            <button class="myavana-btn-secondary" id="myavana-load-more-btn">Load More Stories</button>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Sidebar: sticky on desktop, a stacked set of banner cards on mobile -->
+                <aside class="myavana-guest-sidebar" aria-label="Join MYAVANA">
+                    <div class="myavana-guest-sidebar-inner">
+
+                        <div class="myavana-guest-cta-card">
+                            <span class="myavana-preheader">MYAVANA COMMUNITY</span>
+                            <h1 class="myavana-guest-cta-title">A place for every stage of your hair journey.</h1>
+                            <p class="myavana-body">Real progress, routines, and wins from people on the same path as you.</p>
+                            <a href="#auth" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-guest-cta-btn">Create your free account</a>
+                            <a href="#auth" data-open-auth="signin" class="myavana-guest-cta-signin">Already have an account? Sign in</a>
+                        </div>
+
+                        <?php if ($member_count >= 500): ?>
+                        <div class="myavana-guest-stats" role="group" aria-label="Community stats">
+                            <div><strong><?php echo esc_html(number_format_i18n($member_count)); ?></strong><span>Members</span></div>
+                            <div><strong><?php echo esc_html(number_format_i18n($entries_count)); ?></strong><span>Entries logged</span></div>
+                            <div><strong><?php echo esc_html(number_format_i18n($public_posts_count)); ?></strong><span>Posts shared</span></div>
+                        </div>
+                        <?php else: ?>
+                        <div class="myavana-guest-stats" role="group" aria-label="Community Highlights" style="grid-template-columns: 1fr; text-align: left; padding: 12px 16px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">✨</span>
+                                <div>
+                                    <strong style="display: block; font-size: 13px; color: var(--myavana-onyx, #222323);">Private &amp; Supportive Sisterhood</strong>
+                                    <span style="font-size: 12px; color: var(--myavana-stone-dark, #666);">Real textured hair progress &amp; shared regimens</span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Gamified goal picker: a light, low-commitment first step that
+                             ends on the same signup CTA rather than a real quiz result. -->
+                        <div class="myavana-guest-goal-card" id="myavana-guest-goal-card" data-step="1">
+                            <div class="myavana-guest-goal-progress" aria-hidden="true">
+                                <span class="myavana-guest-goal-dot active" data-dot="1"></span>
+                                <span class="myavana-guest-goal-dot" data-dot="2"></span>
+                            </div>
+                            <h3>What's your hair goal?</h3>
+                            <p class="myavana-guest-goal-hint">Pick one to preview your starting point.</p>
+                            <div class="myavana-guest-goal-options" role="group" aria-label="Choose a hair goal">
+                                <button type="button" data-guest-goal="Stronger, healthier hair">💪 Stronger hair</button>
+                                <button type="button" data-guest-goal="More moisture and definition">💧 Moisture &amp; definition</button>
+                                <button type="button" data-guest-goal="A consistent growth routine">🌱 Growth routine</button>
+                            </div>
+                            <div class="myavana-guest-goal-result" hidden>
+                                <p><strong id="myavana-guest-goal-result-title"></strong> is one of the top goals in the MYAVANA community right now. Create a free account to get a routine built around it.</p>
+                                <a href="#auth" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-guest-cta-btn">Unlock my plan</a>
+                            </div>
+                        </div>
+
+                        <section class="myavana-guest-discovery-card" aria-label="Trending in the community">
+                            <h3>Trending hashtags</h3>
+                            <div class="myavana-discovery-chip-list" id="myavana-discovery-hashtags">
+                                <span class="myavana-discovery-empty">Loading hashtags...</span>
+                            </div>
+                        </section>
+
+                        <section class="myavana-guest-discovery-card" aria-label="Active community challenges">
+                            <h3>Active challenges</h3>
+                            <div class="myavana-discovery-challenges" id="myavana-discovery-challenges">
+                                <span class="myavana-discovery-empty">Loading challenges...</span>
+                            </div>
+                        </section>
+
+                        <ul class="myavana-guest-highlights">
+                            <li><strong>Learn together</strong><span>Practical care ideas and supportive conversations.</span></li>
+                            <li><strong>Celebrate progress</strong><span>See how consistent care becomes visible over time.</span></li>
+                            <li><strong>Share when ready</strong><span>Your journey stays private unless you choose to share it.</span></li>
+                        </ul>
+
+                        <div class="myavana-guest-sidebar-legal">
+                            <a href="<?php echo esc_url(home_url('/privacy/')); ?>">Privacy</a>
+                            <a href="<?php echo esc_url(home_url('/terms/')); ?>">Terms</a>
+                            <span>© <?php echo esc_html(wp_date('Y')); ?> MYAVANA</span>
+                        </div>
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+
+        <script>
+            window.myavanaCommunitySettings = {
+                ajaxUrl: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+                nonce: '<?php echo esc_js(wp_create_nonce('myavana_nonce')); ?>',
+                userId: 0,
+                isGuest: true,
+                currentFilter: 'all',
+                initialSearch: '',
+                initialHashtag: '',
+                initialMediaFilter: '',
+                initialMode: 'discover',
+                initialCircle: '',
+                perPage: 10,
+                currentPage: 1
+            };
+
+            // Guests can read the public feed and browse trending hashtags/
+            // challenges, but any action that would touch a member-only
+            // endpoint (like, comment, save, follow, post, open a profile)
+            // routes to sign-up instead.
+            document.addEventListener('click', function(event) {
+                const scope = event.target.closest('#myavana-feed-grid, .myavana-guest-discovery-card');
+                if (!scope) return;
+
+                // Looking is free: photos open in the lightbox, hashtags and
+                // challenges re-filter the public feed. Only the social
+                // actions ask for an account.
+                if (event.target.closest('.myavana-post-image-wrapper, .myavana-guest-feed-cta')) return;
+
+                const control = event.target.closest('button, a');
+                if (!control) return;
+                const isSafeControl = control.matches(
+                    '.myavana-discovery-hashtag, .myavana-discovery-challenge.has-hashtag'
+                );
+                if (isSafeControl) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                if (window.MyavanaNext && MyavanaNext.Auth) {
+                    MyavanaNext.Auth.open('signup');
+                }
+            }, true);
+
+            // A light, low-stakes first step: pick a goal, see a one-line
+            // reveal, then the same signup CTA everything else leads to.
+            (function() {
+                const card = document.getElementById('myavana-guest-goal-card');
+                if (!card) return;
+                const result = card.querySelector('.myavana-guest-goal-result');
+                const resultTitle = document.getElementById('myavana-guest-goal-result-title');
+                card.querySelectorAll('[data-guest-goal]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        card.dataset.step = '2';
+                        card.querySelector('[data-dot="2"]').classList.add('active');
+                        card.querySelector('.myavana-guest-goal-options').hidden = true;
+                        resultTitle.textContent = button.dataset.guestGoal;
+                        result.hidden = false;
+                    });
+                });
+            })();
+        </script>
+        <?php
+        return ob_get_clean();
     }
     $is_logged_in = is_user_logged_in();
     $current_user = wp_get_current_user();
@@ -95,7 +282,9 @@ function myavana_community_feed_shortcode($atts = []) {
         <?php
         $current_user_id = get_current_user_id();
         $current_user_data = get_userdata($current_user_id);
-        $user_avatar = get_avatar_url($current_user_id, 80);
+        $is_logged_in = is_user_logged_in();
+        $custom_avatar = get_user_meta($current_user_id, 'myavana_custom_avatar_url', true);
+        $user_avatar = !empty($custom_avatar) ? $custom_avatar : get_avatar_url($current_user_id, ['size' => 80]);
 
         // Resolve profile page URL (shortcode page if available)
         $profile_page_url = home_url('/profile/');
@@ -137,6 +326,7 @@ function myavana_community_feed_shortcode($atts = []) {
         ));
         ?>
 
+        <aside class="myavana-community-sidebar" aria-label="Your community tools">
         <div class="myavana-profile-widget">
             <div class="myavana-profile-widget-header">
                 <div class="myavana-profile-widget-avatar-section">
@@ -244,6 +434,7 @@ function myavana_community_feed_shortcode($atts = []) {
                 </article>
             </div>
         </section>
+        </aside>
 
         <!-- Filter Tabs -->
         <?php if ($atts['show_filters'] === 'true') : ?>
@@ -708,6 +899,7 @@ function myavana_community_feed_shortcode($atts = []) {
             ajaxUrl: '<?php echo admin_url('admin-ajax.php'); ?>',
             nonce: '<?php echo wp_create_nonce('myavana_nonce'); ?>',
             userId: <?php echo get_current_user_id(); ?>,
+            userAvatar: '<?php echo esc_url(myavana_get_user_avatar_url(get_current_user_id(), 40)); ?>',
             profileUrl: '<?php echo esc_url($profile_page_url); ?>',
             currentFilter: '<?php echo esc_js($atts['filter']); ?>',
             initialSearch: '',

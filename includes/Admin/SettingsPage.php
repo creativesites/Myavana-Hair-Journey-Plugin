@@ -48,7 +48,7 @@ class SettingsPage {
         $apiKey = get_option('myavana_gemini_api_key', '');
         $googleClientId = get_option('myavana_next_google_client_id', '');
         $googleAuthEnabled = get_option('myavana_next_google_auth_enabled', true);
-        $hairAnalysisUrl = get_option('myavana_next_hair_analysis_url', 'https://www.myavana.com/pages/consumer');
+        $hairAnalysisUrl = get_option('myavana_next_hair_analysis_url', '#routine');
         $aiProvider = get_option('myavana_next_ai_provider', 'gemini');
 
         if ($apiKey === '' && !defined('MYAVANA_GEMINI_API_KEY')) {

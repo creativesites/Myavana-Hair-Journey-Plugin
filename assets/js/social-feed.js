@@ -162,6 +162,7 @@
     function renderPosts(posts) {
         const $grid = $('#myavana-feed-grid');
         $grid.empty();
+        $('.myavana-feed-caught-up').remove();
         postCache.clear();
 
         posts.forEach(post => {
@@ -258,6 +259,9 @@
             'celebrate': '🎉',
             'insightful': '💡'
         };
+        // Build robust avatar fallback
+        const defaultAvatar = settings.defaultAvatarUrl || 'https://www.gravatar.com/avatar/?d=mp&s=64';
+        const userAvatar = post.user_avatar && post.user_avatar.trim() !== '' ? post.user_avatar : defaultAvatar;
 
         let reactionCountsHtml = '';
         if (totalReactions > 0) {
@@ -288,11 +292,12 @@
         return `
             <article class="myavana-post-card" data-post-id="${post.id}">
                 <div class="myavana-post-header">
-                    <img src="${escapeHtml(post.user_avatar)}"
-                         alt="${escapeHtml(post.display_name)}"
-                         class="myavana-post-avatar clickable-avatar"
-                         data-user-id="${post.user_id}"
-                         title="View ${escapeHtml(post.display_name)}'s profile">
+                    <img src="${escapeHtml(userAvatar)}"
+                        alt="${escapeHtml(post.display_name)}"
+                        class="myavana-post-avatar clickable-avatar"
+                        data-user-id="${post.user_id}"
+                        title="View ${escapeHtml(post.display_name)}'s profile"
+                        onerror="this.onerror=null; this.src='${escapeHtml(defaultAvatar)}';">
                     <div class="myavana-post-user-info">
                         <h3 class="myavana-post-username clickable-username" data-user-id="${post.user_id}">${escapeHtml(post.display_name)}</h3>
                         ${post.is_verified_journey ? '<span class="myavana-verified-journey-badge">Verified Journey</span>' : ''}
@@ -390,17 +395,7 @@
                 <!-- Comments Section -->
                 <div class="myavana-post-comments" id="comments-${post.id}" style="display: none;">
                     <div class="myavana-comments-list"></div>
-                    <div class="myavana-comment-form">
-                        <div class="myavana-comment-input-wrapper">
-                            <textarea class="myavana-comment-input" placeholder="Write a comment..." rows="1"></textarea>
-                            <button class="myavana-comment-submit" data-post-id="${post.id}">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    ${buildComposerHTML({ postId: post.id, avatar: settings.userAvatar })}
                 </div>
             </article>
         `;
@@ -1238,18 +1233,28 @@
         const isLiked = comment.is_liked ? 'liked' : '';
         const likeFillColor = comment.is_liked ? 'var(--myavana-coral)' : 'none';
         const replyCount = comment.reply_count || 0;
-        const avatarUrl = comment.user_avatar || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e7a690"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
+
+        const commentAvatarUrl = comment.user_avatar && comment.user_avatar.trim() !== '' ? comment.user_avatar : DEFAULT_AVATAR_SVG;
+        const mediaHtml = comment.image_url ? `
+            <div class="myavana-comment-media">
+                <img src="${escapeHtml(comment.image_url)}" alt="" loading="lazy">
+            </div>
+        ` : '';
 
         return `
             <div class="myavana-comment ${isReply ? 'myavana-comment-reply' : ''}" data-comment-id="${comment.id}" data-post-id="${comment.post_id || ''}">
-                
+
                 <div class="myavana-comment-content">
                     <div class="myavana-comment-header">
-                    <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(comment.display_name)}" class="myavana-comment-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%23e7a690\\'%3E%3Cpath d=\\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\\'/%3E%3C/svg%3E'">
+                        <img src="${escapeHtml(commentAvatarUrl)}"
+                             alt="${escapeHtml(comment.display_name)}"
+                             class="myavana-comment-avatar"
+                             onerror="this.onerror=null; this.src='${escapeHtml(DEFAULT_AVATAR_SVG)}'">
                         <span class="myavana-comment-author">${escapeHtml(comment.display_name)}</span>
                         <span class="myavana-comment-time">${escapeHtml(comment.formatted_date)}</span>
                     </div>
-                    <p class="myavana-comment-text">${escapeHtml(comment.content)}</p>
+                    ${comment.content ? `<p class="myavana-comment-text">${escapeHtml(comment.content)}</p>` : ''}
+                    ${mediaHtml}
                     <div class="myavana-comment-actions">
                         <button class="myavana-comment-like-btn ${isLiked}" data-comment-id="${comment.id}">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="${likeFillColor}" stroke="currentColor" stroke-width="2">
@@ -1275,39 +1280,113 @@
     }
 
     /**
+     * Composer: attach a photo (delegated to every .myavana-composer-file-input,
+     * shared by the main comment box and every reply box)
+     */
+    $(document).on('change', '.myavana-composer-file-input', function() {
+        const file = this.files && this.files[0];
+        const $composer = $(this).closest('.myavana-composer');
+        const $fileInput = $(this);
+
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showNotification('Please select an image file', 'error');
+            $fileInput.val('');
+            return;
+        }
+
+        if (file.size > 8 * 1024 * 1024) {
+            showNotification('Image must be under 8MB', 'error');
+            $fileInput.val('');
+            return;
+        }
+
+        $composer.data('composerFile', file);
+
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            $composer.find('.myavana-composer-preview').html(`
+                <div class="myavana-composer-media-chip">
+                    <img src="${ev.target.result}" alt="">
+                    <button type="button" class="myavana-composer-media-remove" title="Remove photo">&times;</button>
+                </div>
+            `);
+            updateComposerSendState($composer);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    /**
+     * Composer: remove an attached photo
+     */
+    $(document).on('click', '.myavana-composer-media-remove', function(e) {
+        e.preventDefault();
+        const $composer = $(this).closest('.myavana-composer');
+        $composer.removeData('composerFile');
+        $composer.find('.myavana-composer-file-input').val('');
+        $composer.find('.myavana-composer-preview').empty();
+        updateComposerSendState($composer);
+    });
+
+    /**
+     * Composer: auto-resize the textarea and keep the send button in sync
+     * with whether there's text or a photo to post
+     */
+    $(document).on('input', '.myavana-composer-textarea', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+        updateComposerSendState($(this).closest('.myavana-composer'));
+    });
+
+    $(document).on('keydown', '.myavana-composer-textarea', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            $(this).closest('.myavana-composer').find('.myavana-composer-send:not(:disabled)').trigger('click');
+        }
+    });
+
+    /**
      * Handle comment submission
      */
     $(document).on('click', '.myavana-comment-submit', function(e) {
         e.preventDefault();
 
         const $btn = $(this);
-        const postId = $btn.data('post-id');
-        const $form = $btn.closest('.myavana-comment-form');
-        const $input = $form.find('.myavana-comment-input');
-        const content = $input.val().trim();
+        if ($btn.prop('disabled')) return;
 
-        if (!content) {
-            showNotification('Please enter a comment', 'error');
+        const postId = $btn.data('post-id');
+        const $composer = $btn.closest('.myavana-composer');
+        const $input = $composer.find('.myavana-comment-input');
+        const content = $input.val().trim();
+        const file = $composer.data('composerFile');
+
+        if (!content && !file) {
+            showNotification('Write a comment or add a photo', 'error');
             return;
         }
 
-        // Disable button and show loading
         $btn.prop('disabled', true).addClass('loading');
+
+        const formData = new FormData();
+        formData.append('action', 'comment_on_post');
+        formData.append('nonce', settings.nonce);
+        formData.append('post_id', postId);
+        formData.append('content', content);
+        formData.append('parent_id', 0);
+        if (file) {
+            formData.append('comment_image', file);
+        }
 
         $.ajax({
             url: settings.ajaxUrl,
             method: 'POST',
-            data: {
-                action: 'comment_on_post',
-                nonce: settings.nonce,
-                post_id: postId,
-                content: content,
-                parent_id: 0
-            },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.success) {
-                    // Clear input
-                    $input.val('').css('height', 'auto');
+                    resetComposer($composer);
 
                     // Add comment to list
                     const $commentsList = $(`#comments-${postId} .myavana-comments-list`);
@@ -1335,16 +1414,9 @@
             },
             complete: function() {
                 $btn.prop('disabled', false).removeClass('loading');
+                updateComposerSendState($composer);
             }
         });
-    });
-
-    /**
-     * Auto-resize comment textarea
-     */
-    $(document).on('input', '.myavana-comment-input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
     });
 
     /**
@@ -2553,24 +2625,21 @@
         // If form already exists, just toggle it
         if ($replyFormContainer.children().length > 0) {
             $replyFormContainer.toggle();
+            if ($replyFormContainer.is(':visible')) {
+                $replyFormContainer.find('.myavana-composer-textarea').focus();
+            }
             return;
         }
 
-        // Create reply form
-        const $replyForm = $(`
-            <div class="myavana-comment-reply-form">
-                <div class="myavana-comment-input-wrapper">
-                    <textarea class="myavana-reply-input" placeholder="Write a reply..." rows="1"></textarea>
-                    <div class="myavana-reply-actions">
-                        <button class="myavana-reply-cancel-btn" data-comment-id="${commentId}">Cancel</button>
-                        <button class="myavana-reply-submit-btn" data-comment-id="${commentId}">Reply</button>
-                    </div>
-                </div>
-            </div>
-        `);
+        const replyToName = $comment.find('.myavana-comment-author').first().text();
+        const composerHTML = buildComposerHTML({
+            parentId: commentId,
+            avatar: settings.userAvatar,
+            replyToName: replyToName
+        });
 
-        $replyFormContainer.html($replyForm).show();
-        $replyFormContainer.find('.myavana-reply-input').focus();
+        $replyFormContainer.html(composerHTML).show();
+        $replyFormContainer.find('.myavana-composer-textarea').focus();
     });
 
     /**
@@ -2578,7 +2647,7 @@
      */
     $(document).on('click', '.myavana-reply-cancel-btn', function(e) {
         e.preventDefault();
-        $(this).closest('.myavana-reply-form-container').hide();
+        $(this).closest('.myavana-reply-form-container').hide().empty();
     });
 
     /**
@@ -2588,35 +2657,44 @@
         e.preventDefault();
 
         const $btn = $(this);
+        if ($btn.prop('disabled')) return;
+
         const parentCommentId = $btn.data('comment-id');
-        const $form = $btn.closest('.myavana-comment-reply-form');
-        const $input = $form.find('.myavana-reply-input');
+        const $composer = $btn.closest('.myavana-composer');
+        const $input = $composer.find('.myavana-reply-input');
         const content = $input.val().trim();
+        const file = $composer.data('composerFile');
 
         const $comment = $btn.closest('.myavana-comment');
         const postId = $comment.data('post-id');
 
-        if (!content) {
-            showNotification('Please enter a reply', 'error');
+        if (!content && !file) {
+            showNotification('Write a reply or add a photo', 'error');
             return;
         }
 
-        $btn.prop('disabled', true).text('Posting...');
+        $btn.prop('disabled', true).addClass('loading');
+
+        const formData = new FormData();
+        formData.append('action', 'myavana_ci_reply_to_comment');
+        formData.append('nonce', settings.nonce);
+        formData.append('post_id', postId);
+        formData.append('parent_comment_id', parentCommentId);
+        formData.append('content', content);
+        if (file) {
+            formData.append('comment_image', file);
+        }
 
         $.ajax({
             url: settings.ajaxUrl,
             method: 'POST',
-            data: {
-                action: 'myavana_ci_reply_to_comment',
-                nonce: settings.nonce,
-                post_id: postId,
-                parent_comment_id: parentCommentId,
-                content: content
-            },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.success) {
-                    // Hide reply form
-                    $form.closest('.myavana-reply-form-container').hide();
+                    // Hide + clear reply form
+                    $composer.closest('.myavana-reply-form-container').hide().empty();
 
                     // Add reply to replies container
                     const $repliesContainer = $comment.find('.myavana-replies-container').first();
@@ -2654,7 +2732,7 @@
                 showNotification('Network error. Please try again.', 'error');
             },
             complete: function() {
-                $btn.prop('disabled', false).text('Reply');
+                $btn.prop('disabled', false).removeClass('loading');
             }
         });
     });
@@ -2710,14 +2788,6 @@
                 $btn.prop('disabled', false);
             }
         });
-    });
-
-    /**
-     * Auto-resize reply textarea
-     */
-    $(document).on('input', '.myavana-reply-input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
     });
 
     /**
@@ -3362,14 +3432,6 @@
         }
     };
 
-    /**
-     * Edit my profile (opens profile edit modal)
-     */
-    window.editMyProfile = function() {
-        // TODO: Implement profile editing modal in Phase 4
-        alert('Profile editing coming soon! For now, you can update your profile from WordPress settings.');
-    };
-
     function closeSavedPostsModal() {
         const $modal = $('#myavana-saved-posts-modal');
         if ($modal.length) {
@@ -3677,20 +3739,27 @@
             return '';
         }
 
+        // Undo PHP addslashes()-style escaping on plain quote characters
+        // before touching entities, so \' and \" don't survive as stray
+        // backslashes once the entity beside them is decoded.
         normalized = normalized
-            .replace(/\\+(&#0*39;|&#x0*27;|&apos;)/gi, "'$1")
-            .replace(/\\+(&quot;|&amp;)/gi, '$1')
+            .replace(/\\(['"\\])/g, '$1')
             // Old content occasionally includes its own Markdown read-more link;
             // the feed supplies the accessible native control below the post.
             .replace(/\s*\[\*\*Read more\*\*\]\([^)]*\)\s*$/i, '');
 
-        // Decode repeatedly because some legacy records were entity-encoded twice.
+        // Decode repeatedly because some legacy records were entity-encoded
+        // twice (&amp;#039; -> &#039; -> ') — each pass only resolves one layer.
         for (let attempt = 0; attempt < 3; attempt += 1) {
             const decoded = decodeHtmlEntities(normalized);
             if (decoded === normalized) break;
             normalized = decoded;
         }
-        return normalized.replace(/\\+&#0*39;|\\+&#x0*27;|\\+&apos;/gi, "'");
+
+        // A backslash that was escaping the *encoded* form (\&#039; rather
+        // than \') survives decoding untouched, sitting right before the
+        // character the entity resolved to — strip it now that it's exposed.
+        return normalized.replace(/\\(?=['"&])/g, '');
     }
 
     function parseTextWithMentionsAndHashtags(text) {
@@ -3707,6 +3776,78 @@
         text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
         return text;
+    }
+
+    /**
+     * Default fallback avatar (used whenever a user has no avatar or it fails to load)
+     */
+    const DEFAULT_AVATAR_SVG = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e7a690"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
+
+    /**
+     * Build a global, reusable text+media composer (used for the main comment
+     * box and every reply box) so every "write something" input on the page
+     * shares one design instead of each feature hand-rolling its own markup.
+     */
+    function buildComposerHTML(opts) {
+        const { postId, parentId, avatar, replyToName } = opts || {};
+        const avatarUrl = avatar && avatar.trim() !== '' ? avatar : DEFAULT_AVATAR_SVG;
+        const isReply = !!parentId;
+        const placeholder = isReply
+            ? (replyToName ? `Reply to ${replyToName}...` : 'Write a reply...')
+            : 'Write a comment...';
+        const textareaClass = isReply ? 'myavana-composer-textarea myavana-reply-input' : 'myavana-composer-textarea myavana-comment-input';
+        const sendClass = isReply ? 'myavana-composer-send myavana-reply-submit-btn' : 'myavana-composer-send myavana-comment-submit';
+        const rootDataAttr = isReply ? `data-parent-id="${parentId}"` : `data-post-id="${postId}"`;
+        const sendDataAttr = isReply ? `data-comment-id="${parentId}"` : `data-post-id="${postId}"`;
+
+        return `
+            <div class="myavana-composer ${isReply ? 'myavana-composer--reply' : ''}" ${rootDataAttr}>
+                <img src="${escapeHtml(avatarUrl)}" alt="" class="myavana-composer-avatar" onerror="this.onerror=null; this.src='${escapeHtml(DEFAULT_AVATAR_SVG)}';">
+                <div class="myavana-composer-main">
+                    <div class="myavana-composer-field">
+                        <textarea class="${textareaClass}" placeholder="${escapeHtml(placeholder)}" rows="1" maxlength="2000"></textarea>
+                        <label class="myavana-composer-attach" title="Add photo">
+                            <input type="file" class="myavana-composer-file-input" accept="image/*">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <path d="M21 15l-5-5L5 21"></path>
+                            </svg>
+                        </label>
+                        <button type="button" class="${sendClass}" ${sendDataAttr} disabled title="Post">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="myavana-composer-preview"></div>
+                    ${isReply ? `<button type="button" class="myavana-composer-cancel myavana-reply-cancel-btn myavana-btn-secondary myavana-btn-sm" data-comment-id="${parentId}">Cancel</button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Enable/disable a composer's send button based on whether it has text
+     * or an attached photo.
+     */
+    function updateComposerSendState($composer) {
+        const hasText = $composer.find('.myavana-composer-textarea').val().trim().length > 0;
+        const hasMedia = !!$composer.data('composerFile');
+        const isActive = hasText || hasMedia;
+        $composer.find('.myavana-composer-send').prop('disabled', !isActive).toggleClass('is-active', isActive);
+    }
+
+    /**
+     * Clear a composer back to its empty state (text, attached photo, height).
+     */
+    function resetComposer($composer) {
+        $composer.removeData('composerFile');
+        $composer.find('.myavana-composer-file-input').val('');
+        $composer.find('.myavana-composer-preview').empty();
+        $composer.find('.myavana-composer-textarea').val('').css('height', 'auto');
+        updateComposerSendState($composer);
     }
 
     /**
@@ -3830,6 +3971,13 @@
         // Find index of clicked image
         currentImageIndex = galleryImages.indexOf($(this).attr('src'));
 
+        openImageLightbox();
+    });
+
+    $(document).on('click', '.myavana-comment-media img', function(e) {
+        e.preventDefault();
+        galleryImages = [$(this).attr('src')];
+        currentImageIndex = 0;
         openImageLightbox();
     });
 
@@ -3964,7 +4112,7 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        if ($('.myavana-community-container').length) {
+        if ($('.myavana-community-container, .myavana-community-guest').length) {
             initCommunityFeed();
             startActivityPolling();
         }

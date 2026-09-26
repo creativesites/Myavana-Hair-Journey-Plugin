@@ -123,6 +123,21 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
+/* #view-home is rendered inside the app shell's max-width:1200px
+   .myavana-next-container, which double-boxes this page's own full-bleed
+   hero/section backgrounds. Break it out to span the viewport; each
+   section's own inner container (.myavana-luxury-hero-container etc.)
+   still centers its content at the section's intended max-width. */
+#view-home {
+    width: 100vw;
+    max-width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
 /* ================================================
    LUXURY NAVIGATION SYSTEM
    ================================================ */
@@ -401,7 +416,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .myavana-luxury-btn-secondary {
-    background: transparent;
+    background: var(--myavana-light-coral) !important;
     color: var(--myavana-onyx);
     font-family: var(--font-secondary);
     font-size: 14px;
@@ -1338,7 +1353,24 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
 }
+
+/* One-time public welcome prompt: intentionally compact so the homepage
+   remains the main experience, rather than becoming a forced funnel. */
+.myavana-welcome-modal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(20, 21, 21, .48); backdrop-filter: blur(8px); }
+.myavana-welcome-modal[hidden] { display: none; }
+.myavana-welcome-modal-card { position: relative; width: min(100%, 560px); padding: clamp(28px, 5vw, 48px); border-radius: 28px; background: #fff; box-shadow: 0 28px 80px rgba(0,0,0,.24); text-align: center; }
+.myavana-welcome-modal-card h2 { margin: 16px 0 12px; font-size: clamp(28px, 4vw, 42px); line-height: 1.04; text-transform: uppercase; }
+.myavana-welcome-modal-card > p { max-width: 440px; margin: 0 auto 22px; color: rgba(34,35,35,.72); }
+.myavana-welcome-close { position: absolute; top: 12px; right: 15px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f5f5f7; color: #222323; font-size: 26px; line-height: 1; cursor: pointer; }
+.myavana-welcome-goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.myavana-welcome-goals button { min-height: 68px; padding: 10px; border: 1px solid rgba(34,35,35,.12); border-radius: 14px; background: #fff; color: #222323; font: 600 13px var(--font-secondary); cursor: pointer; }
+.myavana-welcome-goals button:hover, .myavana-welcome-goals button.selected { border-color: var(--myavana-coral); background: var(--myavana-light-coral); }
+.myavana-welcome-preview { display: grid; gap: 4px; padding: 14px; margin-bottom: 22px; border-radius: 14px; background: #f5f5f7; text-align: left; font-size: 13px; }
+.myavana-welcome-preview span { color: rgba(34,35,35,.7); }
+.myavana-welcome-later { display: block; margin: 14px auto 0; border: 0; background: transparent; color: #626262; font: 600 13px var(--font-secondary); cursor: pointer; text-decoration: underline; }
+@media (max-width: 520px) { .myavana-welcome-goals { grid-template-columns: 1fr; } .myavana-welcome-goals button { min-height: 44px; } }
 
 .myavana-luxury-section-description {
     font-size: 18px;
@@ -1620,15 +1652,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .myavana-luxury-final-cta-actions .myavana-luxury-btn-secondary {
+    background: var(--myavana-white);
     border-color: var(--myavana-white);
-    color: var(--myavana-white);
+    color: var(--myavana-onyx);
     padding: 18px 36px;
     font-size: 16px;
 }
 
 .myavana-luxury-final-cta-actions .myavana-luxury-btn-secondary:hover {
-    background: var(--myavana-white);
-    color: var(--myavana-onyx);
+    background: transparent;
+    color: var(--myavana-white);
 }
 
 /* Trust Indicators */
@@ -2254,6 +2287,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .myavana-luxury-homepage .myavana-luxury-hero-description { color: var(--myavana-ink-soft); opacity: 1; }
 .myavana-luxury-homepage .myavana-luxury-btn-primary { background: var(--myavana-onyx); box-shadow: none; }
+.myavana-luxury-homepage .myavana-luxury-btn-primary,
+.myavana-luxury-homepage .myavana-luxury-btn-primary:visited { color: #fff !important; }
 .myavana-luxury-homepage .myavana-luxury-btn-primary:hover { background: #4a4440; box-shadow: 0 10px 24px rgba(34,35,35,.12); }
 .myavana-luxury-homepage .myavana-luxury-btn-secondary { border-color: var(--myavana-line); background: transparent; color: var(--myavana-onyx); }
 .myavana-luxury-homepage .myavana-luxury-btn-secondary:hover { border-color: rgba(185,111,88,.5); background: #fff; color: var(--myavana-onyx); }
@@ -2326,6 +2361,15 @@ h1, h2, h3, h4, h5, h6 {
 .myavana-luxury-homepage .myavana-luxury-member-card-actions .myavana-luxury-btn-secondary { border-color: var(--myavana-line); background: #fff; color: var(--myavana-onyx); }
 .myavana-luxury-homepage .myavana-luxury-member-card-actions .myavana-luxury-btn-secondary:hover,
 .myavana-luxury-homepage .myavana-luxury-member-actions .myavana-luxury-btn-secondary:hover { background: #f8e8df; color: var(--myavana-onyx); }
+
+/* The dark final CTA needs a true white headline; the gradient treatment is
+   reserved for light surfaces where it remains legible. */
+.myavana-luxury-homepage .myavana-luxury-final-cta-title,
+.myavana-luxury-homepage .myavana-luxury-final-cta-title .gradient-text {
+    color: #fff;
+    background: none;
+    -webkit-text-fill-color: #fff;
+}
 .myavana-luxury-homepage .myavana-luxury-member-card-head .eyebrow,
 .myavana-luxury-homepage .myavana-luxury-member-item .item-type { color: var(--myavana-coral-deep); }
 .myavana-luxury-homepage .myavana-luxury-member-card-head h3,

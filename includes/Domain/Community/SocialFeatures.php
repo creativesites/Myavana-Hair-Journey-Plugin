@@ -54,7 +54,25 @@ class Myavana_Social_Features {
         $this->user_id = get_current_user_id();
         return (int) $this->user_id;
     }
-    
+
+    /**
+     * Get user avatar URL with custom avatar fallback
+     * Checks for custom avatar first, then falls back to WordPress default
+     */
+    private function get_user_avatar_url($user_id, $size = 64) {
+        $user_id = (int) $user_id;
+        if ($user_id <= 0) {
+            return get_avatar_url(0, ['size' => $size]);
+        }
+
+        $custom_avatar = get_user_meta($user_id, 'myavana_custom_avatar_url', true);
+        if (!empty($custom_avatar) && is_string($custom_avatar)) {
+            return $custom_avatar;
+        }
+
+        return get_avatar_url($user_id, ['size' => $size]);
+    }
+
     /**
      * Create necessary database tables for social features
      */
@@ -115,6 +133,7 @@ class Myavana_Social_Features {
             user_id bigint(20) NOT NULL,
             parent_id mediumint(9) DEFAULT 0,
             content text NOT NULL,
+            image_url varchar(500) DEFAULT NULL,
             likes_count int(11) DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -273,6 +292,27 @@ class Myavana_Social_Features {
         dbDelta($routine_bookmarks_sql);
         dbDelta($post_bookmarks_sql);
         dbDelta($notifications_sql);
+
+        $this->ensure_comment_image_column($comments_table);
+    }
+
+    /**
+     * dbDelta doesn't reliably add columns to a table that already exists in
+     * production, so explicitly add image_url (comment media attachments) if
+     * an older install doesn't have it yet.
+     */
+    private function ensure_comment_image_column($comments_table) {
+        global $wpdb;
+        $column = $wpdb->get_results(
+            $wpdb->prepare(
+                "SHOW COLUMNS FROM $comments_table LIKE %s",
+                'image_url'
+            )
+        );
+
+        if (empty($column)) {
+            $wpdb->query("ALTER TABLE $comments_table ADD COLUMN image_url varchar(500) DEFAULT NULL AFTER content");
+        }
     }
     
     /**
@@ -477,7 +517,7 @@ class Myavana_Social_Features {
         // Enhance posts with additional data
         $entry_count_cache = [];
         foreach ($posts as &$post) {
-            $post->user_avatar = get_avatar_url($post->user_id);
+            $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
             $post->user_profile_url = '#'; // Could be customized
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->is_bookmarked = $this->is_post_bookmarked($post->id, $this->user_id);
@@ -803,14 +843,29 @@ class Myavana_Social_Features {
         }
         
         $post_id = intval($_POST['post_id']);
-        $content = sanitize_textarea_field($_POST['content']);
+        $content = sanitize_textarea_field($_POST['content'] ?? '');
         $parent_id = intval($_POST['parent_id'] ?? 0);
-        
+
+        $image_url = null;
+        if (!empty($_FILES['comment_image']['name'])) {
+            $upload = myavana_ci_upload_post_media($_FILES['comment_image'], 'image');
+            if (is_wp_error($upload)) {
+                wp_send_json_error($upload->get_error_message());
+                return;
+            }
+            $image_url = $upload['url'];
+        }
+
+        if ($content === '' && !$image_url) {
+            wp_send_json_error('Write a comment or add a photo');
+            return;
+        }
+
         global $wpdb;
-        
+
         $comments_table = $wpdb->prefix . 'myavana_post_comments';
         $posts_table = $wpdb->prefix . 'myavana_community_posts';
-        
+
         $result = $wpdb->insert(
             $comments_table,
             array(
@@ -818,11 +873,12 @@ class Myavana_Social_Features {
                 'user_id' => $this->user_id,
                 'parent_id' => $parent_id,
                 'content' => $content,
+                'image_url' => $image_url,
                 'created_at' => current_time('mysql')
             ),
-            array('%d', '%d', '%d', '%s', '%s')
+            array('%d', '%d', '%d', '%s', '%s', '%s')
         );
-        
+
         if ($result) {
             // Update comments count
             $wpdb->query($wpdb->prepare(
@@ -869,7 +925,7 @@ class Myavana_Social_Features {
                 $comment_id
             ));
 
-            $comment->user_avatar = get_avatar_url($comment->user_id);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 48);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
 
             wp_send_json_success(array(
@@ -1049,7 +1105,7 @@ class Myavana_Social_Features {
 
         // Enhance comments with user data
         foreach ($comments as &$comment) {
-            $comment->user_avatar = get_avatar_url($comment->user_id, 40);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 40);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
             $comment->post_id = $post_id;
 
@@ -1360,7 +1416,7 @@ class Myavana_Social_Features {
         $profile = array(
             'user_id' => $user_id,
             'display_name' => $user->display_name,
-            'avatar' => get_avatar_url($user_id, 120),
+            'avatar' => $this->get_user_avatar_url($user_id, 120),
             'bio' => get_user_meta($user_id, 'description', true),
             'stats' => $stats,
             'recent_posts' => $recent_posts,
@@ -1403,7 +1459,7 @@ class Myavana_Social_Features {
         
         // Enhance posts with additional data
         foreach ($trending_posts as &$post) {
-            $post->user_avatar = get_avatar_url($post->user_id);
+            $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->formatted_date = human_time_diff(strtotime($post->created_at)) . ' ago';
         }
@@ -1560,7 +1616,7 @@ class Myavana_Social_Features {
                 $items[] = [
                     'user_id' => (int) $row->user_id,
                     'display_name' => sanitize_text_field($row->display_name ?: 'Community Member'),
-                    'avatar' => get_avatar_url((int) $row->user_id, ['size' => 72]),
+                    'avatar' => $this->get_user_avatar_url((int) $row->user_id, 72),
                     'posts_count' => (int) $row->posts_count,
                     'followers_count' => (int) $row->followers_count,
                     'engagement_score' => (int) $row->engagement_score,
@@ -1697,7 +1753,7 @@ class Myavana_Social_Features {
         ));
 
         foreach ($comments as &$comment) {
-            $comment->user_avatar = get_avatar_url($comment->user_id, 32);
+            $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 32);
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
         }
 

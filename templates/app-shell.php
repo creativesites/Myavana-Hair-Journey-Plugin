@@ -53,14 +53,19 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
                 <!-- Destination 5: Profile & Privacy Center -->
                 <?php include MYAVANA_NEXT_PATH . 'templates/views/profile.php'; ?>
             <?php else : ?>
-                <!-- Public Discovery for First-Time Value -->
-                <?php include MYAVANA_NEXT_PATH . 'templates/views/discovery.php'; ?>
+                <!-- Community is a public window into the MYAVANA experience. -->
+                <?php include MYAVANA_NEXT_PATH . 'templates/views/community.php'; ?>
 
                 <!-- Sign In / Sign Up (hidden until opened via data-open-auth triggers) -->
                 <?php include MYAVANA_NEXT_PATH . 'templates/views/auth.php'; ?>
+
+                <!-- A light, one-time welcome prompt — not a separate destination. -->
+                <?php include MYAVANA_NEXT_PATH . 'templates/views/discovery.php'; ?>
             <?php endif; ?>
         </div>
     </main>
+
+    <?php include MYAVANA_NEXT_PATH . 'templates/components/site-footer.php'; ?>
 
     <!-- Mobile Bottom Navigation -->
     <?php include MYAVANA_NEXT_PATH . 'templates/components/nav-mobile-tabs.php'; ?>

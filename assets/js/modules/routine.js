@@ -17,7 +17,9 @@ MyavanaNext.Routine = (function() {
             btn.addEventListener('click', () => selectTab(btn.getAttribute('data-routine-subtab')));
         });
 
-        selectTab('routine');
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedTab = urlParams.get('tab') || (window.location.hash === '#goals' ? 'goals' : null);
+        selectTab(requestedTab === 'goals' ? 'goals' : 'routine');
     }
 
     function refresh() {
@@ -40,6 +42,20 @@ MyavanaNext.Routine = (function() {
             btn.classList.toggle('active', isActive);
             btn.setAttribute('aria-selected', String(isActive));
         });
+
+        try {
+            const url = new URL(window.location.href);
+            if (active === 'goals') {
+                url.searchParams.set('tab', 'goals');
+            } else {
+                url.searchParams.delete('tab');
+            }
+            window.history.replaceState(null, '', url.toString());
+        } catch (e) {}
+
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
     }
 
     return { init, refresh, selectTab };

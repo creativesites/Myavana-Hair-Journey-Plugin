@@ -219,6 +219,210 @@
 }
 
 /* ==========================================================================
+   Composer — Global Reusable Text+Media Input
+   Used for: comment box, reply box, and any future "write something" field.
+   Structure: <div class="myavana-composer"><img class="myavana-composer-avatar">
+   <div class="myavana-composer-main"><div class="myavana-composer-field">
+   <textarea class="myavana-composer-textarea"><button class="myavana-composer-attach">
+   <button class="myavana-composer-send"></div><div class="myavana-composer-preview">
+   </div></div>
+   ========================================================================== */
+.myavana-composer {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.myavana-composer-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--myavana-coral);
+    margin-top: 2px;
+}
+
+.myavana-composer--reply .myavana-composer-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-width: 1.5px;
+}
+
+.myavana-composer-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.myavana-composer-field {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    background: var(--myavana-stone);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-lg);
+    padding: 6px 6px 6px 16px;
+    max-width: 640px;
+    transition: var(--transition-fast);
+}
+
+.myavana-composer-field:focus-within {
+    background: var(--myavana-white);
+    border-color: var(--myavana-coral);
+    box-shadow: 0 0 0 3px rgba(231, 166, 144, 0.12);
+}
+
+.myavana-composer-textarea {
+    flex: 1;
+    min-height: 22px;
+    max-height: 140px;
+    padding: 7px 2px;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    overflow-y: auto;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--myavana-onyx);
+}
+
+.myavana-composer-textarea::placeholder {
+    color: var(--myavana-muted);
+}
+
+.myavana-composer-attach,
+.myavana-composer-send {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.myavana-composer-attach {
+    background: transparent;
+    color: var(--myavana-muted);
+    position: relative;
+}
+
+.myavana-composer-attach:hover {
+    background: rgba(231, 166, 144, 0.15);
+    color: var(--myavana-coral-dark);
+}
+
+.myavana-composer-attach input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.myavana-composer-send {
+    background: var(--myavana-stone-alt);
+    color: var(--myavana-muted);
+    cursor: not-allowed;
+}
+
+.myavana-composer-send.is-active {
+    background: var(--gradient-coral);
+    color: var(--myavana-white);
+    box-shadow: var(--shadow-coral);
+    cursor: pointer;
+}
+
+.myavana-composer-send.is-active:hover {
+    transform: scale(1.08);
+}
+
+.myavana-composer-send.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.myavana-composer-send svg {
+    width: 15px;
+    height: 15px;
+}
+
+.myavana-composer-attach svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Media preview chips (shown while composing, before send) */
+.myavana-composer-preview {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.myavana-composer-preview:empty {
+    display: none;
+}
+
+.myavana-composer-media-chip {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--myavana-border);
+    background: var(--myavana-stone);
+}
+
+.myavana-composer-media-chip img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.myavana-composer-media-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(34, 35, 35, 0.75);
+    color: #fff;
+    border: 0;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myavana-composer-cancel {
+    align-self: flex-start;
+}
+
+@media (max-width: 640px) {
+    .myavana-composer-avatar { width: 30px; height: 30px; min-width: 30px; }
+    .myavana-composer-field { padding: 5px 5px 5px 12px; max-width: none; }
+    .myavana-composer-textarea { font-size: 13px; }
+    .myavana-composer-attach,
+    .myavana-composer-send { width: 28px; height: 28px; }
+}
+
+/* ==========================================================================
    Modals
    ========================================================================== */
 .myavana-modal-backdrop {
@@ -618,3 +822,34 @@
 .myavana-entry-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--myavana-border); }
 .myavana-entry-back { background: none; border: 0; font-size: 12.5px; font-weight: 600; color: var(--myavana-muted); cursor: pointer; padding: 9px 4px; }
 .myavana-entry-back:hover { color: var(--myavana-onyx); }
+
+/* Discovery view — guest landing page */
+.myavana-discovery-wrap { max-width: 900px; margin: 0 auto; text-align: center; padding: var(--space-2xl) var(--space-md) var(--space-3xl); }
+.myavana-discovery-eyebrow { font-size: 13px; margin-bottom: var(--space-md); }
+.myavana-discovery-title { font-size: clamp(28px, 4vw, 38px); line-height: 1.2; margin-bottom: var(--space-md); }
+.myavana-discovery-subtitle { font-size: 16px; color: var(--myavana-muted); max-width: 620px; margin: 0 auto var(--space-2xl); line-height: 1.65; }
+
+.myavana-discovery-action-card { padding: var(--space-2xl); margin-bottom: var(--space-3xl); box-shadow: var(--shadow-medium); text-align: left; }
+.myavana-discovery-action-title { font-size: 20px; margin-bottom: 6px; text-align: center; }
+.myavana-discovery-action-sub { text-align: center; font-size: 13.5px; margin-bottom: var(--space-lg); color: var(--myavana-muted); }
+.myavana-discovery-action-cta { text-align: center; }
+.myavana-discovery-trust-line { align-items: center; color: var(--myavana-muted); display: flex; font-size: 12px; gap: 7px; justify-content: center; margin-top: var(--space-md); }
+
+.myavana-discovery-icon-circle { align-items: center; background: var(--myavana-light-coral); border-radius: 50%; color: var(--myavana-coral-dark); display: flex; flex-shrink: 0; height: 44px; justify-content: center; margin: 0 auto 10px; transition: var(--transition-fast); width: 44px; }
+.myavana-discovery-icon-circle-lg { margin: 0 0 var(--space-md); }
+
+.myavana-discovery-type-grid { display: grid; gap: var(--space-md); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: var(--space-lg); }
+.discovery-type-card { background: var(--myavana-stone); border: 2px solid transparent; border-radius: var(--radius-lg); cursor: pointer; font-family: inherit; padding: var(--space-lg) var(--space-md); text-align: center; transition: var(--transition-fast); }
+.discovery-type-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+.discovery-type-card strong { color: var(--myavana-onyx); font-size: 13.5px; }
+.discovery-type-card.selected { background: var(--myavana-light-coral); border-color: var(--myavana-coral); }
+.discovery-type-card.selected .myavana-discovery-icon-circle { background: var(--myavana-white); }
+.discovery-type-card.selected strong { color: #8c3f2d; }
+
+.myavana-discovery-feature-grid { display: grid; gap: var(--space-lg); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); text-align: left; }
+.myavana-discovery-feature-card h4 { margin-bottom: 6px; }
+.myavana-discovery-feature-card p { color: var(--myavana-muted); font-size: 13.5px; line-height: 1.55; margin: 0; }
+
+@media (max-width: 560px) {
+    .myavana-discovery-type-grid { grid-template-columns: 1fr 1fr; }
+}

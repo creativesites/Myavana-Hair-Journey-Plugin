@@ -60,6 +60,11 @@ if (!function_exists('myavana_normalize_routine_reminder_days')) {
 
 if (!function_exists('myavana_award_progress_milestones')) {
     function myavana_award_progress_milestones($user_id, $entity_type, $entity_key, $previous_progress, $current_progress, $reference_id = null) {
+        // Gamification hasn't been ported to this plugin yet; saving must not fatal without it.
+        if (!function_exists('myavana_award_points') || !class_exists('Myavana_Gamification')) {
+            return;
+        }
+
         $milestones = [25, 50, 75, 100];
 
         foreach ($milestones as $milestone) {
@@ -640,15 +645,20 @@ if (!function_exists('myavana_record_routine_tracking_status')) {
         }
 
         if ($status === 'completed' && $previous_status !== 'completed') {
-            myavana_award_points(
-                $user_id,
-                Myavana_Gamification::get_reward_value('routine_completed', 10),
-                'Routine completed',
-                'routine_completion',
-                $routine_id,
-                'routine_completed:' . $routine_entity_key . ':' . $date,
-                ['date' => $date]
-            );
+            // Points/badges (Myavana_Gamification) haven't been ported to
+            // this plugin yet — skip the bonus rather than fatal-erroring
+            // the whole completion request over it.
+            if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+                myavana_award_points(
+                    $user_id,
+                    Myavana_Gamification::get_reward_value('routine_completed', 10),
+                    'Routine completed',
+                    'routine_completion',
+                    $routine_id,
+                    'routine_completed:' . $routine_entity_key . ':' . $date,
+                    ['date' => $date]
+                );
+            }
 
             $records = myavana_get_routine_tracking_records($user_id);
             $streak = myavana_calculate_routine_streak($routine_item, $records, $routine_id, $date);
@@ -871,6 +881,25 @@ function myavana_add_goal() {
         $goals = [];
     }
 
+    // Idempotency check: prevent duplicate submissions created within 45 seconds
+    $now_ts = current_time('timestamp');
+    foreach ($goals as $existing_index => $existing_goal) {
+        $existing_title = trim($existing_goal['title'] ?? ($existing_goal['goal_title'] ?? ''));
+        $existing_category = trim($existing_goal['goal_category'] ?? '');
+        $created_ts = isset($existing_goal['created_at']) ? strtotime($existing_goal['created_at']) : 0;
+        if (strcasecmp($existing_title, $title) === 0 && strcasecmp($existing_category, $category) === 0) {
+            if ($created_ts && ($now_ts - $created_ts) < 45) {
+                wp_send_json_success([
+                    'message' => 'Goal saved successfully!',
+                    'goal_id' => $existing_index,
+                    'goal' => $existing_goal,
+                    'deduplicated' => true
+                ]);
+                return;
+            }
+        }
+    }
+
     // Create new goal
     $new_goal = [
         'goal_key' => sanitize_key('goal_' . wp_generate_uuid4()),
@@ -919,14 +948,16 @@ function myavana_add_goal() {
     error_log(sprintf('[MYAVANA] Goal added: User=%d, Title=%s', $user_id, $title));
 
     $goal_index = count($goals) - 1;
-    myavana_award_points(
-        $user_id,
-        Myavana_Gamification::get_reward_value('goal_created', 20),
-        'Hair goal created',
-        'goal',
-        $goal_index,
-        'goal_created:' . $new_goal['goal_key']
-    );
+    if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+        myavana_award_points(
+            $user_id,
+            Myavana_Gamification::get_reward_value('goal_created', 20),
+            'Hair goal created',
+            'goal',
+            $goal_index,
+            'goal_created:' . $new_goal['goal_key']
+        );
+    }
     if ($progress > 0) {
         myavana_award_progress_milestones($user_id, 'goal', $new_goal['goal_key'], 0, $progress, $goal_index);
     }
@@ -1053,6 +1084,25 @@ function myavana_add_routine() {
         $routines = [];
     }
 
+    // Idempotency check: prevent duplicate submissions created within 45 seconds
+    $now_ts = current_time('timestamp');
+    foreach ($routines as $existing_index => $existing_routine) {
+        $existing_name = trim($existing_routine['title'] ?? ($existing_routine['routine_title'] ?? ''));
+        $existing_freq = trim($existing_routine['frequency'] ?? ($existing_routine['routine_frequency'] ?? ''));
+        $created_ts = isset($existing_routine['created_at']) ? strtotime($existing_routine['created_at']) : 0;
+        if (strcasecmp($existing_name, $name) === 0 && strcasecmp($existing_freq, $frequency) === 0) {
+            if ($created_ts && ($now_ts - $created_ts) < 45) {
+                wp_send_json_success([
+                    'message' => 'Routine saved successfully!',
+                    'routine_id' => $existing_index,
+                    'routine' => $existing_routine,
+                    'deduplicated' => true
+                ]);
+                return;
+            }
+        }
+    }
+
     // Create new routine
     $new_routine = [
         'routine_key' => sanitize_key('routine_' . wp_generate_uuid4()),
@@ -1095,14 +1145,16 @@ function myavana_add_routine() {
     error_log(sprintf('[MYAVANA] Routine added: User=%d, Name=%s', $user_id, $name));
 
     $routine_index = count($routines) - 1;
-    myavana_award_points(
-        $user_id,
-        Myavana_Gamification::get_reward_value('routine_created', 15),
-        'Hair routine created',
-        'routine',
-        $routine_index,
-        'routine_created:' . $new_routine['routine_key']
-    );
+    if (function_exists('myavana_award_points') && class_exists('Myavana_Gamification')) {
+        myavana_award_points(
+            $user_id,
+            Myavana_Gamification::get_reward_value('routine_created', 15),
+            'Hair routine created',
+            'routine',
+            $routine_index,
+            'routine_created:' . $new_routine['routine_key']
+        );
+    }
 
     wp_send_json_success([
         'message' => 'Routine added successfully!',

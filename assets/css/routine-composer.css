@@ -1,8 +1,7 @@
-/* Route-owned routine composer: the Routines screen must never inherit a bare legacy form. */
 .myavana-routines-v2-page .offcanvas-overlay-hjn {
     position: fixed;
     inset: 0;
-    z-index: 1200;
+    z-index: 999999;
     opacity: 0;
     pointer-events: none;
     background: rgba(34, 35, 35, .52);
@@ -15,7 +14,7 @@
 .myavana-routines-v2-page #routineOffcanvas.offcanvas-hjn {
     position: fixed;
     inset: 0 0 0 auto;
-    z-index: 1201;
+    z-index: 1000000;
     display: flex;
     flex-direction: column;
     width: min(560px, 100vw);
@@ -28,6 +27,26 @@
 }
 
 .myavana-routines-v2-page #routineOffcanvas.offcanvas-hjn.is-open { transform: translateX(0); }
+
+/* Suppress all floating launchers and triggers when offcanvas is open so action buttons are never blocked */
+body.has-active-offcanvas .mya-launcher,
+body.has-active-offcanvas .mya-trigger,
+body.has-active-offcanvas #mya-widget-trigger,
+body.has-active-offcanvas .myavana-chat-trigger,
+body:has(.offcanvas-hjn.is-open) .mya-launcher,
+body:has(.offcanvas-hjn.is-open) .mya-trigger,
+body:has(.offcanvas-hjn.is-open) #mya-widget-trigger,
+body:has(.offcanvas-hjn.is-open) .myavana-chat-trigger,
+body:has(.offcanvas-hjn.active) .mya-launcher,
+body:has(.offcanvas-hjn.active) .mya-trigger,
+body:has(#routineOffcanvas.is-open) .mya-launcher,
+body:has(#routineOffcanvas.is-open) .mya-trigger {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transform: scale(0.7) translateY(18px) !important;
+    transition: opacity .2s ease, transform .2s ease, visibility .2s !important;
+}
 .myavana-routines-v2-page #routineOffcanvas .offcanvas-header-hjn { position: relative; padding: 30px 64px 24px 28px; background: #222323; color: #fff; }
 .myavana-routines-v2-page #routineOffcanvas .offcanvas-title-hjn { margin: 0; color: #fff; font-family: 'Archivo Black', sans-serif; font-size: 24px; letter-spacing: -.03em; }
 .myavana-routines-v2-page #routineOffcanvas .offcanvas-subtitle-hjn { margin: 7px 0 0; color: rgba(255,255,255,.72); font-size: 14px; }

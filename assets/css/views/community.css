@@ -10,6 +10,587 @@
     gap: var(--space-xl);
 }
 
+/* ==========================================================================
+   Guest Community — Instagram-style: a single reading-width feed column
+   with a compact join card, sticky on desktop, banner-style on mobile.
+   Mobile-first: stacked by default, two columns from 992px up.
+   ========================================================================== */
+.myavana-community-guest {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px 16px 64px;
+}
+
+.myavana-community-guest-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas: "sidebar" "feed";
+    gap: 20px;
+}
+
+.myavana-guest-feed { grid-area: feed; min-width: 0; }
+/* The grid item stretches to the full column height and the inner block is
+   what sticks — the one sticky pattern that survives `align-items` changes
+   and short-sidebar/long-feed pairings. */
+.myavana-guest-sidebar { grid-area: sidebar; min-width: 0; align-self: stretch; }
+.myavana-guest-sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Feed column reuses the member post-card styles; just needs its own
+   single-column rhythm since it isn't nested in the member grid-area. */
+.myavana-guest-feed .myavana-feed-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 470px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.myavana-guest-feed .myavana-feed-filters { max-width: 470px; margin-left: auto; margin-right: auto; }
+.myavana-guest-feed .myavana-feed-empty,
+.myavana-guest-feed .myavana-feed-loading { max-width: 470px; margin-left: auto; margin-right: auto; }
+
+/* Join card */
+.myavana-guest-cta-card {
+    padding: 28px 24px;
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, #fff 0%, #fce5d7 100%);
+    box-shadow: var(--shadow-soft);
+    text-align: center;
+}
+.myavana-guest-cta-card .myavana-preheader { display: block; margin-bottom: 8px; }
+.myavana-guest-cta-title {
+    margin: 0 0 10px;
+    font-size: 26px;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+.myavana-guest-cta-card .myavana-body { margin: 0 0 20px; font-size: 14.5px; line-height: 1.6; }
+.myavana-guest-cta-btn { display: block; width: 100%; text-align: center; }
+.myavana-guest-cta-signin {
+    display: block;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--myavana-muted);
+    text-decoration: none;
+}
+.myavana-guest-cta-signin:hover { color: var(--myavana-coral); }
+
+/* Real, computed-server-side numbers — never a placeholder stat. */
+.myavana-guest-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 18px 10px;
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-lg);
+    background: var(--myavana-white);
+    text-align: center;
+}
+.myavana-guest-stats div { display: grid; gap: 2px; }
+.myavana-guest-stats strong { font-family: 'Archivo Black', sans-serif; font-size: 20px; color: var(--myavana-onyx); line-height: 1.1; }
+.myavana-guest-stats span { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--myavana-muted); }
+
+/* Gamified goal picker — a light, low-commitment first step. Progress dots
+   give the two-tap flow a sense of "almost there" before the signup CTA. */
+.myavana-guest-goal-card {
+    padding: 20px;
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-lg);
+    background: var(--myavana-white);
+}
+.myavana-guest-goal-progress { display: flex; gap: 6px; margin-bottom: 14px; }
+.myavana-guest-goal-dot { width: 22px; height: 4px; border-radius: var(--radius-pill); background: var(--myavana-border); transition: background .2s ease; }
+.myavana-guest-goal-dot.active { background: var(--myavana-coral); }
+.myavana-guest-goal-card h3 { margin: 0 0 4px; font-size: 16px; }
+.myavana-guest-goal-hint { margin: 0 0 14px; font-size: 13px; color: var(--myavana-muted); }
+.myavana-guest-goal-options { display: grid; gap: 8px; }
+.myavana-guest-goal-options button {
+    padding: 12px 14px;
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-sm);
+    background: var(--myavana-stone);
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--myavana-onyx);
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease;
+}
+.myavana-guest-goal-options button:hover { border-color: var(--myavana-coral); background: #fff; }
+.myavana-guest-goal-result p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--myavana-muted); }
+.myavana-guest-goal-result strong { color: var(--myavana-onyx); }
+
+/* Trending hashtags / active challenges — real discovery data, reused from
+   the member sidebar's own endpoint (already public/nopriv). */
+.myavana-guest-discovery-card {
+    padding: 18px;
+    border: 1px solid var(--myavana-border);
+    border-radius: var(--radius-lg);
+    background: var(--myavana-white);
+}
+.myavana-guest-discovery-card h3 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--myavana-onyx); }
+
+/* "Why join" list — hidden on mobile to keep the banner compact; the feed
+   does the convincing there. Shown alongside the sticky card on desktop. */
+.myavana-guest-highlights { display: none; }
+.myavana-guest-sidebar-legal { display: none; }
+
+@media (max-width: 991px) {
+    .myavana-community-guest-grid { gap: 16px; }
+    .myavana-guest-cta-card { padding: 22px 20px; border-radius: var(--radius-lg); }
+    .myavana-guest-cta-title { font-size: 21px; }
+}
+
+@media (min-width: 992px) {
+    .myavana-community-guest { padding: 32px 24px 72px; }
+    .myavana-community-guest-grid {
+        grid-template-columns: minmax(0, 630px) 340px;
+        grid-template-areas: "feed sidebar";
+        justify-content: center;
+        gap: 48px;
+        align-items: start;
+    }
+    .myavana-guest-feed .myavana-feed-grid,
+    .myavana-guest-feed .myavana-feed-filters,
+    .myavana-guest-feed .myavana-feed-empty,
+    .myavana-guest-feed .myavana-feed-loading {
+        max-width: 630px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .myavana-guest-sidebar-inner {
+        position: sticky;
+        top: 88px;
+        max-height: calc(100vh - 108px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(34,35,35,.18) transparent;
+        padding-right: 2px;
+    }
+    .myavana-guest-sidebar-inner::-webkit-scrollbar { width: 6px; }
+    .myavana-guest-sidebar-inner::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(34,35,35,.16); }
+    .myavana-guest-sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+    .myavana-guest-cta-title { font-size: 24px; }
+
+    .myavana-guest-highlights {
+        display: grid;
+        gap: 14px;
+        margin: 0;
+        padding: 20px;
+        list-style: none;
+        border: 1px solid var(--myavana-border);
+        border-radius: var(--radius-lg);
+        background: var(--myavana-white);
+    }
+    .myavana-guest-highlights li { display: grid; gap: 3px; }
+    .myavana-guest-highlights strong { font-size: 14px; }
+    .myavana-guest-highlights span { color: var(--myavana-muted); font-size: 13px; line-height: 1.5; }
+
+    .myavana-guest-sidebar-legal {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        padding: 0 4px;
+        color: var(--myavana-muted);
+        font-size: 12px;
+    }
+    .myavana-guest-sidebar-legal a { color: var(--myavana-muted); text-decoration: none; }
+    .myavana-guest-sidebar-legal a:hover { color: var(--myavana-coral); }
+}
+
+/* ==========================================================================
+   Guest post cards — a quiet, modern social surface.
+
+   Deliberately scoped to .myavana-guest-feed so the member feed keeps its
+   current look: these override the shared social-feed.css card styles only
+   for visitors. Design intent: hairline borders instead of drop shadows,
+   media edge-to-edge and never letterboxed, one clear accent (coral), and
+   whitespace doing the structural work.
+   ========================================================================== */
+.myavana-guest-feed .myavana-post-card {
+    position: relative;
+    border: 1px solid rgba(34, 35, 35, 0.08);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: none;
+    overflow: hidden;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.myavana-guest-feed .myavana-post-card:hover {
+    transform: none;
+    border-color: rgba(34, 35, 35, 0.14);
+    box-shadow: 0 6px 28px rgba(34, 35, 35, 0.06);
+}
+.myavana-guest-feed .myavana-feed-grid { gap: 20px; }
+
+/* --- Header ------------------------------------------------------------ */
+.myavana-guest-feed .myavana-post-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 14px;
+    border-bottom: 0;
+}
+.myavana-guest-feed .myavana-post-avatar {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--myavana-stone);
+}
+/* Monogram stand-in for members with no avatar image — a branded initial
+   beats a grey silhouette, and it never leaves a broken-image gap. */
+.myavana-guest-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    color: #fff;
+    font-family: 'Archivo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    user-select: none;
+}
+.myavana-guest-feed .myavana-post-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+.myavana-guest-feed .myavana-post-username {
+    margin: 0;
+    font-family: 'Archivo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--myavana-onyx);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.myavana-guest-feed .myavana-post-time {
+    font-size: 12px;
+    color: var(--myavana-muted);
+    line-height: 1.3;
+}
+.myavana-guest-feed .myavana-verified-journey-badge {
+    align-self: flex-start;
+    padding: 1px 7px;
+    border-radius: var(--radius-pill);
+    background: rgba(231, 166, 144, .18);
+    color: #a55b3c;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.myavana-guest-feed .myavana-post-header-meta { margin-left: auto; }
+.myavana-guest-feed .myavana-post-type-badge {
+    padding: 4px 10px;
+    border: 1px solid rgba(34, 35, 35, 0.1);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--myavana-muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* --- Media ------------------------------------------------------------- */
+/* Every media item fills a fixed 4:5 frame (the portrait ratio social feeds
+   settled on) so a mixed feed of phone photos, screenshots and stills reads
+   as one clean column instead of a ragged stack of different heights. */
+.myavana-guest-feed .myavana-post-image-wrapper,
+.myavana-guest-feed .myavana-post-video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(110deg, #f2f2f4 30%, #e9e9ec 50%, #f2f2f4 70%);
+    background-size: 200% 100%;
+    animation: myavana-guest-shimmer 1.4s ease-in-out infinite;
+    cursor: zoom-in;
+}
+.myavana-guest-feed .myavana-post-image-wrapper[data-loaded="1"],
+.myavana-guest-feed .myavana-post-video-wrapper { animation: none; }
+.myavana-guest-feed .myavana-post-image,
+.myavana-guest-feed .myavana-post-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform .5s cubic-bezier(.2, .7, .3, 1), opacity .35s ease;
+}
+.myavana-guest-feed .myavana-post-image-wrapper .myavana-post-image { opacity: 0; }
+.myavana-guest-feed .myavana-post-image-wrapper[data-loaded="1"] .myavana-post-image { opacity: 1; }
+.myavana-guest-feed .myavana-post-card:hover .myavana-post-image { transform: scale(1.025); }
+.myavana-guest-feed .myavana-post-video-wrapper { cursor: default; }
+
+@keyframes myavana-guest-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* A text-only post shouldn't read as a card with a hole in it: give it a
+   deliberate typographic panel so the column stays visually even. */
+.myavana-guest-feed .myavana-post-card[data-media="text"] .myavana-post-content {
+    padding: 26px 22px 20px;
+    background: linear-gradient(150deg, #fdf7f4 0%, #fbeee7 100%);
+    border-top: 1px solid rgba(34, 35, 35, 0.05);
+    border-bottom: 1px solid rgba(34, 35, 35, 0.05);
+}
+.myavana-guest-feed .myavana-post-card[data-media="text"] .myavana-post-text {
+    font-size: 16.5px;
+    line-height: 1.62;
+}
+
+/* --- Body -------------------------------------------------------------- */
+.myavana-guest-feed .myavana-post-content { padding: 14px 16px 4px; }
+.myavana-guest-feed .myavana-post-title {
+    margin: 0 0 6px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--myavana-onyx);
+}
+.myavana-guest-feed .myavana-post-text {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #3a3b3c;
+}
+.myavana-guest-feed .myavana-post-text.truncated {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.myavana-guest-feed .myavana-read-more {
+    display: inline-block;
+    margin-top: 5px;
+    color: var(--myavana-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.myavana-guest-feed .myavana-read-more:hover { color: var(--myavana-coral); }
+.myavana-guest-feed .myavana-post-hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.myavana-guest-feed .myavana-post-hashtag {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #7a6b64;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.myavana-guest-feed .myavana-post-hashtag:hover { color: var(--myavana-coral); }
+
+/* --- Actions ----------------------------------------------------------- */
+/* Icon rail first, counts underneath as plain language — the pattern people
+   already read fluently from every other feed they use. */
+.myavana-guest-feed .myavana-post-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 10px 4px;
+    border-top: 0;
+}
+.myavana-guest-feed .myavana-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--myavana-onyx);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .18s ease, color .18s ease, background .18s ease;
+}
+.myavana-guest-feed .myavana-action-btn:hover {
+    background: rgba(34, 35, 35, .045);
+    color: var(--myavana-coral);
+}
+.myavana-guest-feed .myavana-action-btn:active { transform: scale(.9); }
+.myavana-guest-feed .myavana-action-btn svg { width: 21px; height: 21px; stroke-width: 1.7; }
+.myavana-guest-feed .myavana-action-btn .reaction-display { font-size: 18px; line-height: 1; }
+.myavana-guest-feed .myavana-action-btn .myavana-action-count { font-variant-numeric: tabular-nums; }
+.myavana-guest-feed .bookmark-btn { margin-left: auto; }
+/* The reaction picker and report control are member-only affordances; for a
+   visitor they'd be dead weight in the rail. */
+.myavana-guest-feed .myavana-reactions-picker,
+.myavana-guest-feed .myavana-ci-report-btn,
+.myavana-guest-feed .myavana-post-comments { display: none !important; }
+.myavana-guest-feed .myavana-reaction-counts {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px;
+}
+.myavana-guest-feed .myavana-reaction-count-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    color: var(--myavana-muted);
+}
+
+/* Double-tap heart burst — a small, familiar delight that doubles as the
+   conversion moment for a visitor. */
+.myavana-guest-heart-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 92px;
+    height: 92px;
+    margin: -46px 0 0 -46px;
+    pointer-events: none;
+    opacity: 0;
+    color: #fff;
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, .35));
+    animation: myavana-guest-burst .9s cubic-bezier(.2, .8, .3, 1) forwards;
+    z-index: 3;
+}
+@keyframes myavana-guest-burst {
+    0%   { opacity: 0; transform: scale(.4); }
+    18%  { opacity: 1; transform: scale(1.12); }
+    32%  { transform: scale(.96); }
+    45%  { transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.03); }
+}
+
+/* --- Skeletons --------------------------------------------------------- */
+.myavana-guest-skeleton {
+    border: 1px solid rgba(34, 35, 35, 0.08);
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+}
+.myavana-guest-skeleton-row { display: flex; align-items: center; gap: 11px; padding: 13px 14px; }
+.myavana-guest-skeleton-bone {
+    background: linear-gradient(110deg, #f0f0f2 30%, #e7e7ea 50%, #f0f0f2 70%);
+    background-size: 200% 100%;
+    animation: myavana-guest-shimmer 1.4s ease-in-out infinite;
+    border-radius: 6px;
+}
+.myavana-guest-skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; }
+.myavana-guest-skeleton-lines { display: grid; gap: 6px; flex: 1; }
+.myavana-guest-skeleton-media { width: 100%; aspect-ratio: 4 / 5; border-radius: 0; }
+.myavana-guest-skeleton-foot { display: grid; gap: 8px; padding: 14px 16px 18px; }
+/* Replaces the spinner's centred padding with the same rhythm as the feed. */
+.myavana-guest-feed .myavana-feed-loading.myavana-guest-skeleton-stack {
+    display: grid;
+    gap: 20px;
+    padding: 0;
+    text-align: left;
+}
+
+/* --- In-feed join card ------------------------------------------------- */
+/* Placed a few posts deep, once the feed has already earned some interest. */
+.myavana-guest-feed-cta {
+    padding: 30px 26px;
+    border: 1px solid rgba(231, 166, 144, .5);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fffaf7 0%, #fbe4d8 100%);
+    text-align: center;
+}
+.myavana-guest-feed-cta h3 {
+    margin: 0 0 8px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 21px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--myavana-onyx);
+}
+.myavana-guest-feed-cta p {
+    margin: 0 auto 18px;
+    max-width: 330px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #5f5a57;
+}
+.myavana-guest-feed-cta .myavana-btn { min-width: 220px; }
+
+/* --- Lightbox ---------------------------------------------------------- */
+/* Visitors get to actually look at the work — media opens full-size, and
+   only social actions are gated. */
+.myavana-guest-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background: rgba(18, 18, 20, .92);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity .22s ease;
+}
+.myavana-guest-lightbox[data-open="1"] { opacity: 1; }
+.myavana-guest-lightbox img {
+    max-width: min(1100px, 100%);
+    max-height: 100%;
+    border-radius: 10px;
+    object-fit: contain;
+    transform: scale(.97);
+    transition: transform .22s cubic-bezier(.2, .8, .3, 1);
+}
+.myavana-guest-lightbox[data-open="1"] img { transform: scale(1); }
+.myavana-guest-lightbox-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .18s ease;
+}
+.myavana-guest-lightbox-close:hover { background: rgba(255, 255, 255, .22); }
+
+@media (prefers-reduced-motion: reduce) {
+    .myavana-guest-feed .myavana-post-image,
+    .myavana-guest-lightbox,
+    .myavana-guest-lightbox img { transition: none; }
+    .myavana-guest-feed .myavana-post-image-wrapper,
+    .myavana-guest-skeleton-bone,
+    .myavana-guest-skeleton-media { animation: none; }
+    .myavana-guest-heart-burst { animation-duration: .01ms; }
+}
+
 @media (min-width: 992px) {
     .myavana-community-layout {
         grid-template-columns: 1.8fr 1fr;

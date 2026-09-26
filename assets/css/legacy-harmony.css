@@ -1,0 +1,84 @@
+/**
+ * Legacy Harmony
+ *
+ * Routines, Goals, and Community are the complete ported legacy
+ * experiences (routines-page-redesign.css, goals-page-redesign.css,
+ * social-feed.css) — their layouts and behaviour are untouched. But each
+ * one shipped its own accent color ("blueberry" #4a4d68, "amber" #c49a3c)
+ * layered on top of the shared coral/onyx palette, which is what made
+ * Goals' banner read as a different app from Today/Timeline/Profile.
+ *
+ * This file retints those two accents back onto --myavana-onyx and
+ * --myavana-coral-dark wherever they're driven by a CSS custom property,
+ * plus the handful of spots where the old color was hardcoded instead of
+ * using the variable. It is enqueued after every legacy stylesheet so it
+ * wins the cascade on source order alone, no !important needed.
+ *
+ * @package Myavana\Next
+ */
+
+/* ---------------------------------------------------------------------
+   Goals (goals-page-redesign.css)
+   --------------------------------------------------------------------- */
+.myavana-goals-v2-page {
+    --gv2-blueberry: var(--myavana-onyx);
+    --gv2-bb-light: rgba(var(--myavana-onyx-rgb), 0.06);
+    --gv2-bb-mid: rgba(var(--myavana-onyx-rgb), 0.14);
+    --gv2-amber: var(--myavana-coral-dark);
+    --gv2-amber-bg: rgba(212, 149, 111, 0.12);
+    --gv2-amber-mid: rgba(212, 149, 111, 0.28);
+}
+
+.myavana-goals-v2-page .myavana-gv2 {
+    background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.52)),
+        radial-gradient(circle at 8% -8%, rgba(231, 166, 144, 0.18), transparent 36%),
+        radial-gradient(circle at 100% 0%, rgba(var(--myavana-onyx-rgb), 0.08), transparent 38%),
+        rgba(245, 245, 247, 0.9);
+}
+
+.myavana-goals-v2-page .myavana-gv2-overview {
+    background: var(--gradient-onyx);
+}
+
+.myavana-gv2-confirm-actions button {
+    color: var(--myavana-onyx);
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert {
+    box-shadow: 0 12px 28px rgba(212, 149, 111, 0.1);
+}
+
+.myavana-goals-v2-page .myavana-gv2-alert .close {
+    border-color: rgba(var(--myavana-onyx-rgb), 0.16);
+}
+
+.myavana-goals-v2-page .myavana-gv2-card-strip.strip-amber,
+.myavana-goals-v2-page .fill.pf-amber {
+    background: linear-gradient(90deg, var(--myavana-coral-dark), var(--myavana-coral));
+}
+
+.myavana-goals-v2-page .myavana-gv2-create-card {
+    border-color: rgba(var(--myavana-coral-rgb), 0.4);
+}
+
+.myavana-goals-v2-page .impact {
+    background: linear-gradient(180deg, rgba(var(--myavana-onyx-rgb), 0.06), rgba(255, 255, 255, 0.46));
+}
+
+/* ---------------------------------------------------------------------
+   Routines (routines-page-redesign.css)
+   --------------------------------------------------------------------- */
+.myavana-routines-v2-page {
+    --rv2-blueberry: var(--myavana-onyx);
+    --rv2-bb-light: rgba(var(--myavana-onyx-rgb), 0.06);
+    --rv2-bb-mid: rgba(var(--myavana-onyx-rgb), 0.14);
+}
+
+/* ---------------------------------------------------------------------
+   Community (social-feed.css) — blueberry drives most link/active states
+   here, so retinting the single variable carries through the whole feed.
+   --------------------------------------------------------------------- */
+#view-community {
+    --myavana-blueberry: var(--myavana-onyx);
+}

@@ -6,60 +6,32 @@
 .myavana-auth-message { border-radius: var(--radius-md); font-size: 13px; margin-bottom: var(--space-md); padding: 12px 14px; }
 .myavana-auth-message.is-error { background: rgba(197, 63, 43, .08); color: #a5372c; }
 .myavana-auth-message.is-success { background: rgba(63, 122, 92, .1); color: #3f7a5c; }
-.myavana-auth-message-action { display: block; font-weight: 700; margin-top: 6px; text-decoration: underline; }
 .myavana-auth-panel.active { display: block; }
 .myavana-google-auth-wrap { display: flex; justify-content: center; margin-bottom: var(--space-md); min-height: 44px; }
 .myavana-google-auth-slot { width: 100%; }
-.myavana-google-auth-fallback { background: var(--myavana-stone); border: 1px dashed var(--myavana-border-hover); border-radius: var(--radius-md); color: var(--myavana-muted); font-size: 12.5px; padding: 12px 14px; text-align: center; }
 .myavana-auth-divider { align-items: center; color: var(--myavana-muted); display: flex; font-size: 12px; font-weight: 700; gap: 12px; letter-spacing: .06em; margin: var(--space-md) 0; text-transform: uppercase; }
 .myavana-auth-divider::before, .myavana-auth-divider::after { background: var(--myavana-border); content: ""; flex: 1; height: 1px; }
 .myavana-auth-checkbox { align-items: flex-start; color: var(--myavana-muted); display: flex; font-size: 12.5px; gap: 8px; line-height: 1.5; margin: var(--space-xs) 0 var(--space-lg); }
 .myavana-auth-checkbox input { accent-color: var(--myavana-coral); margin-top: 2px; }
 .myavana-auth-checkbox a { color: var(--myavana-coral-dark); }
 .myavana-auth-hint { color: var(--myavana-muted); font-size: 11.5px; margin: 6px 0 0; }
-.myavana-auth-panel-intro { color: var(--myavana-muted); font-size: 13.5px; line-height: 1.5; margin: 0 0 var(--space-lg); }
+.myavana-auth-row { align-items: center; display: flex; justify-content: space-between; gap: var(--space-md); margin: var(--space-xs) 0 var(--space-lg); }
+.myavana-auth-row .myavana-auth-checkbox { margin: 0; }
+.myavana-auth-link { background: none; border: 0; color: var(--myavana-coral-dark); cursor: pointer; font-size: 12.5px; font-weight: 700; padding: 0; white-space: nowrap; }
+.myavana-auth-link:hover { text-decoration: underline; }
+.myavana-auth-back-link { color: var(--myavana-muted); display: block; margin-top: var(--space-md); text-align: center; width: 100%; }
+.myavana-auth-panel-intro { color: var(--myavana-muted); font-size: 13.5px; line-height: 1.6; margin: 0 0 var(--space-lg); }
 
-.myavana-auth-label-row { align-items: baseline; display: flex; justify-content: space-between; }
-.myavana-auth-inline-link { color: var(--myavana-coral-dark); font-size: 12.5px; font-weight: 600; }
-.myavana-auth-link-btn { background: none; border: 0; color: var(--myavana-muted); cursor: pointer; display: block; font-size: 13px; font-weight: 600; margin: var(--space-md) auto 0; padding: 4px; text-align: center; width: 100%; }
-.myavana-auth-link-btn:hover { color: var(--myavana-onyx); }
-
-.myavana-password-field { position: relative; }
-.myavana-password-field .myavana-input { padding-right: 44px; }
-.myavana-password-toggle {
-    align-items: center;
-    background: none;
-    border: 0;
-    border-radius: var(--radius-sm);
-    color: var(--myavana-muted);
-    cursor: pointer;
-    display: flex;
-    height: 32px;
-    justify-content: center;
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
+/* .myavana-input's default border is rgba(onyx, 0.08) — nearly invisible on
+   this card's white background, so fields read as unbounded/uneditable.
+   Give auth inputs a filled, clearly-bounded look befitting a first
+   impression of the product. */
+.myavana-auth-card .myavana-input {
+    background: var(--myavana-stone);
+    border-color: var(--myavana-border-hover);
 }
-.myavana-password-toggle:hover { color: var(--myavana-onyx); }
-.myavana-password-toggle:focus-visible { outline: 2px solid var(--myavana-coral); outline-offset: 1px; }
-.myavana-password-toggle svg { height: 19px; width: 19px; }
-.myavana-password-toggle .icon-eye-off { display: none; }
-.myavana-password-toggle.is-visible .icon-eye { display: none; }
-.myavana-password-toggle.is-visible .icon-eye-off { display: block; }
-
-.myavana-password-meter { margin-top: 8px; max-height: 0; opacity: 0; overflow: hidden; transition: var(--transition-fast); }
-.myavana-password-meter.is-visible { max-height: 160px; opacity: 1; margin-top: 10px; }
-.myavana-password-meter-bar { background: var(--myavana-stone-alt); border-radius: var(--radius-pill); height: 4px; overflow: hidden; }
-.myavana-password-meter-bar span { background: #c5432b; border-radius: var(--radius-pill); display: block; height: 100%; transition: width .2s ease, background-color .2s ease; width: 0; }
-.myavana-password-meter[data-strength="3"] .myavana-password-meter-bar span,
-.myavana-password-meter[data-strength="4"] .myavana-password-meter-bar span { background: #b5872a; }
-.myavana-password-meter[data-strength="5"] .myavana-password-meter-bar span { background: #3f7a5c; }
-.myavana-password-meter-rules { display: grid; gap: 4px; grid-template-columns: 1fr 1fr; list-style: none; margin: 8px 0 0; padding: 0; }
-.myavana-password-meter-rules li { color: var(--myavana-muted); font-size: 11.5px; padding-left: 16px; position: relative; }
-.myavana-password-meter-rules li::before { content: "○"; left: 0; position: absolute; font-size: 9px; top: 3px; }
-.myavana-password-meter-rules li.is-met { color: #3f7a5c; }
-.myavana-password-meter-rules li.is-met::before { content: "●"; }
+.myavana-auth-card .myavana-input:focus {
+    background: var(--myavana-white);
+}
 
 @media (max-width: 480px) { .myavana-auth-card { padding: var(--space-xl) var(--space-lg); } }

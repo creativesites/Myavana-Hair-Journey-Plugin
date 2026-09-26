@@ -19,6 +19,7 @@ if (!defined('ABSPATH')) {
         <span><?php esc_html_e('Home', 'myavana-hair-journey-next'); ?></span>
     </a>
 
+    <?php if (is_user_logged_in()) : ?>
     <!-- Tab 1: Today -->
     <a href="#today" class="myavana-next-tab-item active" data-tab="today">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -64,4 +65,14 @@ if (!defined('ABSPATH')) {
         </svg>
         <span><?php esc_html_e('Community', 'myavana-hair-journey-next'); ?></span>
     </a>
+    <?php else : ?>
+    <a href="#community" class="myavana-next-tab-item" data-tab="community">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
+        <span><?php esc_html_e('Community', 'myavana-hair-journey-next'); ?></span>
+    </a>
+    <a href="#auth" class="myavana-next-tab-item" data-open-auth="signup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M3 12h18" stroke-linecap="round" /></svg>
+        <span><?php esc_html_e('Join', 'myavana-hair-journey-next'); ?></span>
+    </a>
+    <?php endif; ?>
 </nav>

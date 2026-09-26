@@ -114,6 +114,9 @@
 .myavana-journey-share-destinations { display: flex; flex-direction: column; gap: 8px; }
 .myavana-journey-share-destinations button { align-items: center; background: var(--myavana-white); border: 1px solid var(--myavana-border); border-radius: var(--radius-md); cursor: pointer; display: flex; font-size: 13.5px; font-weight: 600; justify-content: space-between; padding: 13px 16px; }
 .myavana-journey-share-destinations button:hover { border-color: var(--myavana-border-hover); }
+.myavana-journey-share-destinations button:disabled { color: var(--myavana-muted); cursor: not-allowed; opacity: 0.55; }
+.myavana-journey-share-destinations button:disabled:hover { border-color: var(--myavana-border); }
+.myavana-journey-share-destinations button:disabled span { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 
 @media (max-width: 780px) {
     .myavana-journey-stats { grid-template-columns: repeat(2, 1fr); }

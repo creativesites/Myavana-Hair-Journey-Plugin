@@ -22,6 +22,8 @@ class Assets {
      * manual version bump (and fighting the browser's cache in the
      * meantime).
      */
+    private static bool $enqueued = false;
+
     private static function ver(string $relativePath): string {
         $path = MYAVANA_NEXT_PATH . $relativePath;
         return file_exists($path) ? (string) filemtime($path) : MYAVANA_NEXT_VERSION;
@@ -31,6 +33,15 @@ class Assets {
      * Enqueue frontend assets for MYAVANA Next
      */
     public static function enqueue(): void {
+        if (self::$enqueued) {
+            return;
+        }
+        self::$enqueued = true;
+
+        // Forcefully dequeue legacy Kommunicate scripts if the third-party plugin is still active
+        wp_dequeue_script('plugin_chat_script');
+        wp_dequeue_style('plugin_chat_style');
+
         // Enqueue Google Fonts
         wp_enqueue_style(
             'myavana-next-fonts',
@@ -109,6 +120,18 @@ class Assets {
             self::ver('assets/js/share-to-community.js'),
             true
         );
+        // Visitor-only enhancement layer over the shared feed renderer:
+        // monogram avatars, media lightbox, in-feed join card, skeletons.
+        if (!is_user_logged_in()) {
+            wp_enqueue_script(
+                'myavana-community-guest-js',
+                MYAVANA_NEXT_URL . 'assets/js/community-guest.js',
+                ['myavana-social-feed-js'],
+                self::ver('assets/js/community-guest.js'),
+                true
+            );
+        }
+
         wp_enqueue_style('myavana-entry-selector-css', MYAVANA_NEXT_URL . 'assets/css/entry-selector.css', ['myavana-social-feed-css'], self::ver('assets/css/entry-selector.css'));
         wp_enqueue_script('myavana-entry-selector-js', MYAVANA_NEXT_URL . 'assets/js/entry-selector.js', ['jquery', 'myavana-social-feed-js'], self::ver('assets/js/entry-selector.js'), true);
 
@@ -122,6 +145,29 @@ class Assets {
         wp_enqueue_style('myavana-routine-composer', MYAVANA_NEXT_URL . 'assets/css/routine-composer.css', ['myavana-routines-page-redesign'], self::ver('assets/css/routine-composer.css'));
         wp_enqueue_style('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/css/goals-page-redesign.css', ['myavana-goal-routine-pages'], self::ver('assets/css/goals-page-redesign.css'));
         wp_enqueue_style('myavana-goal-composer', MYAVANA_NEXT_URL . 'assets/css/goal-composer.css', ['myavana-goals-page-redesign'], self::ver('assets/css/goal-composer.css'));
+
+        // Retints the ported Routines/Goals/Community stylesheets above onto
+        // the shared coral/onyx palette. Depends on all of them (plus the
+        // tokens they need) so it always loads last and wins the cascade
+        // without !important.
+        wp_enqueue_style('myavana-legacy-harmony', MYAVANA_NEXT_URL . 'assets/css/legacy-harmony.css', [
+            'myavana-next-tokens',
+            'myavana-routine-composer',
+            'myavana-goal-composer',
+            'myavana-social-feed-css',
+        ], self::ver('assets/css/legacy-harmony.css'));
+
+        // Phones: every drawer/modal becomes a bottom sheet above the tab bar,
+        // and the Mya launcher moves out of the way. Must load after every
+        // stylesheet whose components it reshapes.
+        wp_enqueue_style('myavana-mobile-sheets', MYAVANA_NEXT_URL . 'assets/css/mobile-sheets.css', [
+            'myavana-next-layout',
+            'myavana-next-components',
+            'myavana-legacy-harmony',
+            'myavana-entry-selector-css',
+            'myavana-onboarding-wizard',
+        ], self::ver('assets/css/mobile-sheets.css'));
+
         wp_enqueue_script('myavana-lucide', 'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js', [], '0.469.0', true);
         wp_enqueue_script('myavana-routines-page-redesign', MYAVANA_NEXT_URL . 'assets/js/routines-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/routines-page-redesign.js'), true);
         wp_enqueue_script('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/js/goals-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/goals-page-redesign.js'), true);
@@ -144,6 +190,7 @@ class Assets {
                 'deleteRoutineNonce' => wp_create_nonce('myavana_delete_routine'),
                 'toggleRoutineNonce' => wp_create_nonce('myavana_toggle_routine_completion'),
                 'nonce' => wp_create_nonce('myavana_nonce'),
+                'goalsUrl' => home_url('/goals/'),
             ]);
             self::$goalRoutineSettingsLocalized = true;
         }
@@ -152,7 +199,8 @@ class Assets {
         $modules = [
             'store' => 'assets/js/store.js',
             'api' => 'assets/js/api.js',
-            'mod-kommunicate' => 'assets/js/modules/kommunicate.js',
+            'mya-widget-core' => 'assets/js/myavana-widget.js',
+            'mod-mya-widget' => 'assets/js/modules/mya-widget-embed.js',
             'mod-smart-entry' => 'assets/js/modules/smart-entry.js',
             'mod-compare-slider' => 'assets/js/modules/compare-slider.js',
             'mod-today' => 'assets/js/modules/today.js',
@@ -215,6 +263,16 @@ class Assets {
             }
         }
 
+        $chatApiBase = defined('MYAVANA_CHAT_API_BASE') ? MYAVANA_CHAT_API_BASE : get_option('myavana_next_chat_api_base', 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app');
+        if (strpos($chatApiBase, 'localhost:8080') !== false || strpos($chatApiBase, '127.0.0.1:8080') !== false) {
+            $socket = @fsockopen('127.0.0.1', 8080, $errno, $errstr, 0.05);
+            if ($socket) {
+                fclose($socket);
+            } else {
+                $chatApiBase = 'https://myavana-ai-bot-staging-201873778892.us-central1.run.app';
+            }
+        }
+
         wp_localize_script('myavana-next-app', 'myavanaNextData', [
             'restUrl' => esc_url_raw(rest_url('myavana/v1/')),
             'nonce' => wp_create_nonce('wp_rest'),
@@ -227,6 +285,7 @@ class Assets {
             'registerUrl' => wp_registration_url(),
             'googleAuthEnabled' => $googleAuth->isEnabled(),
             'googleClientId' => $googleAuth->getClientId(),
+            'chatApiBase' => $chatApiBase,
         ]);
     }
 }

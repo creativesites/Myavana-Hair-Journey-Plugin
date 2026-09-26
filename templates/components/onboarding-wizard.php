@@ -159,13 +159,35 @@ $routinePresets = [
             </button>
         </div>
 
-        <!-- COMPLETION -->
+        <!-- COMPLETION: Personalized Hair Blueprint -->
         <div class="myavana-onboarding-step myavana-onboarding-complete" data-onboarding-step="complete">
             <span class="myavana-onboarding-complete-mark" aria-hidden="true">✓</span>
-            <h2><?php esc_html_e('Your journey is ready', 'myavana-hair-journey-next'); ?></h2>
-            <p class="myavana-onboarding-subtitle"><?php esc_html_e("We've saved your hair profile — Today will start reflecting it right away.", 'myavana-hair-journey-next'); ?></p>
+            <h2><?php esc_html_e('Your Hair Blueprint is Ready', 'myavana-hair-journey-next'); ?></h2>
+            <p class="myavana-onboarding-subtitle"><?php esc_html_e("We've mapped your unique texture profile to an actionable care plan.", 'myavana-hair-journey-next'); ?></p>
+
+            <div class="myavana-blueprint-card" id="myavana-blueprint-card" style="background: rgba(204, 168, 112, 0.08); border: 1px solid rgba(204, 168, 112, 0.35); border-radius: 12px; padding: 20px; text-align: left; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(204, 168, 112, 0.2); padding-bottom: 8px;">
+                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--myavana-gold, #cca870); font-weight: 700;">Diagnostic Blueprint</span>
+                    <span style="font-size: 12px; font-weight: 600;" id="myavana-blueprint-type">Type 4</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; margin-bottom: 12px;">
+                    <div>
+                        <span style="display: block; font-size: 11px; color: var(--myavana-stone-dark, #888);">Porosity &amp; Moisture</span>
+                        <strong id="myavana-blueprint-porosity" style="color: var(--myavana-onyx, #222);">Balanced</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 11px; color: var(--myavana-stone-dark, #888);">Care Focus</span>
+                        <strong id="myavana-blueprint-goal" style="color: var(--myavana-onyx, #222);">Moisture &amp; Health</strong>
+                    </div>
+                </div>
+                <div style="background: #fff; border-radius: 8px; padding: 12px; border-left: 3px solid var(--myavana-gold, #cca870); font-size: 12px;">
+                    <strong style="display: block; margin-bottom: 2px;">Day 1 Starting Action:</strong>
+                    <span id="myavana-blueprint-action">Capture your baseline hair photo on the Today dashboard to track genuine visual curl progress over the next 90 days.</span>
+                </div>
+            </div>
+
             <button type="button" class="myavana-btn myavana-btn-primary myavana-btn-block myavana-btn-lg" id="myavana-onboarding-go-to-today">
-                <?php esc_html_e('Go to Today', 'myavana-hair-journey-next'); ?>
+                <?php esc_html_e('Explore Today & Take Baseline Photo', 'myavana-hair-journey-next'); ?>
             </button>
         </div>
     </div>

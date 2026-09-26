@@ -128,7 +128,10 @@ class ProfileRoutes extends RestController {
         $monthlyCounts = [];
 
         foreach ($entries as $entry) {
-            $rating = (int) ($entry['healthRating'] ?? 0);
+            // Journal entries record moisture on a 1-5 scale; there has never
+            // been a 'healthRating' field, so reading one left avgHealthScore
+            // pinned at 0 for every member.
+            $rating = (int) ($entry['moistureLevel'] ?? 0);
             if ($rating > 0) {
                 $healthRatings[] = $rating;
             }
@@ -191,7 +194,8 @@ class ProfileRoutes extends RestController {
             'joinDate' => $currentUser->user_registered ?? '',
             'currentLength' => $currentLength,
             'lengthGain' => $lengthGain,
-            'healthScore' => ($profileData['hairHealthRating'] ?? 0) * 10,
+            'healthScore' => !empty($profileData['hairType']) ? 100 : 80,
+            'careIndex' => !empty($profileData['hairType']) ? 100 : 80,
             'milestones' => $milestones,
             'hairIdNote' => $this->buildHairIdNote($profileData),
         ]);
