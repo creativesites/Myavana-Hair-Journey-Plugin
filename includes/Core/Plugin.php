@@ -168,9 +168,6 @@ class Plugin {
         }
     }
 
-    /**
-     * Register REST API routes
-     */
     public function preventRestResponseCaching($response, $server, $request) {
         if ($response instanceof \WP_REST_Response && strpos($request->get_route(), '/myavana/v1/') === 0) {
             foreach (wp_get_nocache_headers() as $name => $value) {
@@ -182,6 +179,9 @@ class Plugin {
         return $response;
     }
 
+    /**
+     * Register REST API routes
+     */
     public function registerRestRoutes(): void {
         (new InitRoutes())->registerRoutes();
         (new TodayRoutes())->registerRoutes();
