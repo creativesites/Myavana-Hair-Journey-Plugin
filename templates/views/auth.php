@@ -20,6 +20,11 @@ $hasResetLink = !empty($resetLogin) && !empty($resetKey);
 <section class="myavana-next-view myavana-auth-view" id="view-auth" aria-label="<?php esc_attr_e('Sign in or create an account', 'myavana-hair-journey-next'); ?>" style="display:none;" data-initial-mode="<?php echo $hasResetLink ? 'reset' : 'signin'; ?>">
     <div class="myavana-auth-wrap">
         <div class="myavana-card myavana-auth-card">
+            <div class="myavana-auth-intro">
+                <img src="<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="MYAVANA" class="myavana-auth-logo" />
+                <h1><?php esc_html_e('Your hair story starts here', 'myavana-hair-journey-next'); ?></h1>
+                <p><?php esc_html_e('Log what you try, see what works, and keep the moments you\'re proud of.', 'myavana-hair-journey-next'); ?></p>
+            </div>
             <div class="myavana-auth-toggle" role="tablist" id="myavana-auth-main-toggle" <?php echo $hasResetLink ? 'style="display:none;"' : ''; ?>>
                 <button type="button" class="myavana-auth-toggle-btn active" id="myavana-auth-tab-signin" role="tab" aria-selected="true" aria-controls="myavana-auth-signin-panel">
                     <?php esc_html_e('Sign In', 'myavana-hair-journey-next'); ?>

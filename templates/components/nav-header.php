@@ -62,11 +62,17 @@ if ($is_logged_in) {
                     <?php esc_html_e('Today', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
                 </a>
                 <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your private progress timeline">
-                    <?php esc_html_e('My Journey', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
+                    <?php esc_html_e('My Timeline', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
                 </a>
+<?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
                 <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your personalized routines and goals">
                     <?php esc_html_e('Routines', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
                 </a>
+                <?php else : ?>
+                <a href="#auth" class="myavana-next-nav-link myavana-next-nav-locked" data-open-auth="signup" data-guard-label="Your hair goals">
+                    <?php esc_html_e('Goals', 'myavana-hair-journey-next'); ?><span aria-hidden="true">⌁</span>
+                </a>
+                <?php endif; ?>
                 <?php endif; ?>
             </nav>
 

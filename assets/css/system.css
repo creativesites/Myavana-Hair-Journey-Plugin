@@ -301,3 +301,67 @@ body .myavana-modal-backdrop .myavana-textarea::placeholder {
         flex-wrap: wrap;
     }
 }
+
+/* ---------------------------------------------------------------- Auth */
+
+#myavana-next-root .myavana-auth-intro {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+#myavana-next-root .myavana-auth-logo {
+    display: block;
+    width: 120px;
+    height: auto;
+    margin: 0 auto 18px;
+}
+
+#myavana-next-root .myavana-auth-intro h1 {
+    margin: 0 0 8px;
+    color: var(--ds-onyx);
+    font-size: 24px;
+    line-height: 1.15;
+}
+
+#myavana-next-root .myavana-auth-intro p {
+    margin: 0 auto;
+    max-width: 32ch;
+    color: var(--ds-muted);
+    font: 400 14px/1.55 Archivo, sans-serif;
+}
+
+#myavana-next-root .myavana-auth-card .myavana-form-group {
+    margin-bottom: 16px;
+}
+
+#myavana-next-root .myavana-auth-card .myavana-label {
+    display: block;
+    margin: 0 0 8px;
+}
+
+/* The chat launcher shouldn't sit on top of the sign-up form. */
+@media (max-width: 991px) {
+    body:has(#view-auth:not([style*="none"])) .mya-launcher {
+        display: none !important;
+    }
+}
+
+/* The theme gives every input a 15px margin; spacing belongs to the group. */
+#myavana-next-root input:not([type="checkbox"]):not([type="radio"]),
+#myavana-next-root textarea,
+#myavana-next-root select,
+body .myavana-modal-backdrop input:not([type="checkbox"]):not([type="radio"]),
+body .myavana-modal-backdrop textarea,
+body .myavana-profile-drawer input,
+body .myavana-profile-drawer textarea,
+body .myavana-profile-drawer select {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+    /* The header already carries the logo on phones. */
+    #myavana-next-root .myavana-auth-logo {
+        display: none;
+    }
+}
