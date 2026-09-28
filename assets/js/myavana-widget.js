@@ -5477,11 +5477,14 @@
                 var reader = res.body.getReader();
                 var decoder = new TextDecoder();
                 var lineBuffer = '';
+                var receivedAnything = false;
 
                 function pump() {
                     return reader.read().then(function (result) {
                         if (request.stopped) return;
                         if (result.done) {
+                            // An empty stream is a failed reply, not silence.
+                            if (!receivedAnything && !assistantBubble) throw new Error('Empty reply from chat service');
                             finishStream();
                             return;
                         }
@@ -5497,6 +5500,9 @@
                             if (line) {
                                 try {
                                     var frame = JSON.parse(line);
+                                    if ((frame.t === 'delta' && frame.text) || (frame.t === 'block' && frame.block) || (frame.t === 'action' && frame.actions)) {
+                                        receivedAnything = true;
+                                    }
                                     if (frame.t === 'delta' && frame.text) {
                                         if (statusEl) { statusEl.remove(); statusEl = null; }
                                         if (!assistantBubble) assistantBubble = appendAssistantMessage('');
