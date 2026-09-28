@@ -98,15 +98,7 @@ class TodayService {
      * just her login handle (many accounts have display_name = user_login).
      */
     private function preferredName(int $userId, string $displayName): string {
-        $user = get_userdata($userId);
-        $first = trim((string) get_user_meta($userId, 'first_name', true));
-        if ($first !== '') {
-            return $first;
-        }
-        if ($user && strcasecmp(trim($displayName), $user->user_login) === 0) {
-            return '';
-        }
-        return $displayName;
+        return \Myavana\Next\Core\MemberName::forUser($userId, false);
     }
 
     /**

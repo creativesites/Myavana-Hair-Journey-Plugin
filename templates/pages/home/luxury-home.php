@@ -244,7 +244,7 @@ function myavana_luxury_home_view() {
         'aiToolUrl' => \Myavana\Next\Core\LaunchScope::hairAiUrl(),
         'isLoggedIn' => $is_logged_in,
         'currentUserId' => $is_logged_in ? $current_user->ID : 0,
-        'currentUserName' => $is_logged_in ? $current_user->display_name : '',
+        'currentUserName' => $is_logged_in ? \Myavana\Next\Core\MemberName::forUser($current_user) : '',
         'userStats' => $user_stats,
         'isNewUser' => $is_new_user,
         'showOnboarding' => $is_logged_in && isset($show_onboarding) ? $show_onboarding : false
@@ -312,7 +312,7 @@ function myavana_luxury_home_view() {
                         <?php if ($is_new_user && $user_stats['entries'] == 0): ?>
                             <!-- New User with No Entries -->
                             <div class="myavana-luxury-hero-badge">
-                                Welcome to MYAVANA, <?php echo esc_html($current_user->display_name); ?></div>
+                                Welcome to MYAVANA, <?php echo esc_html(\Myavana\Next\Core\MemberName::forUser($current_user)); ?></div>
                             <h1 class="myavana-luxury-hero-title">
                                 Let's Start Your<br>
                                 <span class="gradient-text">Hair Journey</span>
@@ -341,7 +341,7 @@ function myavana_luxury_home_view() {
                         <?php else: ?>
                             <!-- Existing User -->
                             <div class="myavana-luxury-hero-badge">
-                                Welcome back, <?php echo esc_html($current_user->display_name); ?>
+                                Welcome back, <?php echo esc_html(\Myavana\Next\Core\MemberName::forUser($current_user)); ?>
                             </div>
                             <h1 class="myavana-luxury-hero-title">
                                 Your Hair<br>

@@ -17,6 +17,8 @@ if (!defined('ABSPATH')) {
 class LaunchScope {
     public const ROUTINES_ENABLED = false;
     public const ONBOARDING_WIZARD_ENABLED = false;
+    /** Members don't classify their own hair; HairID comes from MYAVANA HairAI. */
+    public const SELF_REPORTED_HAIR_PROFILE = false;
 
     private const HAIR_AI_URL = 'https://www.myavana.com/pages/consumer';
 

@@ -122,6 +122,12 @@
     font-size: 22px;
 }
 
+#view-profile .myavana-profile-stat-card strong.is-empty {
+    color: var(--myavana-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
 /* 3. Layout */
 #view-profile .myavana-profile-layout {
     display: flex;
@@ -179,6 +185,17 @@
     font-size: 13px;
     line-height: 1.6;
     margin: 0;
+}
+
+#view-profile .myavana-profile-hairid-grid[hidden] {
+    display: none;
+}
+
+#view-profile .myavana-profile-hairai-link {
+    display: inline-flex;
+    margin-top: 14px;
+    color: var(--myavana-deep-rose, #9b5a49);
+    text-decoration: none;
 }
 
 /* 5. Milestones */

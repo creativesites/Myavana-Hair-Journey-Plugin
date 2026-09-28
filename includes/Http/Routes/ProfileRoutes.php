@@ -178,6 +178,10 @@ class ProfileRoutes extends RestController {
 
         return $this->respondSuccess([
             'profile' => $profileData,
+            'publicName' => \Myavana\Next\Core\MemberName::displayFor($userId),
+            'photoCount' => count(array_filter($entries, function ($e) {
+                return !empty($e['featuredImage']) || !empty($e['photos']);
+            })),
             'stats' => $stats,
             'badges' => $badges,
             'entries' => $entries,

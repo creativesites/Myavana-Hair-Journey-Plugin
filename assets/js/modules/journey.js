@@ -23,7 +23,8 @@ MyavanaNext.Journey = (function() {
     let inFlight = null;
     const FIRST_LOAD_RETRY_DELAYS_MS = [3000, 6000, 12000];
 
-    const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback', quick_checkin: 'Check-in', standard: 'Entry' };
+    const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback', quick_checkin: 'Check-in', standard: 'Entry', ai_analysis: 'AI analysis', progress: 'Progress', treatment: 'Treatment', style: 'Style', general: 'Entry' };
+    const typeLabel = (type) => TYPE_LABELS[type] || (type ? String(type).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : 'Entry');
     const MOOD_LABELS = { happy: '✨ Great', neutral: '🌿 Normal', dry: '🍂 Dry', itchy: '💆 Sensitive' };
 
     function init() {
@@ -121,8 +122,7 @@ MyavanaNext.Journey = (function() {
     // =========================
 
     function renderHeader() {
-        const firstEntry = data.timeline.items[data.timeline.items.length - 1];
-        const dayCount = firstEntry ? Math.max(1, Math.floor((Date.now() - new Date(firstEntry.date).getTime()) / 86400000)) : 1;
+        const dayCount = data.dayCount || 1;
         const subtitle = container.querySelector('#journey-subtitle');
         if (subtitle) subtitle.textContent = `Day ${dayCount} of your journey`;
     }
@@ -150,10 +150,13 @@ MyavanaNext.Journey = (function() {
     function renderFilters() {
         const el = container.querySelector('#journey-filters');
         if (!el) return;
-        const filters = [
-            ['all', 'All'], ['wash_day', 'Wash day'], ['length_check', 'Length'],
-            ['milestone', 'Milestones'], ['setback', 'Setbacks'],
-        ];
+        // Only offer filters for kinds of entry she has actually logged.
+        const present = new Set((data.timeline.items || []).map((e) => e.entryType));
+        const filters = [['all', 'All']].concat([
+            ['wash_day', 'Wash days'], ['length_check', 'Length'], ['milestone', 'Milestones'],
+            ['ai_analysis', 'AI analysis'], ['setback', 'Setbacks'], ['quick_checkin', 'Check-ins'],
+        ].filter(([key]) => present.has(key)));
+        if (filters.length <= 2) { el.innerHTML = ''; return; }
         el.innerHTML = filters.map(([key, label]) => `
             <button type="button" class="myavana-entry-pill${key === activeFilter ? ' active' : ''}" data-filter="${key}">${escapeHtml(label)}</button>
         `).join('');
@@ -204,7 +207,7 @@ MyavanaNext.Journey = (function() {
             <div class="myavana-timeline-card" data-entry-id="${entry.id}">
                 <div class="myavana-timeline-card-head">
                     <div class="myavana-timeline-card-kicker">
-                        <strong>${escapeHtml(TYPE_LABELS[entry.entryType] || entry.entryType)}</strong>
+                        <strong>${escapeHtml(typeLabel(entry.entryType))}</strong>
                         <span>${escapeHtml(entry.displayDate || entry.date)}</span>
                     </div>
                     <div class="myavana-timeline-card-tags">${tags.map((t) => `<span>${escapeHtml(t)}</span>`).join('')}</div>
@@ -256,11 +259,14 @@ MyavanaNext.Journey = (function() {
         const all = data.timeline.items;
         if (!all.length) return '';
         const first = all[all.length - 1];
+        const firstDate = new Date(String(first.date).replace(' ', 'T'));
+        const firstLabel = Number.isNaN(firstDate.getTime()) ? '' : firstDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
         return `
         <div class="myavana-timeline-entry myavana-timeline-origin">
             <div class="myavana-timeline-node" style="background:var(--myavana-onyx);box-shadow:0 0 0 2px var(--myavana-onyx);"></div>
             <strong>Where it started</strong>
-            <h4>${escapeHtml(first.title || 'Your first entry')} · ${escapeHtml(first.displayDate || first.date)}</h4>
+            <h4>${escapeHtml(first.title || 'Your first entry')}</h4>
+            ${firstLabel ? `<span class="myavana-timeline-origin-date">${escapeHtml(firstLabel)}</span>` : ''}
             <p>${escapeHtml(first.notes || 'Everything above is what came after.')}</p>
         </div>`;
     }
@@ -343,19 +349,21 @@ MyavanaNext.Journey = (function() {
     function renderGoals() {
         const el = container.querySelector('#journey-goals-list');
         if (!el) return;
-        const goals = (data.goals || []).filter((g) => g.id || g.goal_key);
+        const goals = (data.goals || []).filter((g) => g.title || g.goal_title);
 
         if (!goals.length) {
             el.innerHTML = '<p class="myavana-entry-hint">No active goals yet.</p>';
             return;
         }
 
-        el.innerHTML = goals.map((g) => `
+        el.innerHTML = goals.map((g) => {
+            const pct = Math.max(0, Math.min(100, Math.round(Number(g.progress) || 0)));
+            return `
             <div class="myavana-journey-goal-row">
-                <div class="myavana-journey-goal-top"><span>${escapeHtml(g.title)}</span><span>${escapeHtml(g.progress || 0)}%</span></div>
-                <div class="myavana-journey-goal-bar"><div style="width:${Math.max(0, Math.min(100, g.progress || 0))}%;"></div></div>
-            </div>
-        `).join('');
+                <div class="myavana-journey-goal-top"><span>${escapeHtml(g.title)}</span><span>${pct}%</span></div>
+                <div class="myavana-journey-goal-bar"><div style="width:${pct}%;"></div></div>
+            </div>`;
+        }).join('');
     }
 
     function renderSparkline() {
@@ -383,6 +391,9 @@ MyavanaNext.Journey = (function() {
     function renderRoutines() {
         const el = container.querySelector('#journey-routines-list');
         if (!el) return;
+        const card = container.querySelector('#journey-routines-card');
+        if (card) card.style.display = data.routinesEnabled === false ? 'none' : '';
+        if (data.routinesEnabled === false) return;
         const routines = data.routines || [];
 
         if (!routines.length) {
@@ -522,7 +533,7 @@ MyavanaNext.Journey = (function() {
 
         const entry = findEntryById(photo.id);
         container.querySelector('#story-slide-bg').style.backgroundImage = `url('${photo.imageUrl}')`;
-        container.querySelector('#story-kicker').textContent = TYPE_LABELS[photo.entryType] || photo.entryType;
+        container.querySelector('#story-kicker').textContent = typeLabel(photo.entryType);
         container.querySelector('#story-date').textContent = photo.date;
 
         const moodEl = container.querySelector('#story-mood');
@@ -563,7 +574,7 @@ MyavanaNext.Journey = (function() {
             <div class="myavana-journey-story-compare-pane">
                 <img src="${escapeHtml(p.imageUrl)}" alt="" />
                 <strong>${escapeHtml(p.date)}</strong>
-                <span>${i === 0 ? 'A' : 'B'} · ${escapeHtml(TYPE_LABELS[p.entryType] || p.entryType)}</span>
+                <span>${i === 0 ? 'A' : 'B'} · ${escapeHtml(typeLabel(p.entryType))}</span>
             </div>` : '<div class="myavana-journey-story-compare-pane"></div>'
         ).join('');
     }
@@ -657,7 +668,7 @@ MyavanaNext.Journey = (function() {
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str == null ? '' : String(str);
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     return { init, refresh, focusEntry };

@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 $currentUser = wp_get_current_user();
-$displayName = $currentUser->display_name ?: $currentUser->user_login;
+$displayName = \Myavana\Next\Core\MemberName::displayFor($currentUser);
 $currentUserId = get_current_user_id();
 $customAvatar = get_user_meta($currentUserId, 'myavana_custom_avatar_url', true);
 $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUserId, ['size' => 160]);
@@ -78,8 +78,8 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             <strong id="profile-stat-entries">0</strong>
         </div>
         <div class="myavana-profile-stat-card">
-            <span class="stat-label"><?php esc_html_e('Health score', 'myavana-hair-journey-next'); ?></span>
-            <strong id="profile-stat-health">0</strong>
+            <span class="stat-label"><?php esc_html_e('Photos', 'myavana-hair-journey-next'); ?></span>
+            <strong id="profile-stat-photos">0</strong>
         </div>
     </div>
 
@@ -93,15 +93,20 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
                         <p class="myavana-eyebrow"><?php esc_html_e('Your HairID', 'myavana-hair-journey-next'); ?></p>
                         <h2><?php esc_html_e('What makes your hair, yours', 'myavana-hair-journey-next'); ?></h2>
                     </div>
+                    <?php if (\Myavana\Next\Core\LaunchScope::SELF_REPORTED_HAIR_PROFILE) : ?>
                     <button type="button" class="btn-card-edit" data-edit="hair-profile" title="<?php esc_attr_e('Edit', 'myavana-hair-journey-next'); ?>">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
+                    <?php endif; ?>
                 </div>
                 <div class="myavana-profile-hairid-grid" id="profile-hairid-grid"></div>
                 <p class="myavana-profile-hairid-note" id="profile-hairid-note"></p>
+                <a class="myavana-text-action myavana-profile-hairai-link" href="<?php echo esc_url(\Myavana\Next\Core\LaunchScope::hairAiUrl()); ?>" target="_blank" rel="noopener">
+                    <?php esc_html_e('Get your HairID with MYAVANA HairAI', 'myavana-hair-journey-next'); ?> <span aria-hidden="true">↗</span>
+                </a>
             </section>
 
             <!-- Milestones -->
@@ -148,7 +153,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             <!-- Level & Rewards -->
             <section class="myavana-card sidebar-card">
                 <div class="myavana-section-heading">
-                    <h2 style="font-size:15px;">🏆 <?php esc_html_e('Level & Rewards', 'myavana-hair-journey-next'); ?></h2>
+                    <h2 style="font-size:15px;"><?php esc_html_e('Level & Rewards', 'myavana-hair-journey-next'); ?></h2>
                 </div>
                 <div class="xp-level-badge">
                     <strong id="profile-level-title">Hair Care Explorer</strong>
@@ -178,7 +183,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             <!-- Preferences -->
             <section class="myavana-card">
                 <div class="myavana-section-heading">
-                    <h2 style="font-size:15px;">⚙️ <?php esc_html_e('Preferences', 'myavana-hair-journey-next'); ?></h2>
+                    <h2 style="font-size:15px;"><?php esc_html_e('Preferences', 'myavana-hair-journey-next'); ?></h2>
                 </div>
                 <form id="profile-settings-form" class="settings-form">
                     <div class="setting-item">
@@ -246,7 +251,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             <!-- Data & Account -->
             <section class="myavana-card">
                 <div class="myavana-section-heading">
-                    <h2 style="font-size:15px;">🔒 <?php esc_html_e('Data & Account', 'myavana-hair-journey-next'); ?></h2>
+                    <h2 style="font-size:15px;"><?php esc_html_e('Data & Account', 'myavana-hair-journey-next'); ?></h2>
                 </div>
                 <div class="data-center-row">
                     <div class="data-center-text">
@@ -254,7 +259,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
                         <p><?php esc_html_e('Download your journey logs, routines, and goals as JSON.', 'myavana-hair-journey-next'); ?></p>
                     </div>
                     <button type="button" id="btn-export-user-data" class="myavana-btn myavana-btn-outline btn-sm">
-                        📥
+                        <?php esc_html_e('Download', 'myavana-hair-journey-next'); ?>
                     </button>
                 </div>
                 <div class="data-center-row">
@@ -277,7 +282,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             <div class="drawer-header">
                 <div>
                     <h2><?php esc_html_e('Edit Profile', 'myavana-hair-journey-next'); ?></h2>
-                    <p><?php esc_html_e('Update your profile details and hair care parameters.', 'myavana-hair-journey-next'); ?></p>
+                    <p><?php esc_html_e('How you appear to the MYAVANA community.', 'myavana-hair-journey-next'); ?></p>
                 </div>
                 <button type="button" class="btn-drawer-close" id="btn-close-edit-drawer" aria-label="Close">✕</button>
             </div>
@@ -320,6 +325,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
                     </div>
                 </div>
 
+                <?php if (\Myavana\Next\Core\LaunchScope::SELF_REPORTED_HAIR_PROFILE) : ?>
                 <div class="drawer-section">
                     <h4 class="section-title"><?php esc_html_e('Hair Characteristics', 'myavana-hair-journey-next'); ?></h4>
                     <div class="form-row-2">
@@ -379,9 +385,10 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
                         <input type="number" id="drawer-input-health" name="hairHealthRating" min="1" max="10" class="myavana-form-control" placeholder="8" />
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <div class="drawer-section">
-                    <h4 class="section-title"><?php esc_html_e('Hair Concerns', 'myavana-hair-journey-next'); ?></h4>
+                    <h4 class="section-title"><?php esc_html_e('What you\'re focused on', 'myavana-hair-journey-next'); ?></h4>
                     <div class="concerns-chip-picker" id="drawer-concerns-picker">
                         <?php
                         $availableConcerns = [

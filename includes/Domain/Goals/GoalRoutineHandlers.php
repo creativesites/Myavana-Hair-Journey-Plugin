@@ -875,7 +875,37 @@ function myavana_add_goal() {
         }
     }
 
+    // Concurrent submits (a double tap, or a handler bound twice) each read
+    // the goal list before any of them wrote, so the dedupe below never saw
+    // the others and members ended up with the same goal six times. add_option
+    // is atomic on the unique option_name, so only one request holds the lock.
+    // A request that loses waits for the winner, then the 45-second dedupe
+    // below answers it with the goal the winner saved.
+    $lock = 'myavana_goal_add_lock_' . $user_id;
+    $acquired = false;
+    for ($attempt = 0; $attempt < 40; $attempt++) {
+        if (add_option($lock, time(), '', 'no')) {
+            $acquired = true;
+            break;
+        }
+        wp_cache_delete($lock, 'options');
+        wp_cache_delete('notoptions', 'options');
+        if ((int) get_option($lock) < time() - 30) {
+            delete_option($lock); // a crashed request left it behind
+            continue;
+        }
+        usleep(250000);
+    }
+    if (!$acquired) {
+        wp_send_json_error('Your goal is still being saved. Please refresh in a moment.');
+        return;
+    }
+    register_shutdown_function(function () use ($lock) {
+        delete_option($lock);
+    });
+
     // Get existing goals
+    wp_cache_delete($user_id, 'user_meta');
     $goals = get_user_meta($user_id, 'myavana_hair_goals_structured', true);
     if (!is_array($goals)) {
         $goals = [];
@@ -939,6 +969,7 @@ function myavana_add_goal() {
 
     // Save to user meta
     $updated = update_user_meta($user_id, 'myavana_hair_goals_structured', $goals);
+    delete_option($lock);
 
     if ($updated === false) {
         wp_send_json_error('Failed to save goal');

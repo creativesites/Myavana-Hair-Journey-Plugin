@@ -27,10 +27,10 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 104]);
         </div>
         <div class="myavana-journey-identity">
             <div class="myavana-journey-identity-text">
-                <strong><?php echo esc_html($currentUser->display_name ?: $currentUser->user_login); ?></strong>
+                <strong><?php echo esc_html(\Myavana\Next\Core\MemberName::displayFor($currentUser)); ?></strong>
                 <span id="journey-hair-type"></span>
             </div>
-            <img src="<?php echo esc_url($avatarUrl); ?>" alt="" class="myavana-journey-avatar" />
+            <img src="<?php echo esc_url($avatarUrl); ?>" alt="" class="myavana-journey-avatar"<?php echo \Myavana\Next\Core\MemberName::avatarFallbackAttr(\Myavana\Next\Core\MemberName::displayFor($currentUser)); // phpcs:ignore ?> />
         </div>
     </div>
 
@@ -86,10 +86,12 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 104]);
                     </div>
                 </div>
 
+<?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
                 <div class="myavana-card" id="journey-routines-card">
                     <h3><?php esc_html_e('Routines', 'myavana-hair-journey-next'); ?></h3>
                     <div id="journey-routines-list"></div>
                 </div>
+                <?php endif; ?>
             </aside>
         </div>
     </div>

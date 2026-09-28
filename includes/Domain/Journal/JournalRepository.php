@@ -253,6 +253,15 @@ class JournalRepository {
     }
 
     /**
+     * Titles and notes are stored HTML-escaped by some older forms, so an
+     * ampersand came back as "&amp;" and the client escaped it again. Only
+     * the harmless entities are decoded; the client still escapes on output.
+     */
+    private static function plainText(string $value): string {
+        return strtr($value, ['&amp;' => '&', '&#039;' => "'", '&#39;' => "'", '&quot;' => '"', '&#8217;' => '’', '&#8216;' => '‘', '&#8220;' => '“', '&#8221;' => '”', '&nbsp;' => ' ']);
+    }
+
+    /**
      * Convert WP_Post to JournalEntryEntity
      *
     /**
@@ -342,9 +351,9 @@ class JournalRepository {
         $entity = new JournalEntryEntity();
         $entity->id = (int) $post->ID;
         $entity->userId = (int) $post->post_author;
-        $entity->title = (string) $post->post_title;
+        $entity->title = self::plainText((string) $post->post_title);
         $entity->date = (string) $post->post_date;
-        $entity->notes = (string) $post->post_content;
+        $entity->notes = self::plainText((string) $post->post_content);
 
         $entity->entryType = (string) (get_post_meta($post->ID, 'entry_type', true) ?: 'quick_checkin');
         $entity->mood = (string) get_post_meta($post->ID, 'mood', true);

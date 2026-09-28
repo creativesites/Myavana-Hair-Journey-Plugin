@@ -31,7 +31,7 @@ MyavanaNext.Profile = (function() {
         const profile = data.profile || {};
         currentUnit = profile.measurementUnit === 'cm' ? 'cm' : 'in';
 
-        renderHeader(profile, data.dayCount, data.joinDate);
+        renderHeader(profile, data.dayCount, data.joinDate, data.publicName);
         renderStats(data);
         renderHairId(profile, data.hairIdNote);
         renderMilestones(data.milestones || []);
@@ -44,11 +44,15 @@ MyavanaNext.Profile = (function() {
     }
 
     /* ---------------------------------------------------------------- */
-    function renderHeader(profile, dayCount, joinDate) {
+    function renderHeader(profile, dayCount, joinDate, publicName) {
+        const name = publicName || profile.displayName || profile.username || 'Member';
         const avatarEl = container.querySelector('#profile-avatar');
-        if (avatarEl && profile.avatarUrl) avatarEl.src = profile.avatarUrl;
+        if (avatarEl) {
+            avatarEl.onerror = () => { avatarEl.onerror = null; avatarEl.src = initialAvatar(name); };
+            if (profile.avatarUrl) avatarEl.src = profile.avatarUrl;
+        }
 
-        setTxt('#profile-name', profile.displayName || profile.username || 'Member');
+        setTxt('#profile-name', name);
         setTxt('#profile-username', `@${profile.username || 'myavana'}`);
 
         const locationEl = container.querySelector('#profile-location');
@@ -79,26 +83,37 @@ MyavanaNext.Profile = (function() {
             if (profile.density) tags.push(`${profile.density} Density`);
             tagsWrap.innerHTML = tags.length
                 ? tags.map(t => `<span class="myavana-profile-tag">${escapeHtml(t)}</span>`).join('')
-                : `<span class="myavana-profile-tag is-muted">Complete your HairID</span>`;
+                : '';
         }
     }
 
     function renderStats(data) {
-        setTxt('#profile-stat-length', data.currentLength != null ? formatLength(data.currentLength) : '—');
-        setTxt('#profile-stat-gain', data.lengthGain != null ? `${data.lengthGain > 0 ? '+' : ''}${formatLength(data.lengthGain)}` : '—');
+        setStat('#profile-stat-length', data.currentLength != null ? formatLength(data.currentLength) : null);
+        setStat('#profile-stat-gain', data.lengthGain != null ? `${data.lengthGain > 0 ? '+' : ''}${formatLength(data.lengthGain)}` : null);
         setTxt('#profile-stat-entries', data.totalEntries || 0);
-        setTxt('#profile-stat-health', `${data.healthScore || 0}`);
+        setTxt('#profile-stat-photos', data.photoCount || 0);
+    }
+
+    // Length stats only exist once she logs a length check; say so kindly
+    // instead of showing a bare dash.
+    function setStat(selector, value) {
+        const el = container.querySelector(selector);
+        if (!el) return;
+        el.classList.toggle('is-empty', value == null);
+        el.textContent = value == null ? 'Log a length check' : value;
     }
 
     function renderHairId(profile, note) {
         const grid = container.querySelector('#profile-hairid-grid');
         if (grid) {
+            // HairID comes from MYAVANA HairAI; only show what it has filled in.
             const fields = [
                 ['Type', profile.hairType],
                 ['Porosity', profile.porosity],
                 ['Density', profile.density],
                 ['Length', profile.length],
-            ];
+            ].filter(([, value]) => value);
+            grid.hidden = !fields.length;
             grid.innerHTML = fields.map(([label, value]) => `
                 <div class="myavana-profile-hairid-item">
                     <span class="spec-label">${escapeHtml(label)}</span>
@@ -106,7 +121,10 @@ MyavanaNext.Profile = (function() {
                 </div>
             `).join('');
         }
-        setTxt('#profile-hairid-note', note || '');
+        const hasHairId = !!(profile.hairType || profile.porosity || profile.density);
+        setTxt('#profile-hairid-note', hasHairId ? (note || '') : 'Your HairID is built from a MYAVANA HairAI analysis of your hair: type, porosity, density and what they mean for your care.');
+        const link = container.querySelector('.myavana-profile-hairai-link');
+        if (link) link.firstChild.textContent = hasHairId ? 'Refresh your HairID with HairAI ' : 'Get your HairID with MYAVANA HairAI ';
     }
 
     function renderMilestones(milestones) {
@@ -119,7 +137,7 @@ MyavanaNext.Profile = (function() {
         grid.innerHTML = milestones.map(m => `
             <button type="button" class="myavana-profile-milestone-tile" data-entry-id="${m.id}">
                 <img src="${escapeHtml(m.featuredImage)}" alt="${escapeHtml(m.title || '')}" loading="lazy" />
-                <span>${escapeHtml(m.date || '')}</span>
+                <span>${escapeHtml(formatDay(m.date))}</span>
             </button>
         `).join('');
         grid.querySelectorAll('[data-entry-id]').forEach(btn => {
@@ -142,7 +160,7 @@ MyavanaNext.Profile = (function() {
                 <article class="myavana-profile-recent-item">
                     ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy" />` : `<div class="myavana-profile-recent-placeholder" aria-hidden="true">✦</div>`}
                     <div>
-                        <span>${escapeHtml(e.date || '')}</span>
+                        <span>${escapeHtml(formatDay(e.date))}</span>
                         <strong>${escapeHtml(e.title || 'Hair update')}</strong>
                         ${e.notes ? `<p>${escapeHtml(e.notes)}</p>` : ''}
                     </div>
@@ -154,7 +172,13 @@ MyavanaNext.Profile = (function() {
         const activeWrap = container.querySelector('#profile-active-goals');
         const achievedWrap = container.querySelector('#profile-achieved-goals');
         const achievedLabel = container.querySelector('#profile-achieved-label');
-        const active = overview.active || [];
+        const seen = new Set();
+        const active = (overview.active || []).filter((g) => {
+            const key = String(g.title || g.goal || '').trim().toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
         const completed = overview.completed || [];
 
         if (activeWrap) {
@@ -405,7 +429,19 @@ MyavanaNext.Profile = (function() {
     function setTxt(selector, text) { const el = container.querySelector(selector); if (el) el.textContent = text; }
     function setVal(selector, val) { const el = container.querySelector(selector); if (el) el.value = val; }
     function setChecked(selector, checked) { const el = container.querySelector(selector); if (el) el.checked = !!checked; }
-    function escapeHtml(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; }
+    function formatDay(value) {
+        const d = value ? new Date(String(value).replace(' ', 'T')) : null;
+        if (!d || Number.isNaN(d.getTime())) return '';
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function initialAvatar(name) {
+        const letter = (String(name || 'M').trim()[0] || 'M').toUpperCase();
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#fce5d7"/><text x="60" y="60" dy=".35em" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#9b5a49">${letter.replace(/[<&>]/g, '')}</text></svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function escapeHtml(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = String(str); return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
     return { init, refresh };
 })();

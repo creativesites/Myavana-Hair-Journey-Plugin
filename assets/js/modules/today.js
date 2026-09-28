@@ -314,6 +314,6 @@ MyavanaNext.Today = (function() {
         container.querySelector('#today-open-timeline')?.addEventListener('click', () => MyavanaNext.App.navigate('journey'));
     }
 
-    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML; }
+    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     return { init, refresh };
 })();

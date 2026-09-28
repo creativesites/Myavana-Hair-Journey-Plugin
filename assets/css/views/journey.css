@@ -54,6 +54,7 @@
 .myavana-timeline-origin { padding-bottom: 4px; }
 .myavana-timeline-origin strong { color: var(--myavana-muted); display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; margin-bottom: 8px; text-transform: uppercase; }
 .myavana-timeline-origin h4 { font-size: 20px; margin: 0 0 6px; }
+.myavana-timeline-origin-date { color: var(--myavana-coral-dark, #d4956f); display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin: 0 0 10px; }
 .myavana-timeline-origin p { color: var(--myavana-muted); font-size: 14px; margin: 0; max-width: 54ch; }
 
 .myavana-journey-goal-row { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }

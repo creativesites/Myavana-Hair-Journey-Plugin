@@ -12,15 +12,7 @@ if (!defined('ABSPATH')) {
 $currentUser = wp_get_current_user();
 $is_logged_in = is_user_logged_in();
 $avatarUrl = '';
-// Prefer the member's first name; a display name that is just the login
-// handle reads like a username, not a person.
-$displayName = trim((string) get_user_meta($currentUser->ID, 'first_name', true));
-if ($displayName === '' && $currentUser->display_name !== $currentUser->user_login) {
-    $displayName = (string) $currentUser->display_name;
-}
-if ($displayName === '') {
-    $displayName = (string) $currentUser->user_login;
-}
+$displayName = \Myavana\Next\Core\MemberName::displayFor($currentUser);
 $currentUserId = get_current_user_id();
 if ($is_logged_in) {
     $custom_avatar = get_user_meta($currentUserId, 'myavana_custom_avatar_url', true);
@@ -96,13 +88,13 @@ if ($is_logged_in) {
                 <?php if (is_user_logged_in()) : ?>
                     <div class="myavana-next-account-menu">
                         <button type="button" class="myavana-next-avatar-btn" id="myavana-account-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="myavana-account-dropdown" title="<?php echo esc_attr($displayName); ?>">
-                            <img src="<?php echo esc_url($avatarUrl); ?>" alt="<?php echo esc_attr($displayName); ?>" class="myavana-next-avatar-img" />
+                            <img src="<?php echo esc_url($avatarUrl); ?>" alt="<?php echo esc_attr($displayName); ?>" class="myavana-next-avatar-img"<?php echo \Myavana\Next\Core\MemberName::avatarFallbackAttr($displayName); // phpcs:ignore ?> />
                             <span class="myavana-next-avatar-name"><?php echo esc_html($displayName); ?></span>
                         </button>
 
                         <div class="myavana-account-dropdown" id="myavana-account-dropdown" role="menu" hidden>
                             <div class="myavana-account-dropdown-header">
-                                <img src="<?php echo esc_url($avatarUrl); ?>" alt="<?php echo esc_attr($displayName); ?>" class="myavana-account-dropdown-avatar" />
+                                <img src="<?php echo esc_url($avatarUrl); ?>" alt="<?php echo esc_attr($displayName); ?>" class="myavana-account-dropdown-avatar"<?php echo \Myavana\Next\Core\MemberName::avatarFallbackAttr($displayName); // phpcs:ignore ?> />
                                 <div class="myavana-account-dropdown-identity">
                                     <strong><?php echo esc_html($displayName); ?></strong>
                                     <span><?php echo esc_html($currentUser->user_email); ?></span>

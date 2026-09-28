@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 $currentUser = wp_get_current_user();
 $customAvatar = get_user_meta($currentUser->ID, 'myavana_custom_avatar_url', true);
-$displayName = $currentUser->first_name ?: ($currentUser->display_name ?: $currentUser->user_login);
+$displayName = \Myavana\Next\Core\MemberName::forUser($currentUser);
 $initial = function_exists('mb_substr') ? mb_strtoupper(mb_substr($displayName, 0, 1)) : strtoupper(substr($displayName, 0, 1));
 ?>
 <section class="myavana-next-view active myavana-today" id="view-today" aria-label="<?php esc_attr_e('Today', 'myavana-hair-journey-next'); ?>">

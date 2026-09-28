@@ -85,8 +85,10 @@ class JourneyService {
             'photoEntries' => $photoEntries,
             'heatmap' => $this->buildConsistencyHeatmap($entries),
             'sparkline' => $this->buildGrowthSparkline($lengthHistory),
-            'goals' => array_slice($this->goalRepo->getGoals($userId), 0, 4),
-            'routines' => array_slice($this->routineRepo->getRoutines($userId), 0, 4),
+            'goals' => array_slice($this->distinctActiveGoals($this->goalRepo->getGoals($userId)), 0, 4),
+            'routines' => \Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED ? array_slice($this->routineRepo->getRoutines($userId), 0, 4) : [],
+            'routinesEnabled' => \Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED,
+            'dayCount' => $this->dayCount($entries),
             'stats' => [
                 'currentLength' => !empty($lengthHistory) ? end($lengthHistory)['length'] : null,
                 'healthScore' => $careIndex,
@@ -99,6 +101,29 @@ class JourneyService {
                 'photoCount' => count($photoEntries),
             ],
         ];
+    }
+
+    /** Same count Today shows: day 1 is the day of her first entry. */
+    private function dayCount(array $entries): int {
+        $first = !empty($entries) ? end($entries) : null;
+        return $first ? max(1, (int) round((time() - strtotime($first['date'])) / DAY_IN_SECONDS) + 1) : 1;
+    }
+
+    /** Active goals, one per title (double-submitted forms left duplicates). */
+    private function distinctActiveGoals(array $goals): array {
+        $seen = [];
+        $out = [];
+        foreach ($goals as $g) {
+            $title = trim((string) ($g['title'] ?? $g['goal_title'] ?? ''));
+            $key = strtolower($title);
+            if ($title === '' || isset($seen[$key]) || ($g['status'] ?? 'active') === 'completed') {
+                continue;
+            }
+            $seen[$key] = true;
+            $g['title'] = $title;
+            $out[] = $g;
+        }
+        return $out;
     }
 
     /**

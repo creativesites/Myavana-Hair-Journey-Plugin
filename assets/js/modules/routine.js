@@ -30,7 +30,8 @@ MyavanaNext.Routine = (function() {
     function selectTab(tab) {
         if (!container) return;
         // With Routines switched off for this launch, this view is Goals only.
-        const routinesEnabled = !window.myavanaNextData || window.myavanaNextData.routinesEnabled !== false;
+        // wp_localize_script sends top-level booleans as "1" / "", so test truthiness.
+        const routinesEnabled = !window.myavanaNextData || !!window.myavanaNextData.routinesEnabled;
         const active = (tab === 'goals' || !routinesEnabled) ? 'goals' : 'routine';
 
         container.querySelectorAll('[data-next-legacy-panel]').forEach(panel => {
