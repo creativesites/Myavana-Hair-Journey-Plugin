@@ -57,6 +57,11 @@ class Plugin {
         // REST API registration
         add_action('rest_api_init', [$this, 'registerRestRoutes']);
 
+        // The host's edge cache stores any 200 response to a request without
+        // a WordPress login cookie, so token- or service-key-authenticated
+        // responses would otherwise be served to other visitors.
+        add_filter('rest_post_dispatch', [$this, 'preventRestResponseCaching'], 10, 3);
+
         // Email verification link handler (visited from the confirmation
         // email, not a REST call — needs a real browser redirect).
         add_action('template_redirect', [$this, 'handleVerifyEmailLink']);
@@ -166,6 +171,17 @@ class Plugin {
     /**
      * Register REST API routes
      */
+    public function preventRestResponseCaching($response, $server, $request) {
+        if ($response instanceof \WP_REST_Response && strpos($request->get_route(), '/myavana/v1/') === 0) {
+            foreach (wp_get_nocache_headers() as $name => $value) {
+                if ($value !== false) {
+                    $response->header($name, $value);
+                }
+            }
+        }
+        return $response;
+    }
+
     public function registerRestRoutes(): void {
         (new InitRoutes())->registerRoutes();
         (new TodayRoutes())->registerRoutes();

@@ -12,15 +12,17 @@ MyavanaNext.App = (function() {
     const validTabs = ['home', 'today', 'journey', 'routine', 'community', 'profile'];
 
     function init() {
-        // Initialize sub-modules
-        if (MyavanaNext.SmartEntry) MyavanaNext.SmartEntry.init();
-        if (MyavanaNext.Today) MyavanaNext.Today.init();
-        if (MyavanaNext.Journey) MyavanaNext.Journey.init();
-        if (MyavanaNext.Routine) MyavanaNext.Routine.init();
-        if (MyavanaNext.Community) MyavanaNext.Community.init();
-        if (MyavanaNext.Profile) MyavanaNext.Profile.init();
-        if (MyavanaNext.Auth) MyavanaNext.Auth.init();
-        if (MyavanaNext.Onboarding) MyavanaNext.Onboarding.init();
+        // Each module boots in isolation: one throwing must not leave every
+        // later view (Today included) stuck on its loading skeleton.
+        ['SmartEntry', 'Today', 'Journey', 'Routine', 'Community', 'Profile', 'Auth', 'Onboarding'].forEach(name => {
+            const mod = MyavanaNext[name];
+            if (!mod || typeof mod.init !== 'function') return;
+            try {
+                mod.init();
+            } catch (e) {
+                console.error(`[MYAVANA] ${name} failed to start`, e);
+            }
+        });
 
         bindNavigation();
         bindGlobalActions();

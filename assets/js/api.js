@@ -15,6 +15,8 @@ MyavanaNext.API = (function() {
     // a 401/403 there specifically means that session is gone.
     const PUBLIC_ENDPOINTS = ['auth/login', 'auth/register', 'auth/google', 'auth/forgot-password', 'auth/reset-password'];
     let sessionExpiredHandled = false;
+    const REQUEST_TIMEOUT_MS = 60000;
+    const UPLOAD_TIMEOUT_MS = 120000;
 
     function isPublicEndpoint(endpoint) {
         return PUBLIC_ENDPOINTS.some((p) => endpoint === p || endpoint.startsWith(p + '?'));
@@ -74,17 +76,32 @@ MyavanaNext.API = (function() {
             ...(options.headers || {})
         };
 
-        if (options.body && !(options.body instanceof FormData)) {
+        const isUpload = options.body instanceof FormData;
+        if (options.body && !isUpload) {
             headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(options.body);
         }
 
+        // A request that never settles would leave its view on a loading
+        // skeleton forever; abort it so the caller's error state can show.
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
+
         try {
-            const res = await fetch(url.toString(), {
-                ...options,
-                headers,
-                credentials: 'same-origin',
-            });
+            let res;
+            try {
+                res = await fetch(url.toString(), {
+                    ...options,
+                    headers,
+                    credentials: 'same-origin',
+                    signal: controller.signal,
+                });
+            } catch (networkErr) {
+                if (networkErr.name === 'AbortError') {
+                    throw new Error('The request took too long. Please check your connection and try again.');
+                }
+                throw networkErr;
+            }
 
             const json = await res.json();
 
@@ -115,6 +132,8 @@ MyavanaNext.API = (function() {
         } catch (err) {
             console.error('[MYAVANA API Error]', { endpoint, error: err.message, details: err });
             throw err;
+        } finally {
+            window.clearTimeout(timer);
         }
     }
 

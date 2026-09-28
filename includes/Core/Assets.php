@@ -168,7 +168,9 @@ class Assets {
             'myavana-onboarding-wizard',
         ], self::ver('assets/css/mobile-sheets.css'));
 
-        wp_enqueue_script('myavana-lucide', 'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js', [], '0.469.0', true);
+        // Self-hosted: a third-party CDN here blocks every app script after it
+        // whenever the visitor's network can't reach that CDN.
+        wp_enqueue_script('myavana-lucide', MYAVANA_NEXT_URL . 'assets/js/lib/lucide-0.469.0.min.js', [], '0.469.0', true);
         wp_enqueue_script('myavana-routines-page-redesign', MYAVANA_NEXT_URL . 'assets/js/routines-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/routines-page-redesign.js'), true);
         wp_enqueue_script('myavana-goals-page-redesign', MYAVANA_NEXT_URL . 'assets/js/goals-page-redesign.js', ['jquery', 'myavana-lucide'], self::ver('assets/js/goals-page-redesign.js'), true);
         wp_enqueue_script('myavana-premium-goal-form', MYAVANA_NEXT_URL . 'assets/js/premium-goal-form.js', ['jquery'], self::ver('assets/js/premium-goal-form.js'), true);

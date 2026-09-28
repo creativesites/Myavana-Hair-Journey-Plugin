@@ -33,7 +33,7 @@ function myavana_routines_page_shortcode($atts = [], $content = null) {
     );
     wp_enqueue_script(
         'myavana-lucide',
-        'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js',
+        MYAVANA_NEXT_URL . 'assets/js/lib/lucide-0.469.0.min.js',
         [],
         '0.469.0',
         true
