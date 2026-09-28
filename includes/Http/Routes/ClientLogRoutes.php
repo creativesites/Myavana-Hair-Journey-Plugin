@@ -46,7 +46,7 @@ class ClientLogRoutes extends RestController {
             (int) $request->get_param('status'),
             (int) $request->get_param('attempt'),
             $request->get_param('online') === false ? 'no' : 'yes',
-            $clean($request->get_param('reason'), 300),
+            $clean($request->get_param('reason'), 1000),
             $clean($_SERVER['HTTP_USER_AGENT'] ?? '', 160)
         ));
 

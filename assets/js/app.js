@@ -10,6 +10,7 @@ MyavanaNext.App = (function() {
     'use strict';
 
     const validTabs = ['home', 'today', 'journey', 'routine', 'community', 'profile'];
+    let booted = false;
 
     function init() {
         // Each module boots in isolation: one throwing must not leave every
@@ -26,6 +27,7 @@ MyavanaNext.App = (function() {
 
         bindNavigation();
         bindGlobalActions();
+        booted = true;
 
         // Guests begin on the complete public homepage. Community and auth
         // are sibling views; the welcome prompt is an overlay, never a route.
@@ -238,6 +240,7 @@ MyavanaNext.App = (function() {
     return {
         init,
         navigate,
+        isBooted: () => booted,
     };
 })();
 

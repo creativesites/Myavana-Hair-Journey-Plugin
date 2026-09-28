@@ -293,6 +293,73 @@ class Plugin {
     public function enqueueAppAssets(): void {
         if (Router::isCurrentAppPage()) {
             Assets::enqueue();
+            if (is_user_logged_in()) {
+                add_action('wp_head', [$this, 'printBootWatchdog'], 1);
+            }
         }
+    }
+
+    /**
+     * Inline (so no network fetch can block it) check that the app actually
+     * started. If it hasn't within 15s, or Today is still on its skeleton,
+     * it reports pending/slow scripts and early errors to the client log.
+     */
+    public function printBootWatchdog(): void {
+        $endpoint = esc_url_raw(rest_url('myavana/v1/client-log'));
+        $nonce = wp_create_nonce('wp_rest');
+        ?>
+<script id="myavana-boot-watchdog">
+(function () {
+    var errors = [];
+    window.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t !== window && (t.src || t.href)) {
+            if (t.tagName === 'SCRIPT' || t.tagName === 'LINK') errors.push('load-failed ' + String(t.src || t.href).split('?')[0]);
+        } else {
+            errors.push('js ' + (e.message || '') + ' @' + String(e.filename || '').split('/').pop() + ':' + (e.lineno || ''));
+        }
+    }, true);
+    window.addEventListener('unhandledrejection', function (e) {
+        errors.push('rejection ' + String((e.reason && e.reason.message) || e.reason));
+    });
+    function shortName(url) {
+        return String(url).split('?')[0].split('/').slice(-2).join('/');
+    }
+    function report(kind) {
+        try {
+            var durations = {};
+            (performance.getEntriesByType('resource') || []).forEach(function (r) { durations[r.name] = Math.round(r.duration); });
+            var pending = [], slow = [];
+            [].forEach.call(document.scripts, function (s) {
+                if (!s.src) return;
+                if (!(s.src in durations)) pending.push(shortName(s.src));
+                else if (durations[s.src] > 4000) slow.push(shortName(s.src) + '=' + durations[s.src] + 'ms');
+            });
+            fetch(<?php echo wp_json_encode($endpoint); ?>, {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': <?php echo wp_json_encode($nonce); ?> },
+                body: JSON.stringify({
+                    endpoint: 'boot:' + kind,
+                    status: 0,
+                    attempt: 0,
+                    online: navigator.onLine,
+                    reason: JSON.stringify({ ready: document.readyState, pending: pending.slice(0, 8), slow: slow.slice(0, 6), errors: errors.slice(0, 6) })
+                })
+            }).catch(function () {});
+        } catch (e) {}
+    }
+    window.setTimeout(function () {
+        var app = window.MyavanaNext && window.MyavanaNext.App;
+        if (!app || !app.isBooted || !app.isBooted()) {
+            report('stalled');
+        } else if (document.querySelector('#view-today.active #today-checklist-items .myavana-today-skeleton')) {
+            report('today-stuck');
+        }
+    }, 15000);
+})();
+</script>
+        <?php
     }
 }
