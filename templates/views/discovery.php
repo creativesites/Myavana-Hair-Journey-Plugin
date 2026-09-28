@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
             <button type="button" data-welcome-goal="More moisture and definition">Moisture &amp; definition</button>
             <button type="button" data-welcome-goal="A consistent growth routine">Growth routine</button>
         </div>
-        <div class="myavana-welcome-preview" aria-live="polite"><strong><?php esc_html_e('Your MYAVANA plan', 'myavana-hair-journey-next'); ?></strong><span><?php esc_html_e('A tailored routine, private photo timeline, and guidance that evolves with your entries.', 'myavana-hair-journey-next'); ?></span></div>
+        <div class="myavana-welcome-preview" aria-live="polite"><strong><?php esc_html_e('Your MYAVANA plan', 'myavana-hair-journey-next'); ?></strong><span><?php esc_html_e('A private photo timeline, goals you can track, and guidance that evolves with your entries.', 'myavana-hair-journey-next'); ?></span></div>
         <a href="#auth" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-btn-lg"><?php esc_html_e('Create my free plan', 'myavana-hair-journey-next'); ?></a>
         <button type="button" class="myavana-welcome-later" data-close-welcome><?php esc_html_e('I’ll explore first', 'myavana-hair-journey-next'); ?></button>
     </div>

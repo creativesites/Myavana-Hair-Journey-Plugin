@@ -46,6 +46,7 @@ if (!defined('ABSPATH')) {
         </svg>
     </button>
 
+    <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
     <!-- Tab 3: Routine -->
     <a href="#routine" class="myavana-next-tab-item" data-tab="routine">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -54,6 +55,17 @@ if (!defined('ABSPATH')) {
         </svg>
         <span><?php esc_html_e('Routine', 'myavana-hair-journey-next'); ?></span>
     </a>
+    <?php else : ?>
+    <!-- Tab 3: Goals -->
+    <a href="#routine" class="myavana-next-tab-item" data-tab="routine" data-routine-panel="goals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="5"/>
+            <circle cx="12" cy="12" r="1.5"/>
+        </svg>
+        <span><?php esc_html_e('Goals', 'myavana-hair-journey-next'); ?></span>
+    </a>
+    <?php endif; ?>
 
     <!-- Tab 4: Community -->
     <a href="#community" class="myavana-next-tab-item" data-tab="community">

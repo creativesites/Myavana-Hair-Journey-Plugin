@@ -257,7 +257,7 @@ class Assets {
         // (myavana_onboarding_completed, the same key the legacy
         // luxury-home banner reads).
         $showOnboardingWizard = false;
-        if ($currentUserId > 0 && FeatureFlags::isEnabled('onboarding_wizard', $currentUserId)) {
+        if ($currentUserId > 0 && LaunchScope::ONBOARDING_WIZARD_ENABLED && FeatureFlags::isEnabled('onboarding_wizard', $currentUserId)) {
             $onboardingDone = get_user_meta($currentUserId, 'myavana_onboarding_completed', true);
             if (empty($onboardingDone)) {
                 $profile = (new \Myavana\Next\Domain\Profile\ProfileRepository())->getByUserId($currentUserId);
@@ -282,6 +282,8 @@ class Assets {
             'currentUser' => $userData,
             'flags' => FeatureFlags::getAll(),
             'showOnboardingWizard' => $showOnboardingWizard,
+            'routinesEnabled' => LaunchScope::ROUTINES_ENABLED,
+            'hairAiUrl' => LaunchScope::hairAiUrl(),
             'pluginUrl' => MYAVANA_NEXT_URL,
             'loginUrl' => wp_login_url(get_permalink()),
             'registerUrl' => wp_registration_url(),

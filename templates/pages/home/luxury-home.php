@@ -241,7 +241,7 @@ function myavana_luxury_home_view() {
     wp_localize_script('myavana-luxury-home', 'myavanaLuxuryData', [
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('myavana_nonce'),
-        'aiToolUrl' => get_option('myavana_next_hair_analysis_url', '#routine'),
+        'aiToolUrl' => \Myavana\Next\Core\LaunchScope::hairAiUrl(),
         'isLoggedIn' => $is_logged_in,
         'currentUserId' => $is_logged_in ? $current_user->ID : 0,
         'currentUserName' => $is_logged_in ? $current_user->display_name : '',
@@ -361,13 +361,14 @@ function myavana_luxury_home_view() {
                             <p class="myavana-luxury-hero-description">
                                 <?php if ($user_profile && isset($user_profile->hair_health_rating)): ?>
                                     Your current hair health score: <strong><?php echo esc_html(number_format_i18n((float) $user_profile->hair_health_rating, 1)); ?>/10</strong>,
-                                    with <strong><?php echo esc_html($user_stats['active_goals']); ?></strong> active goals and
-                                    <strong><?php echo esc_html($user_stats['current_routines']); ?></strong> current routines.
+                                    with <strong><?php echo esc_html($user_stats['active_goals']); ?></strong> active goals<?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED): ?> and
+                                    <strong><?php echo esc_html($user_stats['current_routines']); ?></strong> current routines<?php endif; ?>.
                                     <br>Keep building consistency so your timeline can surface stronger patterns and insights.
                                 <?php else: ?>
-                                    You have <strong><?php echo esc_html($user_stats['entries']); ?></strong> entries,
+                                    You have <strong><?php echo esc_html($user_stats['entries']); ?></strong> entries<?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED): ?>,
                                     <strong><?php echo esc_html($user_stats['active_goals']); ?></strong> active goals,
-                                    and <strong><?php echo esc_html($user_stats['current_routines']); ?></strong> routines in motion.
+                                    and <strong><?php echo esc_html($user_stats['current_routines']); ?></strong> routines in motion<?php else: ?>
+                                    and <strong><?php echo esc_html($user_stats['active_goals']); ?></strong> active goals<?php endif; ?>.
                                     <br>Keep documenting your progress to turn daily care into visible transformation.
                                 <?php endif; ?>
                             </p>
@@ -412,6 +413,7 @@ function myavana_luxury_home_view() {
                                     <p>Review your latest entries</p>
                                 </div>
                             </a>
+                            <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED): ?>
                             <a class="quick-action-card" href="<?php echo esc_url($home_urls['routines']); ?>" data-tab="routine" data-routine-panel="routine" data-home-nav>
                                 <div class="action-icon">
                                     <i class="fas fa-repeat"></i>
@@ -421,6 +423,17 @@ function myavana_luxury_home_view() {
                                     <p>Stay consistent with your plan</p>
                                 </div>
                             </a>
+                            <?php else: ?>
+                            <a class="quick-action-card" href="<?php echo esc_url(\Myavana\Next\Core\LaunchScope::hairAiUrl()); ?>" target="_blank" rel="noopener noreferrer">
+                                <div class="action-icon">
+                                    <i class="fas fa-magic"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>HairAI Analysis</h4>
+                                    <p>Subscribe to HairAI for your personalized analysis</p>
+                                </div>
+                            </a>
+                            <?php endif; ?>
                             <a class="quick-action-card" href="<?php echo esc_url($home_urls['goals']); ?>" data-tab="routine" data-routine-panel="goals" data-home-nav>
                                 <div class="action-icon">
                                     <i class="fas fa-bullseye"></i>
@@ -518,6 +531,7 @@ function myavana_luxury_home_view() {
                             </div>
                         </article>
 
+                        <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED): ?>
                         <article class="myavana-luxury-member-card">
                             <div class="myavana-luxury-member-card-head">
                                 <div>
@@ -561,6 +575,7 @@ function myavana_luxury_home_view() {
                                 <a class="myavana-luxury-btn-secondary" href="<?php echo esc_url($home_urls['routines']); ?>" data-tab="routine" data-routine-panel="routine" data-home-nav>Add Routine</a>
                             </div>
                         </article>
+                        <?php endif; ?>
                     </div>
                 </div>
             </section>
@@ -594,8 +609,8 @@ function myavana_luxury_home_view() {
                                 Get instant, professional-grade analysis of your hair health, texture, and needs
                                 using our advanced AI vision technology.
                             </p>
-                            <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
-                                Try Analysis <i class="fas fa-arrow-right"></i>
+                            <a href="<?php echo esc_url(\Myavana\Next\Core\LaunchScope::hairAiUrl()); ?>" class="myavana-luxury-feature-link" target="_blank" rel="noopener noreferrer">
+                                Subscribe to HairAI <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
 
@@ -1023,18 +1038,8 @@ function myavana_luxury_home_view() {
                 window.location.hash = '#auth';
             }
         } else if (modalType === 'ai-analysis') {
-            // Direct to in-app Hair Assessment / Onboarding Blueprint instead of external Shopify
-            const authData = window.myavanaNextData || {};
-            if (authData.isLoggedIn) {
-                window.location.hash = '#routine';
-            } else {
-                const signupBtn = document.querySelector('[data-open-auth="signup"]');
-                if (signupBtn) {
-                    signupBtn.click();
-                } else {
-                    window.location.hash = '#auth';
-                }
-            }
+            // Hair analysis is the separate HairAI subscription product.
+            window.open(<?php echo wp_json_encode(\Myavana\Next\Core\LaunchScope::hairAiUrl()); ?>, '_blank', 'noopener');
         }
     };
     </script>

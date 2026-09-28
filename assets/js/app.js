@@ -150,7 +150,12 @@ MyavanaNext.App = (function() {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const tab = item.getAttribute('data-tab');
-                if (tab) navigate(tab);
+                if (!tab) return;
+                navigate(tab);
+                const panel = item.getAttribute('data-routine-panel');
+                if (tab === 'routine' && panel && MyavanaNext.Routine) {
+                    MyavanaNext.Routine.selectTab(panel);
+                }
             });
         });
 

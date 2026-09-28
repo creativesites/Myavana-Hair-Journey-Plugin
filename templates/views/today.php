@@ -42,6 +42,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
     <div class="myavana-today-layout">
         <div class="myavana-today-main">
 
+            <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
             <!-- Today's Routine -->
             <section class="myavana-card myavana-today-routine-card" aria-labelledby="today-care-title">
                 <div class="myavana-section-heading">
@@ -59,6 +60,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                     </div>
                 </div>
             </section>
+            <?php endif; ?>
 
             <!-- MYAVANA Insight — AI-generated when a provider is configured (see
                  IntelligenceOrchestrator/GeminiProvider), otherwise the
@@ -75,6 +77,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                 <ul class="myavana-today-insight-signals" id="today-insight-signals" hidden></ul>
             </section>
 
+            <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
             <!-- From your routines -->
             <section class="myavana-card" id="today-products-card" style="display:none;">
                 <div class="myavana-section-heading">
@@ -85,6 +88,7 @@ $avatarUrl = get_avatar_url($currentUser->ID, ['size' => 92]);
                 </div>
                 <div class="myavana-today-products-grid" id="today-products-grid"></div>
             </section>
+            <?php endif; ?>
 
             <!-- Latest progress -->
             <section class="myavana-card myavana-today-progress-card" aria-labelledby="today-progress-title">

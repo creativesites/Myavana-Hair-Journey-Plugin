@@ -29,7 +29,9 @@ MyavanaNext.Routine = (function() {
 
     function selectTab(tab) {
         if (!container) return;
-        const active = tab === 'goals' ? 'goals' : 'routine';
+        // With Routines switched off for this launch, this view is Goals only.
+        const routinesEnabled = !window.myavanaNextData || window.myavanaNextData.routinesEnabled !== false;
+        const active = (tab === 'goals' || !routinesEnabled) ? 'goals' : 'routine';
 
         container.querySelectorAll('[data-next-legacy-panel]').forEach(panel => {
             panel.hidden = panel.dataset.nextLegacyPanel !== active;

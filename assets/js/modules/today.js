@@ -47,7 +47,8 @@ MyavanaNext.Today = (function() {
     }
 
     function renderLoadError() {
-        const list = container.querySelector('#today-checklist-items');
+        // The checklist card isn't rendered while Routines is switched off.
+        const list = container.querySelector('#today-checklist-items') || container.querySelector('#today-latest-entry');
         if (!list) return;
         list.innerHTML = `
             <div class="myavana-today-error-state">

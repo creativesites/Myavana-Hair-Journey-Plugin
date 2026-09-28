@@ -40,9 +40,11 @@ if ($is_logged_in) {
                 <a href="#journey" class="myavana-next-nav-link" data-tab="journey">
                     <?php esc_html_e('My Timeline', 'myavana-hair-journey-next'); ?>
                 </a>
+                <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
                 <a href="#routine" class="myavana-next-nav-link" data-tab="routine" data-routine-panel="routine">
                     <?php esc_html_e('Routines', 'myavana-hair-journey-next'); ?>
                 </a>
+                <?php endif; ?>
                 <a href="#routine" class="myavana-next-nav-link" data-tab="routine" data-routine-panel="goals">
                     <?php esc_html_e('Goals', 'myavana-hair-journey-next'); ?>
                 </a>

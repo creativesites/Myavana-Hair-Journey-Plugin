@@ -21,7 +21,9 @@ if (!defined('ABSPATH')) {
                 <span class="myavana-next-footer-label"><?php esc_html_e('Your journey', 'myavana-hair-journey-next'); ?></span>
                 <a href="#today" data-tab="today" data-home-nav><?php esc_html_e('Today', 'myavana-hair-journey-next'); ?></a>
                 <a href="#journey" data-tab="journey" data-home-nav><?php esc_html_e('Timeline', 'myavana-hair-journey-next'); ?></a>
+<?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
                 <a href="#routine" data-tab="routine" data-routine-panel="routine" data-home-nav><?php esc_html_e('Routines', 'myavana-hair-journey-next'); ?></a>
+                <?php endif; ?>
                 <a href="#routine" data-tab="routine" data-routine-panel="goals" data-home-nav><?php esc_html_e('Goals', 'myavana-hair-journey-next'); ?></a>
                 <a href="#community" data-tab="community" data-home-nav><?php esc_html_e('Community', 'myavana-hair-journey-next'); ?></a>
             </nav>
