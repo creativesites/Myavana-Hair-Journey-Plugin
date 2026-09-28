@@ -315,7 +315,8 @@ class Plugin {
     window.addEventListener('error', function (e) {
         var t = e.target;
         if (t && t !== window && (t.src || t.href)) {
-            if (t.tagName === 'SCRIPT' || t.tagName === 'LINK') errors.push('load-failed ' + String(t.src || t.href).split('?')[0]);
+            var url = String(t.src || t.href);
+            if ((t.tagName === 'SCRIPT' || t.tagName === 'LINK') && url.indexOf('http://fonts.googleapis.com') !== 0) errors.push('load-failed ' + url.split('?')[0]);
         } else {
             errors.push('js ' + (e.message || '') + ' @' + String(e.filename || '').split('/').pop() + ':' + (e.lineno || ''));
         }
@@ -332,7 +333,7 @@ class Plugin {
             (performance.getEntriesByType('resource') || []).forEach(function (r) { durations[r.name] = Math.round(r.duration); });
             var pending = [], slow = [];
             [].forEach.call(document.scripts, function (s) {
-                if (!s.src) return;
+                if (!s.src || s.src.indexOf(location.origin) !== 0) return;
                 if (!(s.src in durations)) pending.push(shortName(s.src));
                 else if (durations[s.src] > 4000) slow.push(shortName(s.src) + '=' + durations[s.src] + 'ms');
             });
@@ -346,7 +347,7 @@ class Plugin {
                     status: 0,
                     attempt: 0,
                     online: navigator.onLine,
-                    reason: JSON.stringify({ ready: document.readyState, pending: pending.slice(0, 8), slow: slow.slice(0, 6), errors: errors.slice(0, 6) })
+                    reason: JSON.stringify({ ready: document.readyState, boot: window.MyavanaNextBoot || 'app.js-not-run', pending: pending.slice(0, 8), slow: slow.slice(0, 6), errors: errors.slice(0, 6) })
                 })
             }).catch(function () {});
         } catch (e) {}

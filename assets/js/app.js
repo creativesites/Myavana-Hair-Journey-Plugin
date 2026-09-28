@@ -247,9 +247,25 @@ MyavanaNext.App = (function() {
 // Alias for Router
 window.MyavanaNext.Router = window.MyavanaNext.App;
 
-// Initialize on DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.myavana-next-shell')) {
+// Start-up progress, read by the inline boot watchdog when the app fails to start.
+window.MyavanaNextBoot = { stage: 'script-loaded', readyStateAtLoad: document.readyState };
+
+// Boot once the DOM is parsed. If this script runs after DOMContentLoaded
+// has already fired (browser extensions can shift script timing), start now
+// rather than waiting for an event that will never come.
+(function bootWhenReady() {
+    const boot = () => {
+        if (!document.querySelector('.myavana-next-shell')) {
+            window.MyavanaNextBoot.stage = 'no-shell';
+            return;
+        }
+        window.MyavanaNextBoot.stage = 'init-started';
         MyavanaNext.App.init();
+        window.MyavanaNextBoot.stage = 'init-finished';
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
     }
-});
+})();

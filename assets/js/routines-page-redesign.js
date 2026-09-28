@@ -1,4 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Runs now if the DOM is already parsed, since DOMContentLoaded may have
+// fired before this script executed.
+(function (start) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})(() => {
     'use strict';
 
     const root = document.querySelector('.myavana-routines-v2-page') || document.body;
