@@ -273,13 +273,18 @@
             '.mya-logo-badge.glow{box-shadow:0 0 12px rgba(231,166,144,0.5);border-color:' + COLORS.coral + ';}',
 
             // Launcher Button (Mobile-First Floating Companion Pill)
-            '.mya-launcher{position:fixed;bottom:24px;left:24px;height:52px;padding:0 18px 0 10px;border-radius:9999px;',
-            'background:' + COLORS.onyx + ';color:#ffffff;border:1px solid rgba(255,255,255,0.14);cursor:pointer;',
-            'box-shadow:0 10px 28px rgba(0,0,0,0.2), 0 2px 8px rgba(231,166,144,0.2);',
-            'display:flex;align-items:center;gap:10px;font-family:Archivo,-apple-system,sans-serif;font-size:14px;font-weight:600;',
-            'z-index:999998;transition:all 0.22s cubic-bezier(0.4,0,0.2,1);outline:none;user-select:none;}',
-            '.mya-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,0.26), 0 4px 14px rgba(231,166,144,0.35);background:' + COLORS.onyxSoft + ';}',
-            '.mya-launcher-badge{background:' + COLORS.coral + ';color:' + COLORS.onyx + ';font-size:10px;font-weight:700;padding:2px 7px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.04em;}',
+            // A quiet onyx disc with a coral hairline; "Ask Mya" unfurls on hover.
+            '.mya-launcher{position:fixed;bottom:28px;left:28px;height:56px;min-width:56px;padding:0 8px;border-radius:9999px;',
+            'background:' + COLORS.onyx + ';color:#ffffff;border:0;cursor:pointer;',
+            'box-shadow:0 0 0 1px rgba(231,166,144,0.55), 0 0 0 5px rgba(255,255,255,0.9), 0 14px 32px rgba(34,35,35,0.22);',
+            'display:flex;align-items:center;gap:0;font-family:Archivo,-apple-system,sans-serif;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;',
+            'z-index:999998;transition:transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease, gap 0.3s ease, padding 0.3s ease;outline:none;user-select:none;}',
+            '.mya-launcher .mya-logo-badge{box-shadow:none;border:0;}',
+            '.mya-launcher-label{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width 0.34s cubic-bezier(0.22,1,0.36,1), opacity 0.22s ease;}',
+            '.mya-launcher-dot{position:absolute;top:6px;left:42px;width:9px;height:9px;border-radius:50%;background:' + COLORS.coral + ';box-shadow:0 0 0 2px ' + COLORS.onyx + ';}',
+            '.mya-launcher:hover,.mya-launcher:focus-visible{transform:translateY(-2px);gap:12px;padding:0 20px 0 8px;',
+            'box-shadow:0 0 0 1px ' + COLORS.coral + ', 0 0 0 5px rgba(255,255,255,0.95), 0 18px 38px rgba(34,35,35,0.26);}',
+            '.mya-launcher:hover .mya-launcher-label,.mya-launcher:focus-visible .mya-launcher-label{max-width:120px;opacity:1;}',
             '.mya-launcher.is-right{left:auto;right:24px;}',
             // Hidden — not display:none — so it animates back on close.
             '.mya-launcher.is-morphed{opacity:0;transform:scale(0.6) translateY(10px);pointer-events:none;',
@@ -938,9 +943,9 @@
             '.mya-nav-item:active{transform:scale(0.96);}',
 
             // Launcher: a slow breathing halo so it reads as present, not urgent
-            '@keyframes myaHalo{0%,100%{box-shadow:0 10px 28px rgba(0,0,0,0.2),0 0 0 0 rgba(231,166,144,0.34);}50%{box-shadow:0 10px 28px rgba(0,0,0,0.2),0 0 0 9px rgba(231,166,144,0);}}',
-            '.mya-launcher{animation:myaHalo 3.6s ease-out infinite;}',
-            '.mya-launcher:hover{animation-play-state:paused;}',
+            // Launcher: arrives once, then stays still; presence is the coral dot.
+            '@keyframes myaArrive{from{opacity:0;transform:translateY(12px) scale(0.92);}to{opacity:1;transform:none;}}',
+            '.mya-launcher:not(.is-morphed){animation:myaArrive 0.6s cubic-bezier(0.22,1,0.36,1) 0.4s backwards;}',
             '.mya-launcher:active{transform:translateY(0) scale(0.97);}',
 
             // Composer: lift the whole bar on focus
@@ -987,17 +992,45 @@
 
     // ---- DOM Builder ----
 
+    // On phones the launcher would sit on top of whatever she is reading.
+    // While she scrolls down it slides mostly off the left edge, leaving a
+    // sliver; scrolling up, pausing, or tapping the sliver brings it back.
+    function tuckLauncherWhileScrolling(launcher) {
+        var lastY = window.pageYOffset || 0;
+        var idleTimer = null;
+        var mq = window.matchMedia ? window.matchMedia('(max-width: 991px)') : null;
+        function untuck() { launcher.classList.remove('is-tucked'); }
+        window.addEventListener('scroll', function () {
+            if (!mq || !mq.matches) return;
+            var y = window.pageYOffset || 0;
+            if (y > lastY + 6 && y > 80) {
+                launcher.classList.add('is-tucked');
+            } else if (y < lastY - 6) {
+                untuck();
+            }
+            lastY = y;
+            window.clearTimeout(idleTimer);
+            idleTimer = window.setTimeout(untuck, 1400);
+        }, { passive: true });
+        launcher.addEventListener('click', function (e) {
+            if (launcher.classList.contains('is-tucked')) {
+                e.stopImmediatePropagation();
+                untuck();
+            }
+        }, true);
+    }
+
     function buildWidget() {
         var side = state.position === 'bottom-right' ? 'is-right' : '';
 
         // Launcher Button
         var launcher = document.createElement('button');
         launcher.className = 'mya-launcher ' + side;
-        launcher.setAttribute('aria-label', 'Open Mya Hair AI Companion');
+        launcher.setAttribute('aria-label', 'Ask Mya, your hair companion');
         launcher.innerHTML = [
-            getMyaLogoHtml(30, 'glow'),
-            '<span>Mya</span>',
-            '<span class="mya-launcher-badge">AI</span>'
+            getMyaLogoHtml(40),
+            '<span class="mya-launcher-label">Ask Mya</span>',
+            '<span class="mya-launcher-dot" aria-hidden="true"></span>'
         ].join('');
         launcher.addEventListener('click', togglePanel);
 
@@ -1259,6 +1292,7 @@
 
         document.body.appendChild(launcher);
         document.body.appendChild(panel);
+        tuckLauncherWhileScrolling(launcher);
 
         state.els = {
             launcher: launcher,
