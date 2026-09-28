@@ -813,7 +813,8 @@ function myavana_community_feed_shortcode($atts = []) {
                                         <?php if ($products): ?>
                                         <span class="meta-tag-hjn">
                                             <?php
-                                            $product_count = count(array_filter(explode(',', $products)));
+                                            // Saved as a list by the app, as comma-separated text by older entries.
+                                            $product_count = count(is_array($products) ? array_filter(array_map('trim', array_map('strval', $products))) : array_filter(array_map('trim', explode(',', (string) $products))));
                                             echo $product_count . ' Product' . ($product_count !== 1 ? 's' : '');
                                             ?>
                                         </span>

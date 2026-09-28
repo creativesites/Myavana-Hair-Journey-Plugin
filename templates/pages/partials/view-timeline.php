@@ -304,7 +304,7 @@ else: ?>
                 $e_type_meta = get_post_meta($post_id, 'entry_type', true);
                 $e_type_label = $e_type_meta ? ucfirst(str_replace('_', ' ', $e_type_meta)) : 'Entry';
                 $e_products_raw = get_post_meta($post_id, 'products_used', true);
-                $e_products = $e_products_raw ? array_filter(array_map('trim', explode(',', (string)$e_products_raw))) : [];
+                $e_products = $e_products_raw ? is_array($e_products_raw) ? array_filter(array_map('trim', array_map('strval', $e_products_raw))) : array_filter(array_map('trim', explode(',', (string) $e_products_raw))) : [];
                 $stars_str = $render_stars($e_rating);
 ?>
                 <div class="tl2-entry-hero tl2-filter-item" data-type="entry" data-rating="<?php echo esc_attr($e_rating); ?>"

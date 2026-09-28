@@ -41,22 +41,22 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
 
             <?php if ($isLoggedIn) : ?>
                 <!-- Destination 1: Today Habit Hub -->
-                <?php \Myavana\Next\Core\SafeRender::section('today', function () { include MYAVANA_NEXT_PATH . 'templates/views/today.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('today', function () { include MYAVANA_NEXT_PATH . 'templates/views/today.php'; }, 'view-today'); ?>
 
                 <!-- Destination 2: Timeline Workspace (Timeline, Real Compare, Heatmap) -->
-                <?php \Myavana\Next\Core\SafeRender::section('journey', function () { include MYAVANA_NEXT_PATH . 'templates/views/journey.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('journey', function () { include MYAVANA_NEXT_PATH . 'templates/views/journey.php'; }, 'view-journey'); ?>
 
                 <!-- Destination 3: Routine & Goals Workspace -->
-                <?php \Myavana\Next\Core\SafeRender::section('routine', function () { include MYAVANA_NEXT_PATH . 'templates/views/routine.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('routine', function () { include MYAVANA_NEXT_PATH . 'templates/views/routine.php'; }, 'view-routine'); ?>
 
                 <!-- Destination 4: Community -->
-                <?php \Myavana\Next\Core\SafeRender::section('community', function () { include MYAVANA_NEXT_PATH . 'templates/views/community.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('community', function () { include MYAVANA_NEXT_PATH . 'templates/views/community.php'; }, 'view-community'); ?>
 
                 <!-- Destination 5: Profile & Privacy Center -->
-                <?php \Myavana\Next\Core\SafeRender::section('profile', function () { include MYAVANA_NEXT_PATH . 'templates/views/profile.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('profile', function () { include MYAVANA_NEXT_PATH . 'templates/views/profile.php'; }, 'view-profile'); ?>
             <?php else : ?>
                 <!-- Community is a public window into the MYAVANA experience. -->
-                <?php \Myavana\Next\Core\SafeRender::section('community', function () { include MYAVANA_NEXT_PATH . 'templates/views/community.php'; }); ?>
+                <?php \Myavana\Next\Core\SafeRender::section('community', function () { include MYAVANA_NEXT_PATH . 'templates/views/community.php'; }, 'view-community'); ?>
 
                 <!-- Sign In / Sign Up (hidden until opened via data-open-auth triggers) -->
                 <?php \Myavana\Next\Core\SafeRender::section('auth', function () { include MYAVANA_NEXT_PATH . 'templates/views/auth.php'; }); ?>

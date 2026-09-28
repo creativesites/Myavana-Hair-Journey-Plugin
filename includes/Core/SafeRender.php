@@ -20,7 +20,12 @@ class SafeRender {
     private static $currentSection = null;
     private static $shutdownRegistered = false;
 
-    public static function section(string $name, callable $render): void {
+    /**
+     * @param string|null $viewId When the section is an app view, a placeholder
+     *                            view with this id is rendered on failure so
+     *                            its tab shows a message instead of a blank page.
+     */
+    public static function section(string $name, callable $render, ?string $viewId = null): void {
         self::registerShutdownLogger();
 
         $level = ob_get_level();
@@ -35,6 +40,12 @@ class SafeRender {
             }
             self::log($name, get_class($e) . ': ' . $e->getMessage(), $e->getFile(), $e->getLine());
             $html = '<!-- myavana: section "' . esc_attr($name) . '" could not be rendered -->';
+            if ($viewId !== null) {
+                $html .= '<section class="myavana-next-view" id="' . esc_attr($viewId) . '" style="display:none;">'
+                    . '<div class="myavana-calm-empty"><p>'
+                    . esc_html__('This section couldn\'t load right now. Your data is safe, and we\'ve been notified.', 'myavana-hair-journey-next')
+                    . '</p></div></section>';
+            }
         }
         self::$currentSection = null;
 
