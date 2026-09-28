@@ -803,3 +803,403 @@
         padding: 18px !important;
     }
 }
+
+/* --------------------------------------------------------------------------
+   Share a moment (entry picker)
+   -------------------------------------------------------------------------- */
+.myavana-share-picker {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.myavana-share-picker .myavana-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 35, 35, 0.48);
+    backdrop-filter: blur(6px);
+}
+
+.myavana-share-picker .myavana-modal-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: min(760px, 100%);
+    max-height: min(820px, calc(100vh - 48px));
+    padding: 0;
+    overflow: hidden;
+    border-radius: 28px;
+    background: #fdf8f5;
+    box-shadow: 0 30px 80px rgba(34, 35, 35, 0.28);
+    font-family: Archivo, sans-serif;
+}
+
+.myavana-share-picker-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 28px 28px 16px;
+}
+
+.myavana-share-picker-eyebrow {
+    margin: 0 0 6px;
+    color: #9b5a49;
+    font: 700 11px/1 Archivo, sans-serif;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.myavana-share-picker-head h2 {
+    margin: 0;
+    color: #222323;
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.myavana-share-picker-sub {
+    margin: 8px 0 0;
+    max-width: 52ch;
+    color: #6b6b6b;
+    font: 400 14px/1.5 Archivo, sans-serif;
+}
+
+.myavana-share-picker .myavana-modal-close {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid #eadfd8;
+    border-radius: 50%;
+    background: #fff;
+    color: #222323 !important;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.myavana-share-picker .myavana-modal-close svg {
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    fill: none !important;
+}
+
+.myavana-share-picker .myavana-modal-close:hover {
+    border-color: #e7a690;
+    transform: rotate(90deg);
+}
+
+.myavana-share-picker-search {
+    padding: 0 28px 16px;
+}
+
+.myavana-share-picker-search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 42px;
+    border: 1px solid #eadfd8;
+    border-radius: 9999px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239b5a49' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 16px center;
+    font: 400 14px/1 Archivo, sans-serif;
+    color: #222323;
+}
+
+.myavana-share-picker-search input:focus {
+    outline: none;
+    border-color: #e7a690;
+    box-shadow: 0 0 0 4px rgba(231, 166, 144, 0.18);
+}
+
+.myavana-share-picker-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 4px 28px 24px;
+}
+
+.myavana-share-picker .entry-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.myavana-share-picker .entry-selector-card,
+.myavana-share-picker .entry-selector-card:hover,
+.myavana-share-picker .entry-selector-card.is-selected {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.myavana-share-picker .entry-selector-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.myavana-share-picker .entry-selector-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fce5d7;
+    box-shadow: 0 0 0 1px rgba(34, 35, 35, 0.06);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.myavana-share-picker .entry-selector-media img {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover;
+    display: block;
+    border-radius: 0 !important;
+}
+
+.myavana-share-picker .entry-selector-noimg {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: #9b5a49;
+    font: 700 40px/1 Archivo, sans-serif;
+}
+
+.myavana-share-picker .entry-selector-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.myavana-share-picker .entry-selector-tick {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: rgba(34, 35, 35, 0.25);
+    color: transparent;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.myavana-share-picker .entry-selector-card:hover .entry-selector-media {
+    transform: translateY(-2px);
+}
+
+.myavana-share-picker .entry-selector-card.is-selected .entry-selector-media,
+.myavana-share-picker .entry-selector-checkbox:focus-visible + .entry-selector-tick {
+    box-shadow: 0 0 0 3px #e7a690;
+}
+
+.myavana-share-picker .entry-selector-card.is-selected .entry-selector-tick {
+    background: #e7a690;
+    color: #222323;
+}
+
+.myavana-share-picker .entry-selector-card.already-shared {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.myavana-share-picker .entry-selector-flag {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 5px 10px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #222323;
+    font: 600 11px/1 Archivo, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.myavana-share-picker .entry-selector-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.myavana-share-picker .entry-selector-date {
+    color: #9b5a49;
+    font: 600 11px/1 Archivo, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.myavana-share-picker .entry-selector-title {
+    overflow: hidden;
+    color: #222323;
+    font: 600 14px/1.35 Archivo, sans-serif;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.myavana-share-picker-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 28px;
+    border-top: 1px solid #eadfd8;
+    background: #fff;
+}
+
+.myavana-share-picker-audience {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 9999px;
+    background: #f6ede8;
+}
+
+.myavana-share-picker-audience label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.myavana-share-picker-audience input {
+    position: absolute;
+    opacity: 0;
+}
+
+.myavana-share-picker-audience span {
+    display: block;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    color: #6b6b6b;
+    font: 600 13px/1 Archivo, sans-serif;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.myavana-share-picker-audience input:checked + span {
+    background: #fff;
+    color: #222323;
+    box-shadow: 0 2px 8px rgba(34, 35, 35, 0.08);
+}
+
+.myavana-share-picker-audience input:focus-visible + span {
+    outline: 2px solid #d4956f;
+    outline-offset: 2px;
+}
+
+.myavana-share-picker-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.myavana-share-picker .entry-selection-info {
+    color: #6b6b6b;
+    font: 500 13px/1 Archivo, sans-serif;
+}
+
+.myavana-share-picker-cancel,
+.myavana-share-picker-submit {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 9999px;
+    font: 700 12px/1 Archivo, sans-serif;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.myavana-share-picker-cancel {
+    border: 1px solid #eadfd8;
+    background: #fff;
+    color: #222323;
+}
+
+.myavana-share-picker-submit {
+    border: 0;
+    background: #222323;
+    color: #fff;
+}
+
+.myavana-share-picker-submit:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+.myavana-share-picker-submit:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.myavana-share-picker-empty {
+    padding: 8px 28px 32px;
+    color: #6b6b6b;
+    font: 400 15px/1.6 Archivo, sans-serif;
+}
+
+@media (max-width: 767px) {
+    .myavana-share-picker {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    .myavana-share-picker .myavana-modal-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        margin: 0 !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    .myavana-share-picker-head {
+        padding: 22px 20px 12px;
+    }
+
+    .myavana-share-picker-head h2 {
+        font-size: 22px;
+    }
+
+    .myavana-share-picker-search,
+    .myavana-share-picker-body {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .myavana-share-picker .entry-selector-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px;
+    }
+
+    .myavana-share-picker-foot {
+        padding: 12px 20px max(12px, env(safe-area-inset-bottom));
+    }
+
+    .myavana-share-picker-actions {
+        width: 100%;
+    }
+
+    .myavana-share-picker-submit {
+        margin-left: auto;
+    }
+
+    .myavana-share-picker-cancel {
+        display: none;
+    }
+}

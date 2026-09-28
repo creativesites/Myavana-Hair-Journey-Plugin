@@ -684,200 +684,97 @@ function myavana_community_feed_shortcode($atts = []) {
         </div>
     </div>
 
-    <!-- Share Existing Entry Modal -->
-    <div class="myavana-modal" id="myavana-entry-selector-modal" style="display: none;">
+    <!-- Share Existing Entry Modal: pick moments from her timeline. -->
+    <div class="myavana-modal myavana-share-picker" id="myavana-entry-selector-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="myavana-share-picker-title">
         <div class="myavana-modal-overlay"></div>
         <div class="myavana-modal-container">
-            <div class="myavana-modal-header">
-                <h2>Select Entries to Share</h2>
-                <button class="myavana-modal-close">&times;</button>
+            <div class="myavana-share-picker-head">
+                <div>
+                    <p class="myavana-share-picker-eyebrow"><?php esc_html_e('From your journey', 'myavana-hair-journey-next'); ?></p>
+                    <h2 id="myavana-share-picker-title"><?php esc_html_e('Share a moment', 'myavana-hair-journey-next'); ?></h2>
+                    <p class="myavana-share-picker-sub"><?php esc_html_e('Choose up to 10. Only the photo, title and story are shared, never your private notes or ratings.', 'myavana-hair-journey-next'); ?></p>
+                </div>
+                <button type="button" class="myavana-modal-close" aria-label="<?php esc_attr_e('Close', 'myavana-hair-journey-next'); ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
             </div>
 
-            <div class="myavana-modal-body is-overflow-y">
-                <!-- Search and Filter -->
-                <div class="entry-selector-filters">
-                    <input type="text"
-                           id="entry-search"
-                           class="myavana-input"
-                           placeholder="Search entries...">
-                    <select id="entry-filter-photos" class="myavana-select">
-                        <option value="">All Entries</option>
-                        <option value="with-photos">With Photos</option>
-                        <option value="no-photos">Without Photos</option>
-                    </select>
+            <?php if (empty($entries)): ?>
+                <div class="myavana-share-picker-empty">
+                    <p><?php esc_html_e('Your timeline is empty for now. Log a hair update and it will be here to share.', 'myavana-hair-journey-next'); ?></p>
+                </div>
+            <?php else: ?>
+                <div class="myavana-share-picker-search">
+                    <input type="search" id="entry-search" placeholder="<?php esc_attr_e('Search your entries', 'myavana-hair-journey-next'); ?>" aria-label="<?php esc_attr_e('Search your entries', 'myavana-hair-journey-next'); ?>">
                 </div>
 
-                <?php if (empty($entries)): ?>
-                    <!-- Empty State -->
-                    <div class="entry-selector-empty">
-                        <p>No entries found. Create your first hair journey entry!</p>
-                    </div>
-                <?php else: ?>
-                    <!-- Entries Grid -->
+                <div class="myavana-share-picker-body">
                     <div class="entry-selector-grid">
-                        <?php if ( ! empty( $entries ) ) : ?>
-                            <?php foreach ( $entries as $entry ) :
-                                $post_id = $entry->ID;
-                                $entry_title = get_the_title($post_id);
-                                $entry_date = get_the_date('', $post_id);
-                                $entry_date_formatted = get_the_date('F j, Y', $post_id);
+                        <?php foreach ($entries as $entry) :
+                            $post_id = $entry->ID;
+                            $entry_title = html_entity_decode(get_the_title($post_id), ENT_QUOTES, 'UTF-8');
+                            $is_shared = $wpdb->get_var($wpdb->prepare(
+                                "SELECT id FROM {$shared_table} WHERE entry_id = %d",
+                                $post_id
+                            ));
 
-                                // Check if this entry has been shared to community
-                                $is_shared = $wpdb->get_var($wpdb->prepare(
-                                    "SELECT id FROM {$shared_table} WHERE entry_id = %d",
-                                    $post_id
-                                ));
-
-                                // Try to get post thumbnail first
-                                $thumbnail = get_the_post_thumbnail_url($post_id, 'medium');
-                                
-                                // If no thumbnail, check for featured_image_index meta and gallery
-                                if (empty($thumbnail)) {
-                                    $featured_image_index = get_post_meta($post_id, 'featured_image_index', true);
-                                    $gallery_images = get_post_meta($post_id, '_entry_gallery', true);
-                                    
-                                    // If we have a featured_image_index and gallery images exist
-                                    if ($featured_image_index !== '' && !empty($gallery_images) && is_array($gallery_images)) {
-                                        // Ensure the index is valid
-                                        $index = intval($featured_image_index);
-                                        if (isset($gallery_images[$index])) {
-                                            $thumbnail = wp_get_attachment_image_url($gallery_images[$index], 'medium');
-                                        }
-                                    }
-                                    
-                                    // If still no thumbnail, try the first gallery image
-                                    if (empty($thumbnail) && !empty($gallery_images) && is_array($gallery_images)) {
-                                        $thumbnail = wp_get_attachment_image_url($gallery_images[0], 'medium');
-                                    }
+                            // Current entries keep photo URLs in entry_photos; older ones
+                            // use the post thumbnail or a gallery of attachment IDs.
+                            $thumbnail = get_the_post_thumbnail_url($post_id, 'medium');
+                            if (empty($thumbnail)) {
+                                $photos = get_post_meta($post_id, 'entry_photos', true);
+                                if (is_array($photos) && !empty($photos[0])) {
+                                    $thumbnail = (string) $photos[0];
                                 }
-                                
-                                $content = wp_strip_all_tags($entry->post_content);
-                                $excerpt = wp_trim_words($content, 20);
-                                // lets corectly set photo count
-                                $photo_count = 0;
-
-                                // Get entry metadata
-                                $rating = get_post_meta($post_id, 'health_rating', true);
-                                $mood = get_post_meta($post_id, 'mood_demeanor', true);
-                                $products = get_post_meta($post_id, 'products_used', true);
-
-                                // Sort date
-                                $sort_date = strtotime($entry->post_date);
-                            ?>
-                            <div class="list-item-hjn entry-selector-card list-item-entry-hjn <?php echo $is_shared ? 'already-shared' : ''; ?>"
-                                data-type="entries"
-                                data-title="<?php echo esc_attr(strtolower($entry_title)); ?>"
-                                data-date="<?php echo esc_attr($sort_date); ?>"
-                                data-entry-id="<?php echo esc_attr($post_id); ?>"
-                                data-has-photos="<?php echo $photo_count > 0 ? 'yes' : 'no'; ?>"
-                                >
-
-                                <?php if ($thumbnail): ?>
-                                <div class="list-item-thumbnail-hjn">
-                                    <img src="<?php echo esc_url($thumbnail); ?>" alt="<?php echo esc_attr($entry_title); ?>" loading="lazy" />
-                                    <?php if ($rating): ?>
-                                    <div class="thumbnail-rating-hjn">
-                                        <svg viewBox="0 0 24 24" width="14" height="14">
-                                            <path fill="currentColor" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
-                                        </svg>
-                                        <?php echo esc_html($rating); ?>/10
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                                <?php else: ?>
-                                <div class="list-item-icon-hjn list-icon-entry-hjn">
-                                    <svg viewBox="0 0 24 24" width="24" height="24">
-                                        <path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>
-                                    </svg>
-                                </div>
+                            }
+                            if (empty($thumbnail)) {
+                                $gallery_images = get_post_meta($post_id, '_entry_gallery', true);
+                                if (!empty($gallery_images) && is_array($gallery_images)) {
+                                    $index = (int) get_post_meta($post_id, 'featured_image_index', true);
+                                    $thumbnail = wp_get_attachment_image_url($gallery_images[$index] ?? $gallery_images[0], 'medium');
+                                }
+                            }
+                        ?>
+                        <label class="entry-selector-card<?php echo $is_shared ? ' already-shared' : ''; ?>"
+                            data-title="<?php echo esc_attr(strtolower($entry_title)); ?>"
+                            data-entry-id="<?php echo esc_attr($post_id); ?>"
+                            data-has-photos="<?php echo $thumbnail ? 'yes' : 'no'; ?>">
+                            <span class="entry-selector-media">
+                                <?php if ($thumbnail) : ?>
+                                    <img src="<?php echo esc_url($thumbnail); ?>" alt="" loading="lazy" />
+                                <?php else : ?>
+                                    <span class="entry-selector-noimg" aria-hidden="true"><?php echo esc_html(mb_substr($entry_title ?: 'M', 0, 1)); ?></span>
                                 <?php endif; ?>
-
-                                <div class="list-item-content-hjn">
-                                    <div class="list-item-header-hjn">
-                                        <h3 class="list-item-title-hjn"><?php echo esc_html($entry_title); ?></h3>
-                                    </div>
-
-                                    <div class="list-item-date-hjn">
-                                        <svg viewBox="0 0 24 24" width="14" height="14">
-                                            <path fill="currentColor" d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
-                                        </svg>
-                                        <?php echo esc_html($entry_date_formatted); ?>
-                                    </div>
-
-                                    <p class="list-item-description-hjn"><?php echo esc_html($excerpt); ?></p>
-
-                                    <div class="list-item-meta-hjn">
-                                        <span class="meta-tag-hjn tag-type-hjn">Entry</span>
-                                        <?php if ($mood): ?>
-                                        <span class="meta-tag-hjn"><?php echo esc_html($mood); ?></span>
-                                        <?php endif; ?>
-                                        <?php if ($products): ?>
-                                        <span class="meta-tag-hjn">
-                                            <?php
-                                            // Saved as a list by the app, as comma-separated text by older entries.
-                                            $product_count = count(is_array($products) ? array_filter(array_map('trim', array_map('strval', $products))) : array_filter(array_map('trim', explode(',', (string) $products))));
-                                            echo $product_count . ' Product' . ($product_count !== 1 ? 's' : '');
-                                            ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <div class="entry-card-actions">
-                                    <?php if ($is_shared): ?>
-                                        <span class="entry-shared-badge">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                            </svg>
-                                            Already Shared
-                                        </span>
-                                    <?php else: ?>
-                                        <input type="checkbox" class="entry-selector-checkbox" value="<?php echo esc_attr($post_id); ?>">
-                                    <?php endif; ?>
-                                </div>
-
-                                
-                            </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                                <?php if ($is_shared) : ?>
+                                    <span class="entry-selector-flag"><?php esc_html_e('Shared', 'myavana-hair-journey-next'); ?></span>
+                                <?php else : ?>
+                                    <input type="checkbox" class="entry-selector-checkbox" value="<?php echo esc_attr($post_id); ?>" aria-label="<?php echo esc_attr(sprintf(__('Share %s', 'myavana-hair-journey-next'), $entry_title)); ?>">
+                                    <span class="entry-selector-tick" aria-hidden="true">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                <?php endif; ?>
+                            </span>
+                            <span class="entry-selector-meta">
+                                <span class="entry-selector-date"><?php echo esc_html(get_the_date('M j, Y', $post_id)); ?></span>
+                                <span class="entry-selector-title"><?php echo esc_html($entry_title ?: __('Hair update', 'myavana-hair-journey-next')); ?></span>
+                            </span>
+                        </label>
+                        <?php endforeach; ?>
                     </div>
+                </div>
 
-                    <!-- Selection Controls -->
-                    <div class="entry-selector-controls">
-                        <div class="entry-selection-info">
-                            <span id="selected-count">0</span> selected (max 10)
-                        </div>
-                        <div class="entry-selector-buttons">
-                            <button type="button" id="select-all-entries" class="myavana-btn-secondary">Select All</button>
-                            <button type="button" id="deselect-all-entries" class="myavana-btn-secondary">Deselect All</button>
-                        </div>
+                <div class="myavana-share-picker-foot">
+                    <div class="myavana-share-picker-audience" role="radiogroup" aria-label="<?php esc_attr_e('Who can see it', 'myavana-hair-journey-next'); ?>">
+                        <label><input type="radio" name="bulk_privacy" value="public" checked><span><?php esc_html_e('Everyone', 'myavana-hair-journey-next'); ?></span></label>
+                        <label><input type="radio" name="bulk_privacy" value="followers"><span><?php esc_html_e('Followers', 'myavana-hair-journey-next'); ?></span></label>
                     </div>
-
-                    <!-- Privacy Selection -->
-                    <div class="entry-selector-privacy">
-                        <label class="myavana-form-label">Privacy for shared entries:</label>
-                        <div class="myavana-radio-group">
-                            <label class="myavana-radio-label">
-                                <input type="radio" name="bulk_privacy" value="public" checked>
-                                <span class="myavana-radio-custom"></span>
-                                <span>Public</span>
-                            </label>
-                            <label class="myavana-radio-label">
-                                <input type="radio" name="bulk_privacy" value="followers">
-                                <span class="myavana-radio-custom"></span>
-                                <span>Followers Only</span>
-                            </label>
-                        </div>
+                    <div class="myavana-share-picker-actions">
+                        <span class="entry-selection-info"><span id="selected-count">0</span> <?php esc_html_e('selected', 'myavana-hair-journey-next'); ?></span>
+                        <button type="button" class="myavana-share-picker-cancel" id="cancel-entry-selection"><?php esc_html_e('Cancel', 'myavana-hair-journey-next'); ?></button>
+                        <button type="button" class="myavana-share-picker-submit" id="share-selected-entries" disabled><?php esc_html_e('Share', 'myavana-hair-journey-next'); ?></button>
                     </div>
-
-                    <!-- Share Button -->
-                    <div class="entry-selector-footer">
-                        <button type="button" class="myavana-btn-secondary" id="cancel-entry-selection">Cancel</button>
-                        <button type="button" class="myavana-btn-primary" id="share-selected-entries" disabled>
-                            Share Selected Entries
-                        </button>
-                    </div>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
