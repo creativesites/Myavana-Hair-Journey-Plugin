@@ -281,7 +281,16 @@ window.MyavanaNextBoot = { stage: 'script-loaded', readyStateAtLoad: document.re
         window.MyavanaNextBoot.stage = 'init-started';
         MyavanaNext.App.init();
         window.MyavanaNextBoot.stage = 'init-finished';
+        renderIcons();
     };
+    // Server-rendered markup (Home, cards) uses <i data-lucide>; the icon
+    // library may load after this script, so try now and again on load.
+    const renderIcons = () => {
+        try {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+        } catch (e) { /* icons are decoration */ }
+    };
+    window.addEventListener('load', renderIcons);
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
     } else {
