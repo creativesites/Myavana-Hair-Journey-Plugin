@@ -8,6 +8,7 @@
 namespace Myavana\Next\Admin;
 
 use Myavana\Next\Core\FeatureFlags;
+use Myavana\Next\Http\Routes\ClientLogRoutes;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -79,6 +80,33 @@ class SettingsPage {
                 <p style="margin-top:10px; font-size:13px; color:#666;">
                     <?php esc_html_e('Note: All legacy shortcodes (e.g. [myavana_luxury_home], [myavana_hair-journey-page]) remain fully functional.', 'myavana-hair-journey-next'); ?>
                 </p>
+            </div>
+
+            <?php $reports = get_option(ClientLogRoutes::OPTION, []); ?>
+            <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
+                <h2><?php esc_html_e('Load problem reports', 'myavana-hair-journey-next'); ?></h2>
+                <p class="description"><?php esc_html_e('Sent automatically by members\' browsers when the app fails to start or a view fails to load. Newest first; the last 100 are kept.', 'myavana-hair-journey-next'); ?></p>
+                <?php if (empty($reports) || !is_array($reports)) : ?>
+                    <p><em><?php esc_html_e('No reports yet.', 'myavana-hair-journey-next'); ?></em></p>
+                <?php else : ?>
+                    <div style="max-height:420px; overflow:auto;">
+                        <table class="widefat striped" style="font-size:12px;">
+                            <thead><tr><th>Time</th><th>Member</th><th>What</th><th>Status</th><th>Details</th><th>Browser</th></tr></thead>
+                            <tbody>
+                            <?php foreach ($reports as $r) : ?>
+                                <tr>
+                                    <td style="white-space:nowrap;"><?php echo esc_html($r['time'] ?? ''); ?></td>
+                                    <td><?php echo esc_html($r['who'] ?? ''); ?></td>
+                                    <td><?php echo esc_html(($r['endpoint'] ?? '') . ' #' . ($r['attempt'] ?? 0) . (($r['online'] ?? 'yes') === 'no' ? ' (offline)' : '')); ?></td>
+                                    <td><?php echo esc_html((string) ($r['status'] ?? '')); ?></td>
+                                    <td style="word-break:break-all;"><code style="font-size:11px;"><?php echo esc_html($r['reason'] ?? ''); ?></code></td>
+                                    <td style="word-break:break-all; color:#666;"><?php echo esc_html($r['ua'] ?? ''); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <form method="post" action="options.php">

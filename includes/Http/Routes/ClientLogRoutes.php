@@ -15,7 +15,9 @@ if (!defined('ABSPATH')) {
 }
 
 class ClientLogRoutes extends RestController {
+    public const OPTION = 'myavana_client_load_reports';
     private const MAX_REPORTS_PER_HOUR = 30;
+    private const KEEP_REPORTS = 100;
 
     public function registerRoutes(): void {
         register_rest_route(self::NAMESPACE, '/client-log', [
@@ -39,16 +41,35 @@ class ClientLogRoutes extends RestController {
             return substr(preg_replace('/[^\x20-\x7E]/', '?', sanitize_text_field((string) $value)), 0, $max);
         };
 
+        $user = $userId > 0 ? get_userdata($userId) : null;
+        $report = [
+            'time' => current_time('mysql'),
+            'who' => $user ? $user->user_login . ' (#' . $userId . ')' : $who,
+            'endpoint' => $clean($request->get_param('endpoint'), 80),
+            'status' => (int) $request->get_param('status'),
+            'attempt' => (int) $request->get_param('attempt'),
+            'online' => $request->get_param('online') === false ? 'no' : 'yes',
+            'reason' => $clean($request->get_param('reason'), 1000),
+            'ua' => $clean($_SERVER['HTTP_USER_AGENT'] ?? '', 160),
+        ];
+
         error_log(sprintf(
             '[MYAVANA client] %s endpoint=%s status=%d attempt=%d online=%s reason=%s ua=%s',
-            $who,
-            $clean($request->get_param('endpoint'), 80),
-            (int) $request->get_param('status'),
-            (int) $request->get_param('attempt'),
-            $request->get_param('online') === false ? 'no' : 'yes',
-            $clean($request->get_param('reason'), 1000),
-            $clean($_SERVER['HTTP_USER_AGENT'] ?? '', 160)
+            $report['who'],
+            $report['endpoint'],
+            $report['status'],
+            $report['attempt'],
+            $report['online'],
+            $report['reason'],
+            $report['ua']
         ));
+
+        // Also kept in the database so admins can read them in Settings →
+        // MYAVANA Next without needing access to the server's error log.
+        $recent = get_option(self::OPTION, []);
+        $recent = is_array($recent) ? $recent : [];
+        array_unshift($recent, $report);
+        update_option(self::OPTION, array_slice($recent, 0, self::KEEP_REPORTS), false);
 
         return $this->respondSuccess(['logged' => true]);
     }

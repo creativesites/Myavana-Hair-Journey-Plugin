@@ -76,6 +76,7 @@ class Plugin {
         // Load app assets in the document head. Rendering the shortcode happens
         // after wp_head, which is too late to replace the theme header cleanly.
         add_action('wp_enqueue_scripts', [$this, 'enqueueAppAssets']);
+        add_action('wp_head', [$this, 'printBootWatchdog'], 2);
 
         // Give the Next app the same full-page treatment as the original
         // MYAVANA experience, without affecting any other site page.
@@ -293,9 +294,6 @@ class Plugin {
     public function enqueueAppAssets(): void {
         if (Router::isCurrentAppPage()) {
             Assets::enqueue();
-            if (is_user_logged_in()) {
-                add_action('wp_head', [$this, 'printBootWatchdog'], 1);
-            }
         }
     }
 
@@ -305,6 +303,9 @@ class Plugin {
      * it reports pending/slow scripts and early errors to the client log.
      */
     public function printBootWatchdog(): void {
+        if (!is_user_logged_in() || !Router::isCurrentAppPage()) {
+            return;
+        }
         $endpoint = esc_url_raw(rest_url('myavana/v1/client-log'));
         $nonce = wp_create_nonce('wp_rest');
         ?>
