@@ -900,24 +900,24 @@ function myavana_luxury_home_view() {
     // Luxury Homepage JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        // Only real in-page anchors; "#journey"-style links are app routes and
+        // "#auth" links open sign-in, so those must pass through untouched.
+        document.querySelectorAll('a[href^="#"]:not([data-tab]):not([data-home-nav]):not([data-open-auth])').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                const target = /^#[\w-]+$/.test(href) ? document.getElementById(href.slice(1)) : null;
+                if (!target) return;
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
 
-        // Navigation scroll effect
+        // Navigation scroll effect (standalone homepage only; the app shell
+        // has its own header and no .myavana-luxury-nav).
         const nav = document.querySelector('.myavana-luxury-nav');
         let lastScrollY = window.scrollY;
 
-        window.addEventListener('scroll', () => {
+        if (nav) window.addEventListener('scroll', () => {
             if (window.scrollY > 100) {
                 nav.classList.add('scrolled');
             } else {

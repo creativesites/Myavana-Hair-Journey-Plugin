@@ -30,11 +30,15 @@ class InsightEngine {
         $completion = (int) ($context['todays_routine_completion_percent'] ?? 0);
         $dayCount = (int) ($context['day_count_on_journey'] ?? 1);
         $totalEntries = (int) ($context['total_journal_entries'] ?? $entries7d);
+        $streak = (int) ($context['current_streak_days'] ?? 0);
+        $routinesEnabled = \Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED;
 
         if ($totalEntries === 0 || ($dayCount <= 3 && $entries7d === 0)) {
             return [
                 'title' => __('Welcome to Day 1 of your journey', 'myavana-hair-journey-next'),
-                'summary' => __("Welcome to MYAVANA! Start by capturing your Day 1 baseline photo and checking off today's routine.", 'myavana-hair-journey-next'),
+                'summary' => $routinesEnabled
+                    ? __("Welcome to MYAVANA! Start by capturing your Day 1 baseline photo and checking off today's routine.", 'myavana-hair-journey-next')
+                    : __('Welcome to MYAVANA! Start by capturing your Day 1 baseline photo so you can see your progress over time.', 'myavana-hair-journey-next'),
                 'recommendation' => __('Snap a quick baseline photo to begin tracking your true curl health and length over time.', 'myavana-hair-journey-next'),
                 'confidence' => 'high',
                 'supporting_signals' => [__('Day 1 of your personalized journey', 'myavana-hair-journey-next')],
@@ -77,7 +81,7 @@ class InsightEngine {
             ];
         }
 
-        if ($completion < 50 && $streak > 0) {
+        if ($routinesEnabled && $completion < 50 && $streak > 0) {
             return [
                 'title' => __('Routine is slipping a little', 'myavana-hair-journey-next'),
                 'summary' => sprintf(__("Today's routine is %d%% complete, even with a %d-day streak going.", 'myavana-hair-journey-next'), $completion, $streak),
@@ -91,8 +95,10 @@ class InsightEngine {
         }
 
         return [
-            'title' => __('Consistency is paying off', 'myavana-hair-journey-next'),
-            'summary' => sprintf(__('Day %d of your journey, with a %d-day current streak.', 'myavana-hair-journey-next'), $dayCount, $streak),
+            'title' => $streak > 1 ? __('Consistency is paying off', 'myavana-hair-journey-next') : __('Your story is taking shape', 'myavana-hair-journey-next'),
+            'summary' => $streak > 1
+                ? sprintf(__('Day %d of your journey, with a %d-day streak going.', 'myavana-hair-journey-next'), $dayCount, $streak)
+                : sprintf(__('Day %d of your journey — every entry you add makes your story clearer.', 'myavana-hair-journey-next'), $dayCount),
             'recommendation' => __('Keep logging entries — the more your journey has, the more specific your guidance gets.', 'myavana-hair-journey-next'),
             'confidence' => 'low',
             'supporting_signals' => [

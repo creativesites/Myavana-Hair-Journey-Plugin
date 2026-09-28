@@ -92,6 +92,9 @@ class Plugin {
      * Load ported community social features and shortcodes
      */
     private function loadCommunityFeatures(): void {
+        require_once MYAVANA_NEXT_PATH . 'includes/Domain/Community/CommunityIntegration.php';
+        require_once MYAVANA_NEXT_PATH . 'includes/Domain/Community/CommunityDatabase.php';
+
         if (file_exists(MYAVANA_NEXT_PATH . 'includes/Domain/Community/SocialFeatures.php')) {
             require_once MYAVANA_NEXT_PATH . 'includes/Domain/Community/SocialFeatures.php';
             if (class_exists('Myavana_Social_Features')) {

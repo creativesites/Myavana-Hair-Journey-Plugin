@@ -128,13 +128,13 @@ function myavana_share_selected_entry() {
         return;
     }
 
-    // Check if entry belongs to user
     global $wpdb;
-    $entries_table = $wpdb->prefix . 'myavana_hair_diary_entries';
-    $entry = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM {$entries_table} WHERE id = %d AND user_id = %d",
-        $entry_id, get_current_user_id()
-    ));
+
+    // Entries are hair_journey_entry posts; the old custom entries table no longer exists.
+    $entry_post = get_post($entry_id);
+    $entry = ($entry_post && $entry_post->post_type === 'hair_journey_entry' && (int) $entry_post->post_author === get_current_user_id())
+        ? (object) ['title' => $entry_post->post_title, 'notes' => $entry_post->post_content]
+        : null;
 
     if (!$entry) {
         wp_send_json_error(['message' => 'Entry not found or access denied']);

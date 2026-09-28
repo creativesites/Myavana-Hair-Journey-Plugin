@@ -1367,8 +1367,12 @@ class Myavana_Social_Features {
             'routine_steps_count' => count($current_routine),
         );
 
+        // Journal entries are private by default. Other members only see
+        // entries shared with the community, and never goals or routines.
+        $viewer_is_owner = (int) get_current_user_id() === (int) $user_id || current_user_can('manage_options');
+
         // Journey preview for profile offcanvas tab
-        $recent_entry_ids = get_posts([
+        $entry_query = [
             'post_type' => 'hair_journey_entry',
             'author' => $user_id,
             'post_status' => 'publish',
@@ -1376,7 +1380,15 @@ class Myavana_Social_Features {
             'orderby' => 'post_date',
             'order' => 'DESC',
             'fields' => 'ids',
-        ]);
+        ];
+        if (!$viewer_is_owner) {
+            $entry_query['meta_query'] = [[
+                'key' => 'visibility',
+                'value' => ['community', 'public'],
+                'compare' => 'IN',
+            ]];
+        }
+        $recent_entry_ids = get_posts($entry_query);
 
         $entry_preview = [];
         foreach ($recent_entry_ids as $entry_id) {
@@ -1390,7 +1402,7 @@ class Myavana_Social_Features {
         }
 
         $goals_preview = [];
-        foreach (array_slice($structured_goals, 0, 3) as $goal) {
+        foreach ($viewer_is_owner ? array_slice($structured_goals, 0, 3) : [] as $goal) {
             $goals_preview[] = [
                 'title' => sanitize_text_field($goal['title'] ?? 'Hair Goal'),
                 'progress' => isset($goal['progress']) ? (int) $goal['progress'] : 0,
@@ -1399,7 +1411,7 @@ class Myavana_Social_Features {
         }
 
         $routine_preview = [];
-        foreach (array_slice($current_routine, 0, 4) as $step) {
+        foreach ($viewer_is_owner ? array_slice($current_routine, 0, 4) : [] as $step) {
             if (is_array($step)) {
                 $routine_preview[] = [
                     'name' => sanitize_text_field($step['name'] ?? 'Routine Step'),
