@@ -131,6 +131,20 @@ MyavanaNext.App = (function() {
             });
         });
 
+        // Home page shortcuts into the app (buttons, cards, "View all").
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('[data-home-nav][data-tab]');
+            if (!link) return;
+            const tab = link.getAttribute('data-tab');
+            if (!validTabs.includes(tab)) return;
+            e.preventDefault();
+            navigate(tab);
+            const panel = link.getAttribute('data-routine-panel');
+            if (tab === 'routine' && panel && MyavanaNext.Routine) {
+                MyavanaNext.Routine.selectTab(panel);
+            }
+        });
+
         // Mobile Bottom Tab Items
         document.querySelectorAll('.myavana-next-tab-item').forEach(item => {
             item.addEventListener('click', (e) => {

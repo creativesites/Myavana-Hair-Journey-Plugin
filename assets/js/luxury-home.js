@@ -331,12 +331,13 @@
         // Initialize smooth scrolling
         initSmoothScrolling: function() {
             // Add smooth scrolling to all anchor links
-            $('a[href^="#"]').on('click', (e) => {
+            // Only in-page anchors with a real target; "#journey"-style links
+            // are app navigation and must reach the app router untouched.
+            $('a[href^="#"]').not('[data-tab], [data-home-nav]').on('click', (e) => {
                 const href = $(e.currentTarget).attr('href');
-                if (href !== '#') {
-                    e.preventDefault();
-                    this.smoothScrollTo(href);
-                }
+                if (href === '#' || !/^#[\w-]+$/.test(href) || !document.getElementById(href.slice(1))) return;
+                e.preventDefault();
+                this.smoothScrollTo(href);
             });
         },
 
