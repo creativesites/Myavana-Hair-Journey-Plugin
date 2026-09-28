@@ -621,7 +621,9 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                                     </div>
 
                                     <h4 class="title"><?php echo esc_html($goal['title']); ?></h4>
-                                    <p class="desc"><?php echo esc_html($goal['description'] !== '' ? wp_trim_words($goal['description'], 24) : 'No description added yet.'); ?></p>
+                                    <?php if ($goal['description'] !== '') : ?>
+                                    <p class="desc"><?php echo esc_html(wp_trim_words($goal['description'], 24)); ?></p>
+                                    <?php endif; ?>
 
                                     <div class="progress-wrap">
                                         <div class="head">
@@ -637,12 +639,16 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                                         <div class="track"><div class="fill <?php echo esc_attr($fill_class); ?>" style="width: <?php echo esc_attr($goal['progress']); ?>%"></div></div>
                                     </div>
 
+                                    <?php // Measurements only mean something once a target is set. ?>
+                                    <?php if ($goal['target_display'] !== '-' && $goal['target_display'] !== '') : ?>
                                     <div class="values">
                                         <div class="item"><div class="num"><?php echo esc_html($goal['baseline_display']); ?></div><div class="lbl">Baseline</div></div>
                                         <div class="item"><div class="num"><?php echo esc_html($goal['current_display']); ?></div><div class="lbl">Current</div></div>
                                         <div class="item"><div class="num"><?php echo esc_html($goal['target_display']); ?></div><div class="lbl">Target</div></div>
                                     </div>
+                                    <?php endif; ?>
 
+                                    <?php if ($goal['milestones_total'] > 0) : ?>
                                     <div class="milestones">
                                         <div class="m-label">Milestones</div>
                                         <div class="m-track">
@@ -666,18 +672,18 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                                             <?php endif; ?>
                                         </div>
                                     </div>
+                                    <?php endif; ?>
 
                                     <div class="meta">
                                         <span class="pill"><?php echo $icon('calendar-days', 'is-xxs'); ?><?php echo esc_html($goal['weeks_in']); ?> weeks in</span>
                                         <?php if ($goal['target_date'] !== '') : ?><span class="pill"><?php echo $icon('flag', 'is-xxs'); ?><?php echo esc_html(date_i18n('M Y', strtotime($goal['target_date']))); ?></span><?php endif; ?>
-                                        <span class="pill"><?php echo $icon('repeat-2', 'is-xxs'); ?><?php echo esc_html($goal['checkin_frequency']); ?></span>
                                     </div>
                                 </div>
 
                                 <div class="myavana-gv2-card-foot">
                                     <div>
-                                        <div class="left-meta">Last check-in: <?php echo esc_html($goal['last_checkin'] !== '' ? date_i18n('M j, Y', strtotime($goal['last_checkin'])) : 'Not yet'); ?></div>
-                                        <div class="left-streak"><?php echo $icon('flame', 'is-xxs'); ?><?php echo esc_html($goal['checkin_frequency']); ?> cadence</div>
+                                        <div class="left-meta"><?php echo esc_html($goal['checkin_frequency']); ?> check-ins</div>
+                                        <div class="left-streak"><?php echo esc_html($goal['last_checkin'] !== '' ? sprintf(__('Last: %s', 'myavana-hair-journey-next'), date_i18n('M j', strtotime($goal['last_checkin']))) : __('No check-in yet', 'myavana-hair-journey-next')); ?></div>
                                     </div>
                                     <button type="button" class="checkin-btn" data-gv2-open-checkin="<?php echo esc_attr($goal['id']); ?>"><?php echo $icon('plus', 'is-xxs'); ?>Check in</button>
                                 </div>
@@ -687,7 +693,7 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                         <article class="myavana-gv2-create-card" data-gv2-open-picker>
                             <div class="cc-icon"><?php echo $icon('target', 'is-create'); ?></div>
                             <h4>Set a New Goal</h4>
-                            <p>Define milestones, timeline, and success criteria.</p>
+                            <p>Name what you want for your hair, and when.</p>
                         </article>
                     <?php endif; ?>
                 </div>

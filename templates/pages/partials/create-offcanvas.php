@@ -349,8 +349,8 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
      aria-modal="true" aria-labelledby="goalOffcanvasTitle">
 
     <div class="offcanvas-header-hjn">
-        <h2 class="offcanvas-title-hjn" id="goalOffcanvasTitle">Create a goal</h2>
-        <p class="offcanvas-subtitle-hjn">Make progress feel clear and achievable.</p>
+        <h2 class="offcanvas-title-hjn" id="goalOffcanvasTitle">Set a goal</h2>
+        <p class="offcanvas-subtitle-hjn">Name what you want for your hair. You can add the details any time.</p>
         <button class="offcanvas-close-hjn" onclick="HJN.closeOffcanvas()" aria-label="Close">
             <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
         </button>
@@ -365,11 +365,11 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
             <div class="float-field-hjn">
                 <input type="text" id="goal_title" name="goal_title" class="form-input-hjn"
                        placeholder=" " maxlength="100" required>
-                <label for="goal_title" class="float-label-hjn">Goal Title <span class="form-required-hjn">*</span></label>
+                <label for="goal_title" class="float-label-hjn">What's your goal? <span class="form-required-hjn">*</span></label>
             </div>
 
             <div class="form-group-hjn">
-                <label class="form-label-hjn">Category</label>
+                <label class="form-label-hjn">Focus</label>
                 <div class="tag-pills-hjn" id="goalCategoryPills">
                     <?php foreach (['Length','Health','Moisture','Strength','Texture','Thickness','Scalp','Retention','Style','Other'] as $c): ?>
                     <button type="button" class="tag-pill-hjn" data-value="<?php echo esc_attr($c); ?>"><?php echo esc_html($c); ?></button>
@@ -381,20 +381,23 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
             <div class="float-field-hjn is-textarea">
                 <textarea id="goal_description" name="goal_description" class="form-textarea-hjn"
                           placeholder=" " rows="3" maxlength="1000"></textarea>
-                <label for="goal_description" class="float-label-hjn">Description</label>
+                <label for="goal_description" class="float-label-hjn">A line about it (optional)</label>
             </div>
 
-            <div class="form-row-hjn">
-                <div class="float-field-hjn">
-                    <input type="date" id="goal_start_date" name="goal_start_date" class="form-input-hjn"
-                           placeholder=" " required value="<?php echo esc_attr($today); ?>">
-                    <label for="goal_start_date" class="float-label-hjn">Start Date <span class="form-required-hjn">*</span></label>
-                </div>
-                <div class="float-field-hjn">
-                    <input type="date" id="goal_end_date" name="goal_end_date" class="form-input-hjn"
-                           placeholder=" " min="<?php echo esc_attr($today); ?>">
-                    <label for="goal_end_date" class="float-label-hjn">Target Date</label>
-                </div>
+            <div class="float-field-hjn">
+                <input type="date" id="goal_end_date" name="goal_end_date" class="form-input-hjn"
+                       placeholder=" " min="<?php echo esc_attr($today); ?>">
+                <label for="goal_end_date" class="float-label-hjn">By when? (optional)</label>
+            </div>
+
+            <?php // Everything below is optional; most members never need it to start. ?>
+            <details class="goal-more-hjn">
+                <summary><?php esc_html_e('More details', 'myavana-hair-journey-next'); ?> <span><?php esc_html_e('Start date, check-ins, milestones, motivation', 'myavana-hair-journey-next'); ?></span></summary>
+
+            <div class="float-field-hjn">
+                <input type="date" id="goal_start_date" name="goal_start_date" class="form-input-hjn"
+                       placeholder=" " required value="<?php echo esc_attr($today); ?>">
+                <label for="goal_start_date" class="float-label-hjn">Start date</label>
             </div>
 
             <div class="form-row-hjn">
@@ -463,6 +466,7 @@ $render_routine_offcanvas = ($myavana_hjn_context ?? '') !== 'goals';
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/></svg>
                 Add Milestone
             </button>
+            </details>
 
             <!-- Edit mode: progress notes -->
             <div id="goalProgressNotesGroup" style="display:none">
@@ -971,6 +975,8 @@ const HJN = window.HJN = {
         document.getElementById('goal_description').value = '';
         document.getElementById('goal_start_date').value = '<?php echo esc_js($today); ?>';
         document.getElementById('goal_end_date').value = '';
+        const goalMore = document.querySelector('#goalForm .goal-more-hjn');
+        if (goalMore) goalMore.open = false;
         document.getElementById('goal_priority').value = 'Medium';
         document.getElementById('goal_checkin_frequency').value = 'Weekly';
         const bVal = document.getElementById('goal_baseline_value'); if (bVal) bVal.value = '';
@@ -1043,6 +1049,9 @@ const HJN = window.HJN = {
         }
         if (endDate) {
             document.getElementById('goal_end_date').value = endDate;
+            // Editing: show the details she filled in before.
+            const goalMoreEdit = document.querySelector('#goalForm .goal-more-hjn');
+            if (goalMoreEdit) goalMoreEdit.open = true;
         }
     },
 
