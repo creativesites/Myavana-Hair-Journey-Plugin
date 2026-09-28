@@ -68,8 +68,13 @@
     /**
      * Load posts from server
      */
-    function loadPosts(append = false) {
+    // Dropped connections and gateway hiccups are retried quietly before
+    // the member sees an error.
+    const FEED_RETRY_DELAYS_MS = [500, 1500, 3000];
+
+    function loadPosts(append = false, attempt = 0) {
         if (isLoading) return;
+        let retryDelay = null;
 
         isLoading = true;
         if (!append) {
@@ -126,11 +131,20 @@
                     showError('Failed to load posts. Please try again.');
                 }
             },
-            error: function() {
+            error: function(xhr) {
+                const transient = xhr.status === 0 || [502, 503, 504].includes(xhr.status);
+                if (transient && attempt < FEED_RETRY_DELAYS_MS.length) {
+                    retryDelay = FEED_RETRY_DELAYS_MS[attempt];
+                    return;
+                }
                 showError('Network error. Please check your connection.');
             },
             complete: function() {
                 isLoading = false;
+                if (retryDelay !== null) {
+                    setTimeout(() => loadPosts(append, attempt + 1), retryDelay);
+                    return;
+                }
                 if (!append) {
                     hideLoading();
                 }

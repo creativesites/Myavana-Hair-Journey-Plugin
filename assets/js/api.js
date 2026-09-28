@@ -17,11 +17,27 @@ MyavanaNext.API = (function() {
     let sessionExpiredHandled = false;
     const REQUEST_TIMEOUT_MS = 60000;
     const UPLOAD_TIMEOUT_MS = 120000;
-    const READ_RETRY_DELAYS_MS = [400, 1200];
+    const READ_RETRY_DELAYS_MS = [500, 1500, 3000];
     const RETRYABLE_STATUSES = [502, 503, 504];
+    const OFFLINE_WAIT_MS = 10000;
 
-    function wait(ms) {
-        return new Promise(resolve => window.setTimeout(resolve, ms));
+    // Phones resuming from the background often report offline for a moment
+    // while the radio wakes, so an offline retry waits for 'online' instead
+    // of burning its attempts on a connection that isn't back yet.
+    function waitBeforeRetry(ms) {
+        return new Promise(resolve => {
+            if (navigator.onLine !== false) {
+                window.setTimeout(resolve, ms);
+                return;
+            }
+            const done = () => {
+                window.removeEventListener('online', done);
+                window.clearTimeout(timer);
+                resolve();
+            };
+            const timer = window.setTimeout(done, OFFLINE_WAIT_MS);
+            window.addEventListener('online', done);
+        });
     }
 
     function isPublicEndpoint(endpoint) {
@@ -113,11 +129,11 @@ MyavanaNext.API = (function() {
                         throw new Error('The request took too long. Please check your connection and try again.');
                     }
                     if (!canRetry) throw networkErr;
-                    await wait(READ_RETRY_DELAYS_MS[attempt]);
+                    await waitBeforeRetry(READ_RETRY_DELAYS_MS[attempt]);
                     continue;
                 }
                 if (canRetry && RETRYABLE_STATUSES.includes(res.status)) {
-                    await wait(READ_RETRY_DELAYS_MS[attempt]);
+                    await waitBeforeRetry(READ_RETRY_DELAYS_MS[attempt]);
                     continue;
                 }
                 break;

@@ -20,6 +20,7 @@ MyavanaNext.Journey = (function() {
     let compareB = null;
     let shareContext = null;
     let pendingFocusEntryId = null;
+    let inFlight = null;
 
     const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback', quick_checkin: 'Check-in', standard: 'Entry' };
     const MOOD_LABELS = { happy: '✨ Great', neutral: '🌿 Normal', dry: '🍂 Dry', itchy: '💆 Sensitive' };
@@ -34,14 +35,25 @@ MyavanaNext.Journey = (function() {
         bindTimelineActions();
     }
 
-    async function refresh() {
-        if (!container) return;
+    function refresh() {
+        if (!container) return Promise.resolve();
+        if (!inFlight) {
+            inFlight = load().finally(() => { inFlight = null; });
+        }
+        return inFlight;
+    }
+
+    async function load() {
+        let fresh;
         try {
-            data = await MyavanaNext.API.get('journal/workspace');
+            fresh = await MyavanaNext.API.get('journal/workspace');
         } catch (err) {
-            if (!err.sessionExpired) renderLoadError();
+            if (err.sessionExpired) return;
+            // Keep an already-rendered timeline rather than replacing it.
+            if (!data) renderLoadError();
             return;
         }
+        data = fresh;
         storyIndex = 0;
         renderAll();
     }

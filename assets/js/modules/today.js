@@ -3,6 +3,8 @@ window.MyavanaNext = window.MyavanaNext || {};
 MyavanaNext.Today = (function() {
     'use strict';
     let container = null;
+    let hasRendered = false;
+    let inFlight = null;
 
     function init() {
         container = document.querySelector('#view-today');
@@ -11,17 +13,28 @@ MyavanaNext.Today = (function() {
         refresh();
     }
 
-    async function refresh() {
-        if (!container) return;
+    function refresh() {
+        if (!container) return Promise.resolve();
+        if (!inFlight) {
+            inFlight = load().finally(() => { inFlight = null; });
+        }
+        return inFlight;
+    }
+
+    async function load() {
         let data;
         try {
             data = await MyavanaNext.API.get('today');
         } catch (error) {
-            if (!error.sessionExpired) renderLoadError();
+            if (error.sessionExpired) return;
+            // A failed background refresh keeps the view that's already on
+            // screen; the error state is only for a first load with nothing to show.
+            if (!hasRendered) renderLoadError();
             return;
         }
         MyavanaNext.Store.set('today', data);
         render(data);
+        hasRendered = true;
     }
 
     function renderLoadError() {
