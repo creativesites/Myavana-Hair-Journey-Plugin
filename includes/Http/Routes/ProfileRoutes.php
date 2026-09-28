@@ -255,8 +255,24 @@ class ProfileRoutes extends RestController {
         $data = $request->get_json_params() ?: $request->get_params();
         $status = ($data['status'] ?? '') === 'skipped' ? 'skipped' : 'completed';
 
+        $name = sanitize_text_field((string) ($data['name'] ?? ''));
+        if ($name !== '') {
+            wp_update_user(['ID' => $userId, 'display_name' => $name, 'first_name' => explode(' ', $name)[0]]);
+        }
+
+        // Hair goals from the welcome pop-up, stored under the original Hair
+        // Journey plugin's keys (comma-separated goal keys + primary goal) so
+        // the MYAVANA AI integration can read them. Deliberately not written
+        // to myavana_hair_goals_structured, which holds the Goals page's list.
+        if (isset($data['goals']) && is_array($data['goals'])) {
+            $goals = array_values(array_filter(array_map('sanitize_key', $data['goals'])));
+            update_user_meta($userId, 'myavana_hair_goals', implode(',', $goals));
+            update_user_meta($userId, 'myavana_primary_goal', $goals[0] ?? '');
+        }
+
         update_user_meta($userId, 'myavana_onboarding_completed', $status);
         update_user_meta($userId, 'myavana_onboarding_status', $status);
+        update_user_meta($userId, 'myavana_onboarding_completed_date', current_time('mysql'));
 
         return $this->respondSuccess(['status' => $status]);
     }

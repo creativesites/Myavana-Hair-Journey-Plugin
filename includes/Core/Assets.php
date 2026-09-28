@@ -213,6 +213,7 @@ class Assets {
             'mod-profile' => 'assets/js/modules/profile.js',
             'mod-auth' => 'assets/js/modules/auth.js',
             'mod-onboarding' => 'assets/js/modules/onboarding.js',
+            'mod-signup-welcome' => 'assets/js/modules/signup-welcome.js',
             'app' => 'assets/js/app.js',
         ];
 
@@ -283,6 +284,7 @@ class Assets {
             'flags' => FeatureFlags::getAll(),
             'showOnboardingWizard' => $showOnboardingWizard,
             'routinesEnabled' => LaunchScope::ROUTINES_ENABLED,
+            'showSignupWelcome' => !$showOnboardingWizard && LaunchScope::shouldShowSignupWelcome($currentUserId),
             'hairAiUrl' => LaunchScope::hairAiUrl(),
             'pluginUrl' => MYAVANA_NEXT_URL,
             'loginUrl' => wp_login_url(get_permalink()),

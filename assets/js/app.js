@@ -15,7 +15,7 @@ MyavanaNext.App = (function() {
     function init() {
         // Each module boots in isolation: one throwing must not leave every
         // later view (Today included) stuck on its loading skeleton.
-        ['SmartEntry', 'Today', 'Journey', 'Routine', 'Community', 'Profile', 'Auth', 'Onboarding'].forEach(name => {
+        ['SmartEntry', 'Today', 'Journey', 'Routine', 'Community', 'Profile', 'Auth', 'Onboarding', 'SignupWelcome'].forEach(name => {
             const mod = MyavanaNext[name];
             if (!mod || typeof mod.init !== 'function') return;
             try {

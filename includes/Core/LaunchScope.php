@@ -21,6 +21,16 @@ class LaunchScope {
     private const HAIR_AI_URL = 'https://www.myavana.com/pages/consumer';
 
     /**
+     * The restored post-signup welcome pop-up shows once, to members whose
+     * signup left onboarding pending and who haven't finished or skipped it.
+     */
+    public static function shouldShowSignupWelcome(int $userId): bool {
+        return $userId > 0
+            && get_user_meta($userId, 'myavana_onboarding_status', true) === 'pending'
+            && empty(get_user_meta($userId, 'myavana_onboarding_completed', true));
+    }
+
+    /**
      * The HairAI subscription page. The admin setting may still hold an
      * in-app hash (e.g. "#routine") from an earlier release; only a full URL
      * overrides the default.

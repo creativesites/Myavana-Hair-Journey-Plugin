@@ -76,6 +76,11 @@ $isLoggedIn = \Myavana\Next\Core\Permissions::isAuthenticated();
         <!-- Two-Speed Smart Entry Modal -->
         <?php \Myavana\Next\Core\SafeRender::section('smart-entry-modal', function () { include MYAVANA_NEXT_PATH . 'templates/components/smart-entry-modal.php'; }); ?>
 
+        <?php if (\Myavana\Next\Core\LaunchScope::shouldShowSignupWelcome(get_current_user_id())) : ?>
+        <!-- Post-signup welcome pop-up (name + hair goals), shown once -->
+        <?php \Myavana\Next\Core\SafeRender::section('signup-welcome', function () { include MYAVANA_NEXT_PATH . 'templates/components/signup-welcome.php'; }); ?>
+        <?php endif; ?>
+
         <!-- Post-Signup Onboarding Wizard (shown once; see Assets::enqueue()) -->
         <?php \Myavana\Next\Core\SafeRender::section('onboarding-wizard', function () { include MYAVANA_NEXT_PATH . 'templates/components/onboarding-wizard.php'; }); ?>
     <?php endif; ?>
