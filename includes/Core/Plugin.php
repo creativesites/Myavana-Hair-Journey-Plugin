@@ -347,7 +347,7 @@ class Plugin {
                     status: 0,
                     attempt: 0,
                     online: navigator.onLine,
-                    reason: JSON.stringify({ ready: document.readyState, boot: window.MyavanaNextBoot || 'app.js-not-run', pending: pending.slice(0, 8), slow: slow.slice(0, 6), errors: errors.slice(0, 6) })
+                    reason: JSON.stringify({ ready: document.readyState, boot: window.MyavanaNextBoot || 'app.js-not-run', appTag: !!document.getElementById('myavana-next-app-js'), footer: !!document.querySelector('.myavana-next-shell footer'), lastSection: (function () { var v = document.querySelectorAll('.myavana-next-view'); return v.length ? v[v.length - 1].id : null; })(), pending: pending.slice(0, 8), slow: slow.slice(0, 6), errors: errors.slice(0, 6) })
                 })
             }).catch(function () {});
         } catch (e) {}

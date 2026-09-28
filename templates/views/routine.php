@@ -27,17 +27,21 @@ if (!defined('ABSPATH')) {
 
     <div class="myavana-next-legacy-panel" data-next-legacy-panel="routine">
         <?php
-        if (function_exists('myavana_routines_page_shortcode')) {
-            echo myavana_routines_page_shortcode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        }
+        \Myavana\Next\Core\SafeRender::section('routines-page', function () {
+            if (function_exists('myavana_routines_page_shortcode')) {
+                echo myavana_routines_page_shortcode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            }
+        });
         ?>
     </div>
 
     <div class="myavana-next-legacy-panel" data-next-legacy-panel="goals" hidden>
         <?php
-        if (function_exists('myavana_goals_page_shortcode')) {
-            echo myavana_goals_page_shortcode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        }
+        \Myavana\Next\Core\SafeRender::section('goals-page', function () {
+            if (function_exists('myavana_goals_page_shortcode')) {
+                echo myavana_goals_page_shortcode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            }
+        });
         ?>
     </div>
 </section>
