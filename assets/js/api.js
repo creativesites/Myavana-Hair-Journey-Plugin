@@ -17,6 +17,12 @@ MyavanaNext.API = (function() {
     let sessionExpiredHandled = false;
     const REQUEST_TIMEOUT_MS = 60000;
     const UPLOAD_TIMEOUT_MS = 120000;
+    const READ_RETRY_DELAYS_MS = [400, 1200];
+    const RETRYABLE_STATUSES = [502, 503, 504];
+
+    function wait(ms) {
+        return new Promise(resolve => window.setTimeout(resolve, ms));
+    }
 
     function isPublicEndpoint(endpoint) {
         return PUBLIC_ENDPOINTS.some((p) => endpoint === p || endpoint.startsWith(p + '?'));
@@ -87,20 +93,34 @@ MyavanaNext.API = (function() {
         const controller = new AbortController();
         const timer = window.setTimeout(() => controller.abort(), isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
 
+        // Reads are safe to repeat, so a dropped connection or a gateway
+        // hiccup is retried quietly instead of surfacing as a load error.
+        const isRead = (options.method || 'GET') === 'GET';
+
         try {
             let res;
-            try {
-                res = await fetch(url.toString(), {
-                    ...options,
-                    headers,
-                    credentials: 'same-origin',
-                    signal: controller.signal,
-                });
-            } catch (networkErr) {
-                if (networkErr.name === 'AbortError') {
-                    throw new Error('The request took too long. Please check your connection and try again.');
+            for (let attempt = 0; ; attempt++) {
+                const canRetry = isRead && attempt < READ_RETRY_DELAYS_MS.length;
+                try {
+                    res = await fetch(url.toString(), {
+                        ...options,
+                        headers,
+                        credentials: 'same-origin',
+                        signal: controller.signal,
+                    });
+                } catch (networkErr) {
+                    if (networkErr.name === 'AbortError') {
+                        throw new Error('The request took too long. Please check your connection and try again.');
+                    }
+                    if (!canRetry) throw networkErr;
+                    await wait(READ_RETRY_DELAYS_MS[attempt]);
+                    continue;
                 }
-                throw networkErr;
+                if (canRetry && RETRYABLE_STATUSES.includes(res.status)) {
+                    await wait(READ_RETRY_DELAYS_MS[attempt]);
+                    continue;
+                }
+                break;
             }
 
             const json = await res.json();
@@ -122,10 +142,6 @@ MyavanaNext.API = (function() {
                 const err = new Error(msg);
                 Object.assign(err, json);
                 throw err;
-            }
-
-            if (!json.data) {
-                console.warn('[MYAVANA API] No data in response for endpoint:', endpoint, 'Response:', json);
             }
 
             return json.data;

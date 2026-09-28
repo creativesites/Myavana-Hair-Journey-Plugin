@@ -13,21 +13,15 @@ MyavanaNext.Today = (function() {
 
     async function refresh() {
         if (!container) return;
+        let data;
         try {
-            const data = await MyavanaNext.API.get('today');
-            if (!data || typeof data !== 'object') {
-                console.error('[Today Refresh Error] Invalid response data:', data);
-                renderLoadError();
-                return;
-            }
-            MyavanaNext.Store.set('today', data);
-            render(data);
+            data = await MyavanaNext.API.get('today');
         } catch (error) {
-            console.error('[Today Refresh Error]', error);
-            if (!error.sessionExpired) {
-                renderLoadError();
-            }
+            if (!error.sessionExpired) renderLoadError();
+            return;
         }
+        MyavanaNext.Store.set('today', data);
+        render(data);
     }
 
     function renderLoadError() {
@@ -42,36 +36,25 @@ MyavanaNext.Today = (function() {
     }
 
     function render(data) {
-        if (!data || typeof data !== 'object') {
-            console.error('[Today Render Error] Invalid data object:', data);
-            renderLoadError();
-            return;
+        const dateLine = container.querySelector('#today-date-line');
+        if (dateLine) {
+            dateLine.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
         }
+        const greeting = container.querySelector('.today-greeting-text');
+        const greetingSubtext = container.querySelector('.today-greeting-subtext');
+        if (greeting) greeting.textContent = data.greeting || 'Welcome back';
+        if (greetingSubtext) greetingSubtext.textContent = data.greetingSubtext || "Let's take care of your hair today.";
+        const dayCount = container.querySelector('#today-day-count');
+        if (dayCount) dayCount.textContent = `Day ${data.dayCount || 1}`;
 
-        try {
-            const dateLine = container.querySelector('#today-date-line');
-            if (dateLine) {
-                dateLine.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            }
-            const greeting = container.querySelector('.today-greeting-text');
-            const greetingSubtext = container.querySelector('.today-greeting-subtext');
-            if (greeting) greeting.textContent = data.greeting || 'Welcome back';
-            if (greetingSubtext) greetingSubtext.textContent = data.greetingSubtext || "Let's take care of your hair today.";
-            const dayCount = container.querySelector('#today-day-count');
-            if (dayCount) dayCount.textContent = `Day ${data.dayCount || 1}`;
-
-            renderChecklist(data.checklist || {});
-            renderInsight(data.insight || null);
-            renderProducts(data.routineProducts || []);
-            renderRecentEntries(data.recentEntries && data.recentEntries.length ? data.recentEntries : (data.latestEntry ? [data.latestEntry] : []));
-            renderWeek(data.week || []);
-            renderGoals(data.goals || []);
-            renderUpcoming(data.upcomingGoals || []);
-            renderMemory(data.memory || null);
-        } catch (e) {
-            console.error('[Today Render Error] Exception during render:', e);
-            renderLoadError();
-        }
+        renderChecklist(data.checklist || {});
+        renderInsight(data.insight || null);
+        renderProducts(data.routineProducts || []);
+        renderRecentEntries(data.recentEntries && data.recentEntries.length ? data.recentEntries : (data.latestEntry ? [data.latestEntry] : []));
+        renderWeek(data.week || []);
+        renderGoals(data.goals || []);
+        renderUpcoming(data.upcomingGoals || []);
+        renderMemory(data.memory || null);
     }
 
     function renderChecklist(checklist) {

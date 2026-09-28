@@ -38,12 +38,12 @@ MyavanaNext.Journey = (function() {
         if (!container) return;
         try {
             data = await MyavanaNext.API.get('journal/workspace');
-            storyIndex = 0;
-            renderAll();
         } catch (err) {
-            console.error('[Journey] refresh failed', err);
             if (!err.sessionExpired) renderLoadError();
+            return;
         }
+        storyIndex = 0;
+        renderAll();
     }
 
     function renderLoadError() {
