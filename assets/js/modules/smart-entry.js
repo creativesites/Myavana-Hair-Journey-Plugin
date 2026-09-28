@@ -43,10 +43,11 @@ MyavanaNext.SmartEntry = (function() {
         bindEvents();
     }
 
-    function open() {
+    function open(options) {
         if (!modalBackdrop) return;
         state.photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
         state = defaultState();
+        if (options && typeof options === 'object' && options.mood) state.mood = options.mood;
 
         renderTypeSelection();
         renderPhotoGrid();

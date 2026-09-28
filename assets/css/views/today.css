@@ -1,207 +1,224 @@
-.myavana-eyebrow { color: #9b5a49 !important; font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 5px !important; text-transform: uppercase; }
+/* Today — warm, personal, calm. Brand palette only: onyx, coral, light
+   coral, with a cream ground and the deep-rose accent already used for
+   eyebrows across the app. */
+
+.myavana-today {
+    --today-cream: #fdf8f5;
+    --today-blush: var(--myavana-light-coral);
+    --today-rose: #9b5a49;
+    --today-line: rgba(155, 90, 73, 0.14);
+    background: var(--today-cream);
+    border-radius: var(--radius-xl);
+    font-family: var(--font-body);
+    padding: clamp(16px, 3vw, 28px);
+}
+/* Brand type regardless of the theme's own element fonts. */
+.myavana-today p, .myavana-today span, .myavana-today li, .myavana-today button, .myavana-today strong { font-family: var(--font-body); }
+.myavana-today h1, .myavana-today h2, .myavana-today h3 { font-family: var(--font-heading); }
+
+.myavana-eyebrow { color: var(--today-rose, #9b5a49) !important; font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 5px !important; text-transform: uppercase; }
+.myavana-today-eyebrow { color: var(--today-rose); font-size: 11px; font-weight: 700; letter-spacing: .14em; margin: 0 0 10px; text-transform: uppercase; }
 .myavana-section-heading { align-items: flex-start; display: flex; gap: var(--space-md); justify-content: space-between; margin-bottom: var(--space-md); }
 .myavana-section-heading h2 { font-size: 19px; }
 
-.myavana-today-header { align-items: flex-end; display: flex; gap: var(--space-md); justify-content: space-between; flex-wrap: wrap; margin-bottom: var(--space-md); }
-.today-greeting-text { font-size: clamp(28px, 4vw, 36px); margin: 6px 0 0; }
-.today-greeting-subtext { color: var(--myavana-muted); font-size: 15px; margin-top: 6px; }
-.myavana-today-identity { align-items: center; display: flex; gap: 12px; }
-.myavana-today-identity-text { text-align: right; }
-.myavana-today-identity-text strong { display: block; font-size: 14px; }
-.myavana-today-identity-text span { color: var(--myavana-muted); font-size: 12.5px; }
-.myavana-today-avatar { border: 2px solid var(--myavana-coral); border-radius: 50%; height: 46px; object-fit: cover; width: 46px; }
-
-.myavana-today-quick-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: var(--space-xl); }
-
-.myavana-today-skeleton { display: grid; gap: 10px; }
-.myavana-today-skeleton-row {
-    background: linear-gradient(90deg, var(--myavana-stone) 25%, var(--myavana-stone-alt) 37%, var(--myavana-stone) 63%);
-    background-size: 400% 100%;
-    border-radius: var(--radius-md);
-    height: 52px;
-    animation: myavana-today-skeleton-pulse 1.6s ease infinite;
-}
-@keyframes myavana-today-skeleton-pulse {
-    0% { background-position: 100% 50%; }
-    100% { background-position: 0 50%; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .myavana-today-skeleton-row { animation: none; }
-}
-
-.myavana-today-error-state { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 20px; text-align: center; }
-.myavana-today-error-state p { color: var(--myavana-muted); font-size: 14px; margin: 0 0 12px; }
-
-.myavana-today-layout { display: flex; gap: var(--space-xl); align-items: flex-start; flex-wrap: wrap; }
-.myavana-today-main { display: flex; flex: 2; flex-direction: column; gap: var(--space-lg); min-width: 320px; }
-.myavana-today-sidebar { display: flex; flex: 1; flex-direction: column; gap: var(--space-lg); min-width: 280px; }
-
-.myavana-today-checklist { display: grid; gap: 8px; }
-.myavana-today-care-item { align-items: center; background: var(--myavana-stone); border-radius: var(--radius-md); display: flex; gap: 12px; padding: 12px; }
-.myavana-today-care-item.is-complete { opacity: .62; }
-.myavana-today-care-item.is-complete strong { text-decoration: line-through; }
-.myavana-care-check { align-items: center; background: white !important; border: 2px solid rgba(34,35,35,.2) !important; border-radius: 50%; color: white; display: flex; flex: 0 0 24px; height: 24px; justify-content: center; width: 24px; }
-.myavana-today-care-item.is-complete .myavana-care-check { background: var(--myavana-coral) !important; border-color: var(--myavana-coral) !important; }
-.myavana-today-care-item strong, .myavana-today-care-item span { display: block; }
-.myavana-today-care-item strong { font-size: 14px; }
-.myavana-today-care-item span { color: var(--myavana-muted); font-size: 12px; margin-top: 2px; }
-.myavana-calm-empty { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 20px; }
-.myavana-calm-empty p { font-size: 14px; margin-bottom: 12px; }
-
-.myavana-today-insight-card { background: var(--myavana-onyx); border-radius: var(--radius-xl); color: #fff; padding: 22px 26px; }
-.myavana-today-insight-eyebrow { color: var(--myavana-coral); font-size: 11px; font-weight: 700; letter-spacing: .14em; margin: 0 0 8px; text-transform: uppercase; }
-.myavana-today-insight-title { color: #fff; font-size: 17px; margin: 0 0 6px; }
-.myavana-today-insight-observation { color: rgba(255,255,255,.88); font-size: 15px; line-height: 1.6; margin: 0; }
-.myavana-today-insight-action { color: rgba(255,255,255,.88); font-size: 14px; font-weight: 600; line-height: 1.5; margin: 10px 0 0; }
-.myavana-today-insight-action::before { content: "→ "; color: var(--myavana-coral); }
-
-.myavana-today-insight-why {
-    background: none;
-    border: 0;
-    color: rgba(255,255,255,.55);
-    cursor: pointer;
-    display: none;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 14px;
-    padding: 0;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-.myavana-today-insight-why:hover { color: rgba(255,255,255,.8); }
-
-.myavana-today-insight-signals {
-    background: rgba(255,255,255,.06);
-    border-radius: var(--radius-md);
-    list-style: none;
-    margin: 10px 0 0;
-    padding: 12px 14px;
-}
-.myavana-today-insight-signals li {
-    color: rgba(255,255,255,.7);
-    font-size: 12.5px;
-    line-height: 1.6;
-    padding-left: 14px;
+/* Hero */
+.myavana-today-hero {
+    align-items: center;
+    background: linear-gradient(135deg, var(--today-blush) 0%, #fff4ee 55%, #ffffff 100%);
+    border: 1px solid var(--today-line);
+    border-radius: 28px;
+    display: flex;
+    gap: var(--space-xl);
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+    overflow: hidden;
+    padding: clamp(22px, 4vw, 40px);
     position: relative;
 }
-.myavana-today-insight-signals li::before { content: "•"; color: var(--myavana-coral); left: 0; position: absolute; }
-
-.myavana-today-products-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-.myavana-today-product { background: var(--myavana-stone); border-radius: var(--radius-md); padding: 12px 14px; }
-.myavana-today-product strong { display: block; font-size: 13px; }
-.myavana-today-product span { color: var(--myavana-muted); display: block; font-size: 11px; margin-top: 3px; text-transform: uppercase; letter-spacing: .06em; }
-
-.myavana-latest-entry { align-items: center; display: flex; gap: 14px; min-height: 88px; }
-.myavana-latest-entry img, .myavana-latest-entry-placeholder { background: var(--myavana-light-coral); border-radius: var(--radius-md); flex: 0 0 74px; height: 74px; object-fit: cover; width: 74px; }
-.myavana-latest-entry-placeholder { align-items: center; color: #9b5a49; display: flex; font-size: 24px; justify-content: center; }
-.myavana-latest-entry span, .myavana-latest-entry strong { display: block; }
-.myavana-latest-entry span { color: var(--myavana-muted); font-size: 12px; }
-.myavana-latest-entry strong { font-size: 15px; margin-top: 2px; }
-.myavana-latest-entry p { -webkit-box-orient: vertical; display: -webkit-box; font-size: 13px; -webkit-line-clamp: 2; margin: 4px 0 0; overflow: hidden; }
-
-.myavana-today-story-strip {
-    display: flex;
-    gap: 14px;
-    margin-top: 16px;
-    padding: 4px 2px 6px;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
+.myavana-today-hero::after {
+    background: radial-gradient(circle, rgba(231, 166, 144, 0.28) 0%, rgba(231, 166, 144, 0) 70%);
+    content: "";
+    height: 320px;
+    pointer-events: none;
+    position: absolute;
+    right: -80px;
+    top: -120px;
+    width: 320px;
 }
-.myavana-today-story-strip::-webkit-scrollbar { height: 0; }
+.myavana-today-hero-text { max-width: 560px; position: relative; z-index: 1; }
+.myavana-today-date { color: var(--today-rose); font-size: 11.5px; font-weight: 700; letter-spacing: .14em; margin: 0 0 10px; text-transform: uppercase; }
+.today-greeting-text { font-size: clamp(26px, 4vw, 38px); line-height: 1.08; margin: 0; }
+.today-greeting-subtext { color: #5d5552; font-size: 16px; line-height: 1.55; margin: 12px 0 0; }
+.myavana-today-focus { color: var(--myavana-onyx); font-size: 15px; line-height: 1.55; margin: 6px 0 0; }
+.myavana-today-focus strong { color: var(--today-rose); font-weight: 700; }
+.myavana-today-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.myavana-today-btn-soft { background: rgba(255, 255, 255, 0.8) !important; border: 1px solid var(--today-line) !important; color: var(--myavana-onyx) !important; }
+.myavana-today-btn-soft:hover { background: #fff !important; border-color: var(--myavana-coral) !important; }
 
-.myavana-today-story-item {
-    background: none;
-    border: 0;
+.myavana-today-portrait-wrap { align-items: center; display: flex; flex: none; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
+.myavana-today-portrait {
+    align-items: center;
+    background: var(--gradient-coral);
+    border-radius: 50%;
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.85), 0 0 0 7px var(--today-line), 0 18px 40px rgba(155, 90, 73, 0.18);
+    display: flex;
+    height: 132px;
+    justify-content: center;
+    overflow: hidden;
+    width: 132px;
+}
+.myavana-today-portrait img { height: 100%; object-fit: cover; width: 100%; }
+.myavana-today-portrait-initial { color: #fff; font-family: var(--font-heading); font-size: 48px; line-height: 1; }
+.myavana-today-daypill { background: #fff; border: 1px solid var(--today-line); border-radius: 999px; color: var(--today-rose); font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 6px 14px; white-space: nowrap; }
+.myavana-today-daypill:empty { display: none; }
+
+/* Layout */
+.myavana-today-layout { align-items: flex-start; display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.myavana-today-main { display: flex; flex: 2; flex-direction: column; gap: var(--space-lg); min-width: 300px; }
+.myavana-today-sidebar { display: flex; flex: 1; flex-direction: column; gap: var(--space-lg); min-width: 260px; }
+
+/* How does your hair feel */
+.myavana-today-feel { background: #fff; border: 1px solid var(--today-line); border-radius: var(--radius-lg); padding: 20px 22px; }
+.myavana-today-feel h2 { font-size: 16px; margin: 0 0 14px; }
+.myavana-today-feel-options { display: grid; gap: 10px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.myavana-today-feel-options button {
+    align-items: center;
+    background: var(--today-cream);
+    border: 1px solid transparent;
+    border-radius: 18px;
+    color: var(--myavana-onyx);
     cursor: pointer;
     display: flex;
-    flex: 0 0 auto;
     flex-direction: column;
-    align-items: center;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
     gap: 6px;
-    scroll-snap-align: start;
-    width: 64px;
+    padding: 14px 8px;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
+.myavana-today-feel-options button svg { fill: none; height: 26px; stroke: var(--myavana-coral-dark); stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; width: 26px; }
+.myavana-today-feel-options button:hover,
+.myavana-today-feel-options button:focus-visible { background: var(--today-blush); border-color: var(--myavana-coral); transform: translateY(-1px); }
 
-.myavana-today-story-ring {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(135deg, var(--myavana-coral) 0%, #e7a690 100%);
-    transition: transform .15s ease;
+/* A note for you */
+.myavana-today-insight-card {
+    background: #fff;
+    border: 1px solid var(--today-line);
+    border-left: 4px solid var(--myavana-coral);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
 }
+.myavana-today-insight-eyebrow { color: var(--today-rose); font-size: 11px; font-weight: 700; letter-spacing: .14em; margin: 0 0 8px; text-transform: uppercase; }
+.myavana-today-insight-title { color: var(--myavana-onyx); font-size: 17px; margin: 0 0 6px; }
+.myavana-today-insight-observation { color: #5d5552; font-size: 15px; line-height: 1.6; margin: 0; }
+.myavana-today-insight-action { color: var(--myavana-onyx); font-size: 14px; font-weight: 600; line-height: 1.5; margin: 10px 0 0; }
+.myavana-today-insight-action::before { color: var(--myavana-coral-dark); content: "→ "; }
+.myavana-today-insight-why { background: none; border: 0; color: var(--myavana-muted); cursor: pointer; display: none; font-size: 12px; font-weight: 600; margin-top: 14px; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.myavana-today-insight-why:hover { color: var(--myavana-onyx); }
+.myavana-today-insight-signals { background: var(--today-cream); border-radius: var(--radius-md); list-style: none; margin: 10px 0 0; padding: 12px 14px; }
+.myavana-today-insight-signals li { color: #5d5552; font-size: 12.5px; line-height: 1.6; padding-left: 14px; position: relative; }
+.myavana-today-insight-signals li::before { color: var(--myavana-coral); content: "•"; left: 0; position: absolute; }
+
+/* Your story */
+.myavana-today-story { background: #fff; border: 1px solid var(--today-line); border-radius: var(--radius-lg); padding: 22px 24px; }
+.myavana-today-section-head { align-items: flex-start; display: flex; gap: var(--space-md); justify-content: space-between; margin-bottom: 16px; }
+.myavana-today-section-head h2 { font-size: 19px; margin: 0; }
+.myavana-today-section-head .myavana-text-action { margin-top: 4px; white-space: nowrap; }
+
+.myavana-latest-entry { align-items: stretch; background: var(--today-cream); border-radius: 20px; display: flex; gap: 18px; overflow: hidden; }
+.myavana-latest-entry img, .myavana-latest-entry-placeholder { background: var(--today-blush); flex: 0 0 38%; max-width: 220px; min-height: 170px; object-fit: cover; width: 38%; }
+.myavana-latest-entry-placeholder { align-items: center; color: var(--today-rose); display: flex; font-size: 34px; justify-content: center; }
+.myavana-latest-entry > div { align-self: center; padding: 18px 18px 18px 0; }
+.myavana-latest-entry span, .myavana-latest-entry strong { display: block; }
+.myavana-latest-entry span { color: var(--today-rose); font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.myavana-latest-entry strong { font-size: 18px; margin-top: 6px; }
+.myavana-latest-entry p { -webkit-box-orient: vertical; color: #5d5552; display: -webkit-box; font-size: 14px; -webkit-line-clamp: 3; line-height: 1.55; margin: 8px 0 0; overflow: hidden; }
+
+.myavana-today-story-strip { display: flex; gap: 14px; margin-top: 16px; overflow-x: auto; padding: 4px 2px 6px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.myavana-today-story-strip::-webkit-scrollbar { height: 0; }
+.myavana-today-story-item { align-items: center; background: none; border: 0; cursor: pointer; display: flex; flex: 0 0 auto; flex-direction: column; gap: 6px; scroll-snap-align: start; width: 64px; }
+.myavana-today-story-ring { align-items: center; background: var(--gradient-coral); border-radius: 50%; display: flex; height: 64px; justify-content: center; padding: 3px; transition: transform .15s ease; width: 64px; }
 .myavana-today-story-item:hover .myavana-today-story-ring,
 .myavana-today-story-item:focus-visible .myavana-today-story-ring { transform: scale(1.05); }
-
-.myavana-today-story-ring img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--myavana-white);
-    display: block;
-}
-
-.myavana-today-story-placeholder {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: var(--myavana-light-coral);
-    border: 2px solid var(--myavana-white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9b5a49;
-    font-size: 18px;
-}
-
-.myavana-today-story-label {
-    color: var(--myavana-muted);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
+.myavana-today-story-ring img { border: 2px solid #fff; border-radius: 50%; display: block; height: 100%; object-fit: cover; width: 100%; }
+.myavana-today-story-placeholder { align-items: center; background: var(--today-blush); border: 2px solid #fff; border-radius: 50%; color: var(--today-rose); display: flex; font-size: 18px; height: 100%; justify-content: center; width: 100%; }
+.myavana-today-story-label { color: var(--myavana-muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 
 .myavana-text-action { background: none; border: 0; color: var(--myavana-onyx) !important; cursor: pointer; font-size: 13px; font-weight: 700; margin-top: 18px; padding: 0; }
 .myavana-text-action span { color: var(--myavana-coral-dark); margin-left: 4px; }
 
-.myavana-today-week-strip { display: flex; gap: 8px; margin-bottom: var(--space-md); }
-.myavana-today-week-day { align-items: center; display: flex; flex: 1; flex-direction: column; gap: 7px; }
-.myavana-today-week-day span:first-child { color: var(--myavana-muted); font-size: 10.5px; }
-.myavana-today-week-mark { align-items: center; border-radius: 9px; display: flex; font-size: 12px; font-weight: 700; height: 34px; justify-content: center; width: 100%; }
+/* Sidebar */
+.myavana-today-side-card { background: #fff; border: 1px solid var(--today-line); border-radius: var(--radius-lg); padding: 20px 22px; }
 
-.myavana-today-goals-list { display: flex; flex-direction: column; gap: 12px; padding-top: var(--space-md); border-top: 1px solid var(--myavana-border); }
+.myavana-today-week-strip { display: flex; gap: 6px; justify-content: space-between; }
+.myavana-today-week-day { align-items: center; display: flex; flex: 1; flex-direction: column; gap: 8px; }
+.myavana-today-week-day span:first-child { color: var(--myavana-muted); font-size: 11px; font-weight: 600; }
+.myavana-today-week-mark { align-items: center; border-radius: 50% !important; display: flex; font-size: 12px; font-weight: 700; height: 34px; justify-content: center; max-width: 34px; width: 100%; }
+
+.myavana-today-goals-list { display: flex; flex-direction: column; gap: 12px; }
+.myavana-today-goals-list:not(:empty) { border-top: 1px solid var(--today-line); margin-top: 18px; padding-top: 16px; }
 .myavana-today-goal-row { display: flex; flex-direction: column; gap: 6px; }
 .myavana-today-goal-top { display: flex; font-size: 13px; font-weight: 600; justify-content: space-between; }
-.myavana-today-goal-top span:last-child { color: var(--myavana-muted); font-weight: 700; }
-.myavana-today-goal-bar { background: var(--myavana-stone); border-radius: var(--radius-pill); height: 7px; overflow: hidden; }
-.myavana-today-goal-bar > div { background: var(--myavana-coral); border-radius: var(--radius-pill); height: 100%; }
+.myavana-today-goal-top span:last-child { color: var(--today-rose); font-weight: 700; }
+.myavana-today-goal-bar { background: var(--today-blush); border-radius: var(--radius-pill); height: 7px; overflow: hidden; }
+.myavana-today-goal-bar > div { background: var(--gradient-coral); border-radius: var(--radius-pill); height: 100%; }
 
-.myavana-today-upcoming-item { align-items: flex-start; border-bottom: 1px solid var(--myavana-stone); display: flex; gap: 11px; padding-bottom: 12px; margin-bottom: 12px; }
+.myavana-today-upcoming-item { align-items: flex-start; border-bottom: 1px solid var(--today-line); display: flex; gap: 11px; margin-bottom: 12px; padding-bottom: 12px; }
 .myavana-today-upcoming-item:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
 .myavana-today-upcoming-dot { background: var(--myavana-coral); border-radius: 50%; flex: none; height: 8px; margin-top: 6px; width: 8px; }
 .myavana-today-upcoming-item strong { display: block; font-size: 13.5px; }
 .myavana-today-upcoming-item span { color: var(--myavana-muted); display: block; font-size: 12px; margin-top: 2px; }
 
-.myavana-today-memory-card { background: var(--myavana-onyx); border-radius: var(--radius-xl); min-height: 210px; overflow: hidden; position: relative; }
+.myavana-today-memory-card { background: var(--myavana-onyx); border-radius: var(--radius-lg); min-height: 210px; overflow: hidden; position: relative; }
 .myavana-today-memory-bg { background-position: center; background-size: cover; height: 210px; opacity: .9; width: 100%; }
-.myavana-today-memory-overlay { background: linear-gradient(to top, rgba(34,35,35,.92) 0%, rgba(34,35,35,.1) 60%); inset: 0; position: absolute; }
+.myavana-today-memory-overlay { background: linear-gradient(to top, rgba(34,35,35,.9) 0%, rgba(34,35,35,.08) 60%); inset: 0; position: absolute; }
 .myavana-today-memory-content { bottom: 0; display: flex; flex-direction: column; gap: 7px; left: 0; padding: 18px 20px; position: absolute; right: 0; }
 .myavana-today-memory-eyebrow { color: var(--myavana-coral); font-size: 10px; font-weight: 700; letter-spacing: .16em; margin: 0; text-transform: uppercase; }
 .myavana-today-memory-content p:not(.myavana-today-memory-eyebrow) { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.3; margin: 0; }
 .myavana-today-memory-link { background: none; border: 0; color: #fff; cursor: pointer; font-size: 12.5px; font-weight: 600; padding: 0; text-align: left; }
 
-.myavana-today-help { align-items: center; background: var(--myavana-light-coral); border-radius: var(--radius-lg); display: flex; gap: 16px; justify-content: space-between; padding: 18px 20px; }
-.myavana-today-help strong { font-size: 15px; }
-.myavana-today-help p { font-size: 13px; margin: 2px 0 0; }
+.myavana-today-help { align-items: center; background: linear-gradient(135deg, var(--today-blush) 0%, #fff4ee 100%); border: 1px solid var(--today-line); border-radius: var(--radius-lg); display: flex; gap: 14px; padding: 16px 18px; }
+.myavana-today-help > div { flex: 1; }
+.myavana-today-help-mark { align-items: center; background: var(--myavana-onyx); border-radius: 50%; color: var(--myavana-coral); display: flex; flex: none; font-family: var(--font-heading); font-size: 16px; height: 40px; justify-content: center; width: 40px; }
+.myavana-today-help strong { font-size: 14.5px; }
+.myavana-today-help p { color: #5d5552; font-size: 13px; margin: 2px 0 0; }
 
-@media (max-width: 680px) {
-    .myavana-today-quick-row .myavana-btn { width: 100%; }
-    .myavana-today-help { align-items: stretch; flex-direction: column; }
-    .myavana-today-help .myavana-btn { align-self: flex-start; }
+/* Loading, empty and error states */
+.myavana-today-skeleton { display: grid; gap: 10px; }
+.myavana-today-skeleton-row { animation: myavana-today-skeleton-pulse 1.6s ease infinite; background: linear-gradient(90deg, var(--today-cream, #fdf8f5) 25%, var(--myavana-light-coral) 37%, var(--today-cream, #fdf8f5) 63%); background-size: 400% 100%; border-radius: var(--radius-md); height: 64px; }
+@keyframes myavana-today-skeleton-pulse { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .myavana-today-skeleton-row { animation: none; } }
+.myavana-today-error-state { background: var(--today-cream, #fdf8f5); border-radius: var(--radius-md); padding: 20px; text-align: center; }
+.myavana-today-error-state p { color: var(--myavana-muted); font-size: 14px; margin: 0 0 12px; }
+.myavana-calm-empty { background: var(--today-cream, var(--myavana-stone)); border-radius: var(--radius-md); padding: 20px; }
+.myavana-calm-empty p { font-size: 14px; margin-bottom: 12px; }
+
+/* Routines (shown when LaunchScope::ROUTINES_ENABLED) */
+.myavana-today-checklist { display: grid; gap: 8px; }
+.myavana-today-care-item { align-items: center; background: var(--today-cream); border-radius: var(--radius-md); display: flex; gap: 12px; padding: 12px; }
+.myavana-today-care-item.is-complete { opacity: .62; }
+.myavana-today-care-item.is-complete strong { text-decoration: line-through; }
+.myavana-care-check { align-items: center; background: white !important; border: 2px solid rgba(34,35,35,.2) !important; border-radius: 50%; color: white; display: flex; flex: 0 0 24px; height: 24px; justify-content: center; padding: 0 !important; width: 24px; }
+.myavana-today-care-item.is-complete .myavana-care-check { background: var(--myavana-coral) !important; border-color: var(--myavana-coral) !important; }
+.myavana-today-care-item strong, .myavana-today-care-item span { display: block; }
+.myavana-today-care-item strong { font-size: 14px; }
+.myavana-today-care-item span { color: var(--myavana-muted); font-size: 12px; margin-top: 2px; }
+.myavana-today-products-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.myavana-today-product { background: var(--today-cream); border-radius: var(--radius-md); padding: 12px 14px; }
+.myavana-today-product strong { display: block; font-size: 13px; }
+.myavana-today-product span { color: var(--myavana-muted); display: block; font-size: 11px; letter-spacing: .06em; margin-top: 3px; text-transform: uppercase; }
+
+@media (max-width: 760px) {
+    .myavana-today { border-radius: 0; padding: 12px; }
+    .myavana-today-hero { align-items: flex-start; flex-direction: column-reverse; gap: 18px; }
+    .myavana-today-portrait-wrap { align-items: center; flex-direction: row; }
+    .myavana-today-portrait { height: 76px; width: 76px; }
+    .myavana-today-portrait-initial { font-size: 30px; }
+    .myavana-today-hero-actions .myavana-btn { flex: 1; }
+    .myavana-today-feel-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .myavana-latest-entry { flex-direction: column; }
+    .myavana-latest-entry img, .myavana-latest-entry-placeholder { max-width: none; min-height: 180px; width: 100%; }
+    .myavana-latest-entry > div { padding: 0 16px 18px; }
+    .myavana-today-section-head { flex-direction: column; gap: 6px; }
 }

@@ -87,7 +87,36 @@ class TodayService {
             'goals' => array_slice($goals, 0, 3),
             'upcomingGoals' => $this->buildUpcomingGoals($userId),
             'memory' => $this->findMemory($userId, $entries),
+            'focus' => $this->getGoalFocus($userId),
         ];
+    }
+
+    /**
+     * The hair goals the member chose in the welcome pop-up, as display
+     * labels, so Today can speak to what she's actually working on.
+     *
+     * @param int $userId
+     * @return string[]
+     */
+    private function getGoalFocus(int $userId): array {
+        $labels = [
+            'growth' => __('hair growth', 'myavana-hair-journey-next'),
+            'moisture' => __('more moisture', 'myavana-hair-journey-next'),
+            'strength' => __('stronger hair', 'myavana-hair-journey-next'),
+            'damage' => __('repairing damage', 'myavana-hair-journey-next'),
+            'definition' => __('better definition', 'myavana-hair-journey-next'),
+            'frizz' => __('less frizz', 'myavana-hair-journey-next'),
+            'shine' => __('more shine', 'myavana-hair-journey-next'),
+            'volume' => __('more volume', 'myavana-hair-journey-next'),
+        ];
+        $keys = array_filter(array_map('trim', explode(',', (string) get_user_meta($userId, 'myavana_hair_goals', true))));
+        $focus = [];
+        foreach ($keys as $key) {
+            if (isset($labels[$key])) {
+                $focus[] = $labels[$key];
+            }
+        }
+        return array_slice($focus, 0, 3);
     }
 
     /**

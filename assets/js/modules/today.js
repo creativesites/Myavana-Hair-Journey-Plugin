@@ -68,7 +68,9 @@ MyavanaNext.Today = (function() {
         if (greeting) greeting.textContent = data.greeting || 'Welcome back';
         if (greetingSubtext) greetingSubtext.textContent = data.greetingSubtext || "Let's take care of your hair today.";
         const dayCount = container.querySelector('#today-day-count');
-        if (dayCount) dayCount.textContent = `Day ${data.dayCount || 1}`;
+        if (dayCount) dayCount.textContent = `Day ${data.dayCount || 1} of your journey`;
+        renderFocus(data.focus || []);
+        renderPortrait(data.latestEntry || (data.recentEntries || [])[0] || null);
 
         renderChecklist(data.checklist || {});
         renderInsight(data.insight || null);
@@ -78,6 +80,27 @@ MyavanaNext.Today = (function() {
         renderGoals(data.goals || []);
         renderUpcoming(data.upcomingGoals || []);
         renderMemory(data.memory || null);
+    }
+
+    // The goals she chose at signup, in her own words: "You're focused on
+    // more moisture and hair growth."
+    function renderFocus(focus) {
+        const el = container.querySelector('#today-focus');
+        if (!el) return;
+        if (!focus.length) { el.hidden = true; return; }
+        const parts = focus.map(f => `<strong>${escapeHtml(f)}</strong>`);
+        const list = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0];
+        el.innerHTML = `You're focused on ${list}.`;
+        el.hidden = false;
+    }
+
+    // Her latest hair photo in the hero, unless she has chosen a profile photo.
+    function renderPortrait(entry) {
+        const portrait = container.querySelector('#today-portrait');
+        if (!portrait || portrait.dataset.custom === '1' || portrait.querySelector('img:not([data-from-entry])')) return;
+        const image = entry && (entry.featuredImage || (entry.photos && entry.photos[0]));
+        if (!image) return;
+        portrait.innerHTML = `<img src="${escapeHtml(image)}" alt="" data-from-entry="1" />`;
     }
 
     function renderChecklist(checklist) {
@@ -267,6 +290,9 @@ MyavanaNext.Today = (function() {
     }
 
     function bindEvents() {
+        container.querySelectorAll('[data-feel]').forEach(btn => btn.addEventListener('click', () => {
+            if (MyavanaNext.SmartEntry) MyavanaNext.SmartEntry.open({ mood: btn.dataset.feel });
+        }));
         container.querySelector('#today-open-timeline')?.addEventListener('click', () => MyavanaNext.App.navigate('journey'));
     }
 
