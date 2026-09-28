@@ -21,6 +21,7 @@ MyavanaNext.Journey = (function() {
     let shareContext = null;
     let pendingFocusEntryId = null;
     let inFlight = null;
+    const FIRST_LOAD_RETRY_DELAYS_MS = [3000, 6000, 12000];
 
     const TYPE_LABELS = { wash_day: 'Wash day', length_check: 'Length check', milestone: 'Milestone', setback: 'Setback', quick_checkin: 'Check-in', standard: 'Entry' };
     const MOOD_LABELS = { happy: '✨ Great', neutral: '🌿 Normal', dry: '🍂 Dry', itchy: '💆 Sensitive' };
@@ -45,13 +46,20 @@ MyavanaNext.Journey = (function() {
 
     async function load() {
         let fresh;
-        try {
-            fresh = await MyavanaNext.API.get('journal/workspace');
-        } catch (err) {
-            if (err.sessionExpired) return;
-            // Keep an already-rendered timeline rather than replacing it.
-            if (!data) renderLoadError();
-            return;
+        for (let attempt = 0; ; attempt++) {
+            try {
+                fresh = await MyavanaNext.API.get('journal/workspace');
+                break;
+            } catch (err) {
+                if (err.sessionExpired) return;
+                // Keep an already-rendered timeline rather than replacing it.
+                if (data) return;
+                if (attempt >= FIRST_LOAD_RETRY_DELAYS_MS.length) {
+                    renderLoadError();
+                    return;
+                }
+                await new Promise(resolve => window.setTimeout(resolve, FIRST_LOAD_RETRY_DELAYS_MS[attempt]));
+            }
         }
         data = fresh;
         storyIndex = 0;

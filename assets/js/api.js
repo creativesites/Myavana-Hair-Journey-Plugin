@@ -18,7 +18,6 @@ MyavanaNext.API = (function() {
     const REQUEST_TIMEOUT_MS = 60000;
     const UPLOAD_TIMEOUT_MS = 120000;
     const READ_RETRY_DELAYS_MS = [500, 1500, 3000];
-    const RETRYABLE_STATUSES = [502, 503, 504];
     const OFFLINE_WAIT_MS = 10000;
 
     // Phones resuming from the background often report offline for a moment
@@ -109,12 +108,14 @@ MyavanaNext.API = (function() {
         const controller = new AbortController();
         const timer = window.setTimeout(() => controller.abort(), isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
 
-        // Reads are safe to repeat, so a dropped connection or a gateway
-        // hiccup is retried quietly instead of surfacing as a load error.
+        // Reads are safe to repeat, so any transient failure is retried
+        // quietly; only a failure that outlasts every retry reaches the view.
         const isRead = (options.method || 'GET') === 'GET';
+        const needsSession = !isPublicEndpoint(endpoint);
 
         try {
             let res;
+            let json;
             for (let attempt = 0; ; attempt++) {
                 const canRetry = isRead && attempt < READ_RETRY_DELAYS_MS.length;
                 try {
@@ -128,22 +129,37 @@ MyavanaNext.API = (function() {
                     if (networkErr.name === 'AbortError') {
                         throw new Error('The request took too long. Please check your connection and try again.');
                     }
+                    if (isRead) reportFailure(endpoint, 0, attempt, networkErr.message);
                     if (!canRetry) throw networkErr;
                     await waitBeforeRetry(READ_RETRY_DELAYS_MS[attempt]);
                     continue;
                 }
-                if (canRetry && RETRYABLE_STATUSES.includes(res.status)) {
+
+                const raw = await res.text();
+                try {
+                    json = JSON.parse(raw);
+                } catch (parseErr) {
+                    json = null;
+                }
+
+                const failed = !res.ok || !json || json.success === false;
+                if (!failed) break;
+
+                const sessionGone = needsSession && (res.status === 401 || res.status === 403);
+                if (isRead) reportFailure(endpoint, res.status, attempt, json ? (json.code || json.message) : raw.slice(0, 300));
+                if (canRetry && !sessionGone && res.status !== 404) {
                     await waitBeforeRetry(READ_RETRY_DELAYS_MS[attempt]);
                     continue;
                 }
                 break;
             }
 
-            const json = await res.json();
+            if (!json) {
+                throw new Error('We received an unexpected response. Please try again.');
+            }
 
             if (!res.ok || json.success === false) {
-                console.warn('[MYAVANA API Response]', { status: res.status, endpoint, json });
-                if ((res.status === 401 || res.status === 403) && !isPublicEndpoint(endpoint)) {
+                if ((res.status === 401 || res.status === 403) && needsSession) {
                     handleSessionExpired();
                     const expiredErr = new Error('Your session has expired — please sign in again.');
                     Object.assign(expiredErr, json, { sessionExpired: true });
@@ -151,7 +167,8 @@ MyavanaNext.API = (function() {
                 }
 
                 const msg = json.message || 'An error occurred while processing your request.';
-                showToast(msg, 'error');
+                // Reads leave presentation to their view; only actions toast.
+                if (!isRead) showToast(msg, 'error');
                 // Carry the rest of the error payload (field, showForgot,
                 // attemptsRemaining, code, ...) onto the thrown Error so
                 // callers can react to it without re-parsing the response.
@@ -161,12 +178,25 @@ MyavanaNext.API = (function() {
             }
 
             return json.data;
-        } catch (err) {
-            console.error('[MYAVANA API Error]', { endpoint, error: err.message, details: err });
-            throw err;
         } finally {
             window.clearTimeout(timer);
         }
+    }
+
+    // Sends each failed attempt's real status and reason to the server log,
+    // so failures seen only on a member's device can be diagnosed.
+    const reported = new Set();
+    function reportFailure(endpoint, status, attempt, reason) {
+        const key = endpoint + '|' + status + '|' + attempt;
+        if (endpoint === 'client-log' || !getNonce() || reported.has(key) || reported.size >= 20) return;
+        reported.add(key);
+        fetch(new URL('client-log', getBaseUrl()).toString(), {
+            method: 'POST',
+            credentials: 'same-origin',
+            keepalive: true,
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': getNonce() },
+            body: JSON.stringify({ endpoint, status, attempt, reason: String(reason || '').slice(0, 300), online: navigator.onLine }),
+        }).catch(() => {});
     }
 
     function showToast(message, type = 'info') {

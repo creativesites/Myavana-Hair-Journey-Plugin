@@ -5,6 +5,7 @@ MyavanaNext.Today = (function() {
     let container = null;
     let hasRendered = false;
     let inFlight = null;
+    const FIRST_LOAD_RETRY_DELAYS_MS = [3000, 6000, 12000];
 
     function init() {
         container = document.querySelector('#view-today');
@@ -23,14 +24,22 @@ MyavanaNext.Today = (function() {
 
     async function load() {
         let data;
-        try {
-            data = await MyavanaNext.API.get('today');
-        } catch (error) {
-            if (error.sessionExpired) return;
-            // A failed background refresh keeps the view that's already on
-            // screen; the error state is only for a first load with nothing to show.
-            if (!hasRendered) renderLoadError();
-            return;
+        for (let attempt = 0; ; attempt++) {
+            try {
+                data = await MyavanaNext.API.get('today');
+                break;
+            } catch (error) {
+                if (error.sessionExpired) return;
+                // A failed background refresh keeps the view already on screen.
+                if (hasRendered) return;
+                // First load: keep the skeleton and retry on our own, as the
+                // member would; the error state is for a genuine outage only.
+                if (attempt >= FIRST_LOAD_RETRY_DELAYS_MS.length) {
+                    renderLoadError();
+                    return;
+                }
+                await new Promise(resolve => window.setTimeout(resolve, FIRST_LOAD_RETRY_DELAYS_MS[attempt]));
+            }
         }
         MyavanaNext.Store.set('today', data);
         render(data);

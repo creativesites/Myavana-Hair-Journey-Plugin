@@ -10,6 +10,7 @@ namespace Myavana\Next\Core;
 use Myavana\Next\Admin\SettingsPage;
 use Myavana\Next\Http\Routes\InitRoutes;
 use Myavana\Next\Http\Routes\TodayRoutes;
+use Myavana\Next\Http\Routes\ClientLogRoutes;
 use Myavana\Next\Http\Routes\JournalRoutes;
 use Myavana\Next\Http\Routes\RoutineRoutes;
 use Myavana\Next\Http\Routes\GoalRoutes;
@@ -185,6 +186,7 @@ class Plugin {
     public function registerRestRoutes(): void {
         (new InitRoutes())->registerRoutes();
         (new TodayRoutes())->registerRoutes();
+        (new ClientLogRoutes())->registerRoutes();
         (new JournalRoutes())->registerRoutes();
         (new RoutineRoutes())->registerRoutes();
         (new GoalRoutes())->registerRoutes();
