@@ -25,6 +25,19 @@ class GoalRepository {
             return [];
         }
 
+        // Goals from the first plugin have neither `id` nor `goal_key`, so an
+        // entry could never be linked to them. Give each a stable key once.
+        $backfilled = false;
+        foreach ($goals as $i => $goal) {
+            if (is_array($goal) && empty($goal['id']) && empty($goal['goal_key'])) {
+                $goals[$i]['goal_key'] = 'goal_' . wp_generate_uuid4();
+                $backfilled = true;
+            }
+        }
+        if ($backfilled) {
+            update_user_meta($userId, 'myavana_hair_goals_structured', array_values($goals));
+        }
+
         return array_values($goals);
     }
 

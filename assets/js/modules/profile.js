@@ -2,6 +2,7 @@ window.MyavanaNext = window.MyavanaNext || {};
 
 MyavanaNext.Profile = (function() {
     'use strict';
+    let lastPublicName = '';
 
     let container = null;
     let currentUnit = 'in';
@@ -31,6 +32,7 @@ MyavanaNext.Profile = (function() {
         const profile = data.profile || {};
         currentUnit = profile.measurementUnit === 'cm' ? 'cm' : 'in';
 
+        lastPublicName = data.publicName || '';
         renderHeader(profile, data.dayCount, data.joinDate, data.publicName);
         renderStats(data);
         renderHairId(profile, data.hairIdNote);
@@ -263,7 +265,7 @@ MyavanaNext.Profile = (function() {
         const preview = container.querySelector('#drawer-avatar-preview');
         if (preview && profile.avatarUrl) preview.src = profile.avatarUrl;
 
-        setVal('#drawer-input-name', profile.displayName || '');
+        setVal('#drawer-input-name', lastPublicName || profile.displayName || '');
         setVal('#drawer-input-bio', profile.bio || '');
         setVal('#drawer-input-location', profile.location || '');
         setVal('#drawer-input-website', profile.website || '');

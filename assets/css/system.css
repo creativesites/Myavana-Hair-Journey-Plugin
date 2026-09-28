@@ -1,0 +1,303 @@
+/**
+ * MYAVANA design system: one definition of the shared controls.
+ *
+ * The app grew from several plugins, each with its own primary button, input
+ * and select. This sheet loads last and gives every screen the same set:
+ *
+ *   Primary   onyx pill, white label: the one main action in a view
+ *   Secondary white pill, hairline border, onyx label
+ *   On dark   coral pill, onyx label (primary on an onyx surface)
+ *   Fields    soft white field, hairline border, coral focus ring
+ *
+ * Coral is the accent (focus, selection, progress), never a light fill
+ * behind white text, which fails contrast and reads as disabled.
+ *
+ * @package Myavana\Next
+ */
+
+#myavana-next-root,
+.myavana-modal,
+.myavana-profile-drawer {
+    --ds-onyx: #222323;
+    --ds-onyx-hover: #363737;
+    --ds-coral: #e7a690;
+    --ds-coral-dark: #d4956f;
+    --ds-rose: #9b5a49;
+    --ds-line: #eadfd8;
+    --ds-muted: #6b6b6b;
+    --ds-field: #ffffff;
+    --ds-ring: 0 0 0 4px rgba(231, 166, 144, 0.2);
+}
+
+/* ---------------------------------------------------------------- Buttons */
+
+#myavana-next-root .myavana-btn-primary,
+#myavana-next-root .myavana-profile-widget-btn,
+body .myavana-modal .myavana-btn-primary,
+body .myavana-profile-drawer .myavana-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 24px;
+    border: 1px solid var(--ds-onyx);
+    border-radius: 9999px;
+    background: var(--ds-onyx);
+    background-image: none;
+    color: #ffffff !important;
+    font-family: Archivo, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 20px rgba(34, 35, 35, 0.12);
+    opacity: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#myavana-next-root .myavana-btn-primary:hover,
+#myavana-next-root .myavana-profile-widget-btn:hover,
+body .myavana-modal .myavana-btn-primary:hover,
+body .myavana-profile-drawer .myavana-btn-primary:hover {
+    background: var(--ds-onyx-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(34, 35, 35, 0.16);
+}
+
+#myavana-next-root .myavana-btn-primary:disabled,
+body .myavana-modal .myavana-btn-primary:disabled {
+    opacity: 0.35;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Square icon companion (e.g. Saved posts next to View profile). */
+#myavana-next-root .myavana-profile-widget-btn.myavana-btn-icon {
+    flex: 0 0 44px;
+    width: 44px;
+    padding: 0;
+    border-color: var(--ds-line);
+    background: #ffffff;
+    color: var(--ds-onyx) !important;
+    box-shadow: none;
+}
+
+/* Primary on an onyx surface. */
+#myavana-next-root .myavana-community-header .myavana-btn-primary {
+    border-color: var(--ds-coral);
+    background: var(--ds-coral);
+    color: var(--ds-onyx) !important;
+}
+
+#myavana-next-root .myavana-community-header .myavana-btn-primary:hover {
+    background: #eeb8a5;
+}
+
+#myavana-next-root .myavana-btn-outline,
+#myavana-next-root .myavana-btn-secondary,
+body .myavana-modal .myavana-btn-secondary,
+body .myavana-profile-drawer .myavana-btn-secondary,
+body .myavana-profile-drawer .myavana-btn-ghost {
+    min-height: 40px;
+    border: 1px solid var(--ds-line);
+    border-radius: 9999px;
+    background: #ffffff;
+    color: var(--ds-onyx) !important;
+    box-shadow: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+#myavana-next-root .myavana-btn-outline:hover,
+#myavana-next-root .myavana-btn-secondary:hover,
+body .myavana-modal .myavana-btn-secondary:hover,
+body .myavana-profile-drawer .myavana-btn-secondary:hover {
+    border-color: var(--ds-coral);
+    background: #fffaf7;
+}
+
+/* Destructive stays quiet until hovered. */
+#myavana-next-root .myavana-btn-danger-outline {
+    color: #b4533f !important;
+}
+
+#myavana-next-root .myavana-btn-danger-outline:hover {
+    border-color: #e6b3a6;
+    background: #fdf1ee;
+}
+
+#myavana-next-root .myavana-btn:focus-visible,
+#myavana-next-root .myavana-btn-primary:focus-visible,
+#myavana-next-root .myavana-btn-secondary:focus-visible,
+body .myavana-modal button:focus-visible {
+    outline: none;
+    box-shadow: var(--ds-ring);
+}
+
+/* ---------------------------------------------------------------- Fields */
+
+#myavana-next-root .myavana-form-control,
+#myavana-next-root .myavana-input,
+#myavana-next-root .myavana-textarea,
+#myavana-next-root .myavana-select,
+#myavana-next-root .setting-select,
+body .myavana-modal-backdrop .myavana-input,
+body .myavana-modal-backdrop .myavana-textarea,
+body .myavana-modal-backdrop .myavana-select,
+body .myavana-profile-drawer .myavana-form-control {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 14px;
+    background-color: var(--ds-field);
+    color: var(--ds-onyx);
+    font: 400 15px/1.4 Archivo, sans-serif;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#myavana-next-root textarea.myavana-form-control,
+#myavana-next-root .myavana-textarea,
+body .myavana-profile-drawer textarea.myavana-form-control {
+    min-height: 96px;
+    resize: vertical;
+}
+
+#myavana-next-root .myavana-form-control::placeholder,
+#myavana-next-root .myavana-input::placeholder,
+#myavana-next-root .myavana-textarea::placeholder {
+    color: #a8a2a0;
+}
+
+#myavana-next-root .myavana-form-control:focus,
+body .myavana-modal-backdrop .myavana-input:focus,
+body .myavana-modal-backdrop .myavana-textarea:focus,
+#myavana-next-root .myavana-input:focus,
+#myavana-next-root .myavana-textarea:focus,
+#myavana-next-root .myavana-select:focus,
+#myavana-next-root .setting-select:focus,
+body .myavana-profile-drawer .myavana-form-control:focus {
+    outline: none;
+    border-color: var(--ds-coral);
+    box-shadow: var(--ds-ring);
+}
+
+#myavana-next-root select.myavana-form-control,
+#myavana-next-root .myavana-select,
+#myavana-next-root .setting-select,
+body .myavana-profile-drawer select.myavana-form-control {
+    -webkit-appearance: none;
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b5a49' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+}
+
+/* Compact select inside a settings row. */
+#myavana-next-root .setting-select {
+    width: auto;
+    min-width: 150px;
+    min-height: 40px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+}
+
+#myavana-next-root .myavana-form-group label,
+body .myavana-profile-drawer .myavana-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--ds-onyx);
+    font: 600 12px/1.2 Archivo, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* Toggles use the brand coral when on. */
+#myavana-next-root .myavana-switch input:checked + .switch-slider {
+    background: var(--ds-coral);
+}
+
+/* ---------------------------------------------------------------- Chips */
+
+/* Selectable pills (focus areas, concerns): outline until chosen. */
+#myavana-next-root .concern-pill-check span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 9999px;
+    background: #ffffff;
+    color: var(--ds-onyx);
+    font: 500 13px/1 Archivo, sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+#myavana-next-root .concern-pill-check:hover span {
+    border-color: var(--ds-coral);
+}
+
+#myavana-next-root .concern-pill-check input:checked + span {
+    border-color: var(--ds-onyx);
+    background: var(--ds-onyx);
+    color: #ffffff;
+}
+
+/* Two fields side by side line up on their inputs, not their labels. */
+#myavana-next-root .form-row-2 {
+    align-items: end;
+}
+
+/* Choice cards: the title carries the tone; the description reads as prose. */
+#myavana-next-root .myavana-entry-type-card span,
+body .myavana-entry-modal .myavana-entry-type-card span {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 400;
+    color: var(--ds-muted, #6b6b6b);
+}
+
+#myavana-next-root .setting-select,
+#myavana-next-root select.myavana-form-control {
+    color: var(--ds-onyx) !important;
+    -webkit-text-fill-color: var(--ds-onyx);
+}
+
+/* Typed text is ink, never placeholder grey. */
+body .myavana-modal-backdrop .myavana-input,
+body .myavana-modal-backdrop .myavana-textarea {
+    color: #222323 !important;
+    -webkit-text-fill-color: #222323;
+}
+
+body .myavana-modal-backdrop .myavana-input::placeholder,
+body .myavana-modal-backdrop .myavana-textarea::placeholder {
+    color: #a8a2a0 !important;
+    -webkit-text-fill-color: #a8a2a0;
+}
+
+/* Phones: date and mood stack instead of squeezing side by side. */
+@media (max-width: 640px) {
+    body .myavana-entry-modal .myavana-entry-row {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    body .myavana-entry-modal .myavana-entry-row > .myavana-form-group {
+        flex: none !important;
+        width: 100%;
+    }
+
+    body .myavana-entry-modal .myavana-entry-pill-group {
+        flex-wrap: wrap;
+    }
+}

@@ -100,6 +100,15 @@ class JournalRoutes extends RestController {
             return $this->respondError($result->get_error_message(), $result->get_error_code(), 400);
         }
 
+        // "Who can see this? Community" means it appears in the Community feed.
+        $entryId = (int) ($result['entry']['id'] ?? 0);
+        if ($entryId && ($result['entry']['visibility'] ?? '') === 'community'
+            && class_exists('Myavana_Community_Integration')
+            && \Myavana_Community_Integration::is_entry_shareable($entryId)) {
+            $shared = \Myavana_Community_Integration::share_entry($entryId, 'public');
+            $result['sharedToCommunity'] = !is_wp_error($shared);
+        }
+
         return $this->respondSuccess($result, 201);
     }
 

@@ -168,6 +168,9 @@ class Assets {
             'myavana-onboarding-wizard',
         ], self::ver('assets/css/mobile-sheets.css'));
 
+        // Shared buttons, fields and selects. Last, so every screen agrees.
+        wp_enqueue_style('myavana-system', MYAVANA_NEXT_URL . 'assets/css/system.css', ['myavana-mobile-sheets'], self::ver('assets/css/system.css'));
+
         // Self-hosted: a third-party CDN here blocks every app script after it
         // whenever the visitor's network can't reach that CDN.
         wp_enqueue_script('myavana-lucide', MYAVANA_NEXT_URL . 'assets/js/lib/lucide-0.469.0.min.js', [], '0.469.0', true);

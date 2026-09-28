@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
                     <div class="myavana-entry-type-grid">
                         <button type="button" class="myavana-entry-type-card active" data-entry-type="wash_day">
                             <strong><?php esc_html_e('Wash day', 'myavana-hair-journey-next'); ?></strong>
-                            <span><?php esc_html_e('Routine, products, how it went', 'myavana-hair-journey-next'); ?></span>
+                            <span><?php esc_html_e('Products, method, how it went', 'myavana-hair-journey-next'); ?></span>
                         </button>
                         <button type="button" class="myavana-entry-type-card" data-entry-type="length_check">
                             <strong><?php esc_html_e('Length check', 'myavana-hair-journey-next'); ?></strong>
@@ -144,8 +144,7 @@ if (!defined('ABSPATH')) {
                     <label class="myavana-label"><?php esc_html_e('Who can see this?', 'myavana-hair-journey-next'); ?></label>
                     <div class="myavana-entry-pill-group" id="entry-visibility-group">
                         <button type="button" class="myavana-entry-pill active" data-visibility="private"><?php esc_html_e('Only me', 'myavana-hair-journey-next'); ?></button>
-                        <button type="button" class="myavana-entry-pill" data-visibility="twins"><?php esc_html_e('Hair twins', 'myavana-hair-journey-next'); ?></button>
-                        <button type="button" class="myavana-entry-pill" data-visibility="community"><?php esc_html_e('Community', 'myavana-hair-journey-next'); ?></button>
+                        <button type="button" class="myavana-entry-pill" data-visibility="community"><?php esc_html_e('Share to Community', 'myavana-hair-journey-next'); ?></button>
                     </div>
                 </div>
             </div>

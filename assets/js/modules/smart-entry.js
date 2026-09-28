@@ -59,7 +59,7 @@ MyavanaNext.SmartEntry = (function() {
             loadGoals();
         }
 
-        modalBackdrop.style.display = 'block';
+        modalBackdrop.style.display = 'flex';
         modalBackdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -259,7 +259,16 @@ MyavanaNext.SmartEntry = (function() {
             // Some older goals were saved with a legacy `goal_key` instead
             // of `id` (GoalRepository still accepts either when matching).
             // Normalize here so every goal has a usable identifier.
-            state.goals = ((data && data.active) || []).map((g) => ({ ...g, id: g.id || g.goal_key || '' })).filter((g) => g.id);
+            // One chip per goal title: double-submitted goals left duplicates.
+            const seen = new Set();
+            state.goals = ((data && data.active) || [])
+                .map((g) => ({ ...g, id: g.id !== undefined && g.id !== '' ? String(g.id) : (g.goal_key || ''), title: g.title || g.goal_title || '' }))
+                .filter((g) => {
+                    const key = g.title.trim().toLowerCase();
+                    if (g.id === '' || !key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
             goalsLoaded = true;
             renderGoals();
         } catch (err) {
@@ -276,7 +285,7 @@ MyavanaNext.SmartEntry = (function() {
         if (!goalsLoaded) return;
 
         if (state.goals.length === 0) {
-            group.innerHTML = '<span class="myavana-entry-hint">No active goals yet — set one on the Routine tab.</span>';
+            group.innerHTML = '<span class="myavana-entry-hint">No active goals yet. You can set one on the Goals tab.</span>';
             return;
         }
 
@@ -406,7 +415,7 @@ MyavanaNext.SmartEntry = (function() {
 
         const rows = [
             ['Type', TYPE_LABELS[state.type] || state.type],
-            ['Date', state.date],
+            ['Date', (() => { const d = new Date(`${state.date}T00:00:00`); return Number.isNaN(d.getTime()) ? state.date : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); })()],
         ];
         if (state.title.trim()) {
             rows.push(['Title', state.title.trim()]);
