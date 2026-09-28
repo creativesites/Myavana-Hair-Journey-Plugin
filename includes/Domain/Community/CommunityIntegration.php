@@ -72,15 +72,8 @@ if (!class_exists('Myavana_Community_Integration')) {
                 }
             }
 
-            $content = $entry->post_content;
-            $health_rating = get_post_meta($entry_id, 'health_rating', true);
-            $mood = get_post_meta($entry_id, 'mood_demeanor', true);
-            if (!empty($health_rating) && is_scalar($health_rating)) {
-                $content .= "\n\nHealth Rating: " . $health_rating . '/10';
-            }
-            if (!empty($mood) && is_scalar($mood)) {
-                $content .= "\nMood: " . $mood;
-            }
+            // The story alone: ratings and moods are private journal data.
+            $content = wp_specialchars_decode((string) $entry->post_content, ENT_QUOTES);
 
             $inserted = $wpdb->insert(
                 $wpdb->prefix . 'myavana_community_posts',

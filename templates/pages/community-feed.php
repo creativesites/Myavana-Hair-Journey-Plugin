@@ -33,7 +33,7 @@ function myavana_community_feed_shortcode($atts = []) {
                     <div class="myavana-feed-filters">
                         <button class="myavana-filter-btn active" data-filter="all">All Posts</button>
                         <button class="myavana-filter-btn" data-filter="trending">Trending</button>
-                        <button class="myavana-filter-btn" data-filter="featured">Featured</button>
+                        <button class="myavana-filter-btn" data-filter="featured" hidden>Featured</button>
                     </div>
 
                     <div class="myavana-feed-content">
@@ -331,13 +331,13 @@ function myavana_community_feed_shortcode($atts = []) {
             <div class="myavana-profile-widget-header">
                 <div class="myavana-profile-widget-avatar-section">
                     <img src="<?php echo esc_url($user_avatar); ?>"
-                         alt="<?php echo esc_attr($current_user_data->display_name); ?>"
+                         alt="<?php echo esc_attr(\Myavana\Next\Core\MemberName::displayFor($current_user_id)); ?>"<?php echo \Myavana\Next\Core\MemberName::avatarFallbackAttr(\Myavana\Next\Core\MemberName::displayFor($current_user_id)); // phpcs:ignore ?>
                          class="myavana-profile-widget-avatar clickable-avatar"
                          data-user-id="<?php echo $current_user_id; ?>">
                     <div class="myavana-profile-widget-info">
                         <h3 class="myavana-profile-widget-name clickable-username"
                             data-user-id="<?php echo $current_user_id; ?>">
-                            <?php echo esc_html($current_user_data->display_name); ?>
+                            <?php echo esc_html(\Myavana\Next\Core\MemberName::displayFor($current_user_id)); ?>
                         </h3>
                         <p class="myavana-profile-widget-username">@<?php echo esc_html($current_user_data->user_login); ?></p>
                     </div>
@@ -382,12 +382,12 @@ function myavana_community_feed_shortcode($atts = []) {
         </div>
 
         <section class="myavana-community-discovery" aria-label="Community discovery tools">
-            <div class="myavana-community-mode-row" role="group" aria-label="Feed mode">
+            <div class="myavana-community-mode-row" role="group" aria-label="Feed mode" hidden>
                 <button type="button" class="myavana-community-mode-btn active" data-mode="discover">Discover</button>
                 <button type="button" class="myavana-community-mode-btn" data-mode="following">Following</button>
             </div>
 
-            <div class="myavana-circle-filter-row" role="group" aria-label="Community circles">
+            <div class="myavana-circle-filter-row" role="group" aria-label="Community circles" hidden>
                 <button type="button" class="myavana-circle-filter-btn active" data-circle="">All Circles</button>
                 <button type="button" class="myavana-circle-filter-btn" data-circle="type-4c">Type 4C Circle</button>
                 <button type="button" class="myavana-circle-filter-btn" data-circle="transitioning">Transitioning</button>
@@ -401,12 +401,13 @@ function myavana_community_feed_shortcode($atts = []) {
                     type="search"
                     id="myavana-community-search-input"
                     class="myavana-community-search-input"
-                    placeholder="Search posts, topics, and creators">
-                <button type="button" class="myavana-btn-secondary" id="myavana-community-search-btn">Search</button>
-                <button type="button" class="myavana-btn-secondary" id="myavana-community-search-clear-btn">Clear</button>
+                    placeholder="Search posts, #topics, people"
+                    enterkeyhint="search">
+                <button type="button" class="myavana-btn-secondary" id="myavana-community-search-btn" hidden>Search</button>
+                <button type="button" class="myavana-btn-secondary" id="myavana-community-search-clear-btn" hidden>Clear</button>
             </div>
 
-            <div class="myavana-media-filter-row">
+            <div class="myavana-media-filter-row" hidden>
                 <button type="button" class="myavana-media-filter-btn active" data-media-filter="">All Media</button>
                 <button type="button" class="myavana-media-filter-btn" data-media-filter="image">Images</button>
                 <button type="button" class="myavana-media-filter-btn" data-media-filter="video">Videos</button>
@@ -446,7 +447,7 @@ function myavana_community_feed_shortcode($atts = []) {
                     <rect x="14" y="14" width="7" height="7"></rect>
                     <rect x="3" y="14" width="7" height="7"></rect>
                 </svg>
-                All Posts
+                For you
             </button>
             <button class="myavana-filter-btn" data-filter="following">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -464,15 +465,15 @@ function myavana_community_feed_shortcode($atts = []) {
                 </svg>
                 Trending
             </button>
-            <button class="myavana-filter-btn" data-filter="featured">
+            <button class="myavana-filter-btn" data-filter="featured" hidden>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
                 Featured
             </button>
-            <button class="myavana-filter-btn" data-filter="media_image">Images</button>
-            <button class="myavana-filter-btn" data-filter="media_video">Videos</button>
-            <button class="myavana-filter-btn" data-filter="media_text">Text</button>
+            <button class="myavana-filter-btn" data-filter="media_image">Photos</button>
+            <button class="myavana-filter-btn" data-filter="media_video" hidden>Videos</button>
+            <button class="myavana-filter-btn" data-filter="media_text" hidden>Text</button>
         </div>
         <?php endif; ?>
 

@@ -233,7 +233,12 @@
         const userReaction = post.user_reaction || null;
         const isLiked = post.is_liked || false;
         const postTitle = normalizeCommunityText(post.title || '');
-        const postContent = normalizeCommunityText(post.content || '');
+        // Entries shared before 3.2.27 had "Health Rating: 5/10 Mood: Great"
+        // bolted onto the story; it reads like form residue in a feed.
+        const postContent = normalizeCommunityText(post.content || '')
+            .replace(/\s*Health Rating:\s*\d+(?:\.\d+)?\/10\.?/gi, '')
+            .replace(/\s*Mood:\s*[\w -]{1,24}\s*$/i, '')
+            .trim();
         const hasText = postContent.trim().length > 0;
 
         // Calculate total reactions - use likes_count if reactions are not available
@@ -274,11 +279,12 @@
             'insightful': '💡'
         };
         // Build robust avatar fallback
-        const defaultAvatar = settings.defaultAvatarUrl || 'https://www.gravatar.com/avatar/?d=mp&s=64';
+        const defaultAvatar = monogramAvatar(post.display_name);
         const userAvatar = post.user_avatar && post.user_avatar.trim() !== '' ? post.user_avatar : defaultAvatar;
 
         let reactionCountsHtml = '';
-        if (totalReactions > 0) {
+        // One reaction type is already counted on the action button below.
+        if (totalReactions > 0 && Object.values(reactions).filter((count) => count > 0).length > 1) {
             const reactionItems = Object.entries(reactions)
                 .filter(([type, count]) => count > 0)
                 .map(([type, count]) => `
@@ -509,6 +515,13 @@
             if (event.key === 'Enter') {
                 event.preventDefault();
                 $('#myavana-community-search-btn').trigger('click');
+            }
+        });
+
+        // The native clear (x) on a search field fires "search" with an empty value.
+        $('#myavana-community-search-input').on('search', function() {
+            if (!String($(this).val() || '').trim()) {
+                $('#myavana-community-search-clear-btn').trigger('click');
             }
         });
 
@@ -3776,14 +3789,24 @@
         return normalized.replace(/\\(?=['"&])/g, '');
     }
 
+    /** A coral monogram for members without a photo (or when it fails to load). */
+    function monogramAvatar(name) {
+        const letter = (String(name || 'M').trim().charAt(0) || 'M').toUpperCase().replace(/[^A-Z0-9]/, 'M');
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#fce5d7"/><text x="60" y="60" dy=".35em" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#9b5a49">${letter}</text></svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
     function parseTextWithMentionsAndHashtags(text) {
         if (!text) return '';
 
         // Parse @mentions
-        text = text.replace(/@(\w+)/g, '<span class="myavana-mention">@$1</span>');
+        // (Not inside emails.)
+        text = text.replace(/(^|[^\w.])@(\w+)/g, '$1<span class="myavana-mention">@$2</span>');
 
-        // Parse #hashtags
-        text = text.replace(/#(\w+)/g, '<span class="myavana-hashtag" data-hashtag="$1">#$1</span>');
+        // Parse #hashtags. The text is already HTML-escaped, so an apostrophe
+        // is "&#039;" here: a tag must start with a letter and not follow "&",
+        // or every "Women's" grew a "#039" hashtag.
+        text = text.replace(/(^|[^&\w])#([A-Za-z][\w]*)/g, '$1<span class="myavana-hashtag" data-hashtag="$2">#$2</span>');
 
         // Parse simple formatting (bold, italic)
         text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
