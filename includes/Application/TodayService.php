@@ -73,7 +73,7 @@ class TodayService {
         );
 
         return [
-            'greeting' => $this->getGreeting($profile->displayName),
+            'greeting' => $this->getGreeting($this->preferredName($userId, $profile->displayName)),
             'greetingSubtext' => __('Let\'s take care of your hair today.', 'myavana-hair-journey-next'),
             'dayCount' => $dayCount,
             'user' => $profile->toArray(),
@@ -84,11 +84,47 @@ class TodayService {
             'insight' => $this->insightEngine->generateFallbackInsight($insightContext),
             'routineProducts' => array_slice($this->routineService->getProductCabinet($userId), 0, 3),
             'week' => $this->buildWeekStrip($entries),
-            'goals' => array_slice($goals, 0, 3),
-            'upcomingGoals' => $this->buildUpcomingGoals($userId),
+            'goals' => array_slice($this->distinctActiveGoals($goals), 0, 3),
+            'upcomingGoals' => $this->buildUpcomingGoals($goals),
             'memory' => $this->findMemory($userId, $entries),
-            'focus' => $this->getGoalFocus($userId),
+            'focus' => $focus = $this->getGoalFocus($userId),
+            'focusSource' => $focus ? 'signup' : 'goals',
+            'focusGoals' => $focus ? [] : $this->activeGoalTitles($goals),
         ];
+    }
+
+    /**
+     * First name when she has one; otherwise the display name, unless that is
+     * just her login handle (many accounts have display_name = user_login).
+     */
+    private function preferredName(int $userId, string $displayName): string {
+        $user = get_userdata($userId);
+        $first = trim((string) get_user_meta($userId, 'first_name', true));
+        if ($first !== '') {
+            return $first;
+        }
+        if ($user && strcasecmp(trim($displayName), $user->user_login) === 0) {
+            return '';
+        }
+        return $displayName;
+    }
+
+    /**
+     * Distinct titles of her active goals (at most two), for the hero line
+     * when she hasn't picked focus goals at signup.
+     *
+     * @return string[]
+     */
+    private function activeGoalTitles(array $goals): array {
+        $titles = [];
+        foreach ($goals as $goal) {
+            $title = trim((string) ($goal['title'] ?? ($goal['goal_title'] ?? '')));
+            if ($title === '' || ($goal['status'] ?? 'active') === 'completed' || (int) ($goal['progress'] ?? 0) >= 100) {
+                continue;
+            }
+            $titles[strtolower($title)] = $title;
+        }
+        return array_slice(array_values($titles), 0, 2);
     }
 
     /**
@@ -178,9 +214,32 @@ class TodayService {
      * @param int $userId
      * @return array
      */
-    private function buildUpcomingGoals(int $userId): array {
-        $goals = array_filter($this->goalRepo->getGoals($userId), function ($g) {
-            return !empty($g['target_date']) && ($g['status'] ?? 'active') !== 'completed';
+    /**
+     * Active goals, one per title: members who double-submitted the goal form
+     * have several identical goals, and repeating them reads as a glitch.
+     */
+    private function distinctActiveGoals(array $goals): array {
+        $seen = [];
+        $out = [];
+        foreach ($goals as $g) {
+            $title = trim((string) ($g['title'] ?? $g['goal_title'] ?? ''));
+            $key = strtolower($title);
+            if ($title === '' || isset($seen[$key]) || ($g['status'] ?? 'active') === 'completed') {
+                continue;
+            }
+            $seen[$key] = true;
+            $g['title'] = $title;
+            $out[] = $g;
+        }
+        return $out;
+    }
+
+    /** Goals whose target date is still ahead, soonest first. */
+    private function buildUpcomingGoals(array $goals): array {
+        $today = strtotime(current_time('Y-m-d'));
+        $goals = array_filter($this->distinctActiveGoals($goals), function ($g) use ($today) {
+            $target = !empty($g['target_date']) ? strtotime((string) $g['target_date']) : false;
+            return $target !== false && $target >= $today;
         });
 
         usort($goals, fn($a, $b) => strtotime($a['target_date']) <=> strtotime($b['target_date']));

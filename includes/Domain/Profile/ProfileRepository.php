@@ -191,17 +191,17 @@ class ProfileRepository {
             $concerns = array_map('sanitize_text_field', $data['concerns']);
             update_user_meta($userId, 'myavana_hair_concerns', $concerns);
         }
+        // Profile "goals" are hair-goal focus picks, not the Goals page's list.
+        // Writing them to myavana_hair_goals_structured replaced a member's real
+        // goals (the retired onboarding wizard wiped them this way), so they are
+        // stored as focus only; the Goals list is changed through /goals.
         if (isset($data['goals']) && is_array($data['goals'])) {
-            $goals = array_map(function($g) {
-                if (is_array($g)) {
-                    return [
-                        'goal' => sanitize_text_field($g['goal'] ?? ''),
-                        'progress' => isset($g['progress']) ? max(0, min(100, (int)$g['progress'])) : 0,
-                    ];
-                }
-                return ['goal' => sanitize_text_field((string)$g), 'progress' => 0];
-            }, $data['goals']);
-            update_user_meta($userId, 'myavana_hair_goals_structured', $goals);
+            $focus = array_values(array_filter(array_map(function ($g) {
+                return sanitize_text_field(is_array($g) ? (string) ($g['goal'] ?? '') : (string) $g);
+            }, $data['goals'])));
+            if (!empty($focus)) {
+                update_user_meta($userId, 'myavana_hair_goals', implode(',', $focus));
+            }
         }
 
         // Privacy & Notification Settings

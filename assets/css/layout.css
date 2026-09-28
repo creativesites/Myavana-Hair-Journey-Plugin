@@ -209,6 +209,13 @@ body.myavana-next-app-page #wpadminbar {
     color: var(--myavana-onyx) !important;
 }
 
+/* On phones the floating Mya launcher is the way in; a second chip crowds the header. */
+@media (max-width: 767px) {
+    .myavana-next-concierge-btn {
+        display: none;
+    }
+}
+
 .myavana-next-concierge-btn:hover {
     border-color: var(--myavana-coral);
     box-shadow: var(--shadow-coral);

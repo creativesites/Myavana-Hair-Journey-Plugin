@@ -154,7 +154,10 @@
 .myavana-today-week-strip { display: flex; gap: 6px; justify-content: space-between; }
 .myavana-today-week-day { align-items: center; display: flex; flex: 1; flex-direction: column; gap: 8px; }
 .myavana-today-week-day span:first-child { color: var(--myavana-muted); font-size: 11px; font-weight: 600; }
-.myavana-today-week-mark { align-items: center; border-radius: 50% !important; display: flex; font-size: 12px; font-weight: 700; height: 34px; justify-content: center; max-width: 34px; width: 100%; }
+.myavana-today-week-mark { align-items: center; background: #fff; border: 1px solid var(--today-line); border-radius: 50%; color: #fff; display: flex; font-size: 12px; font-weight: 700; height: 34px; justify-content: center; max-width: 34px; width: 100%; }
+.myavana-today-week-mark.has-entry { background: var(--gradient-coral); border-color: transparent; }
+.myavana-today-week-day.is-today span:first-child { color: var(--today-rose); font-weight: 700; }
+.myavana-today-week-day.is-today .myavana-today-week-mark:not(.has-entry) { border: 2px solid var(--myavana-coral); }
 
 .myavana-today-goals-list { display: flex; flex-direction: column; gap: 12px; }
 .myavana-today-goals-list:not(:empty) { border-top: 1px solid var(--today-line); margin-top: 18px; padding-top: 16px; }

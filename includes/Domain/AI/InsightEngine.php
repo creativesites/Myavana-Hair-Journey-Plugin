@@ -48,7 +48,7 @@ class InsightEngine {
         if ($entries7d === 0) {
             return [
                 'title' => __('Pick back up today', 'myavana-hair-journey-next'),
-                'summary' => __("You haven't logged an entry in the last 7 days — even a quick check-in keeps your routine accurate.", 'myavana-hair-journey-next'),
+                'summary' => __("You haven't logged an entry in the last 7 days — even a quick check-in keeps your story up to date.", 'myavana-hair-journey-next'),
                 'recommendation' => __('Log a quick check-in to note how your hair feels right now.', 'myavana-hair-journey-next'),
                 'confidence' => 'medium',
                 'supporting_signals' => [__('0 journal entries in the last 7 days', 'myavana-hair-journey-next')],

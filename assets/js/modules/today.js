@@ -69,7 +69,7 @@ MyavanaNext.Today = (function() {
         if (greetingSubtext) greetingSubtext.textContent = data.greetingSubtext || "Let's take care of your hair today.";
         const dayCount = container.querySelector('#today-day-count');
         if (dayCount) dayCount.textContent = `Day ${data.dayCount || 1} of your journey`;
-        renderFocus(data.focus || []);
+        renderFocus(data.focus || [], data.focusGoals || []);
         renderPortrait(data.latestEntry || (data.recentEntries || [])[0] || null);
 
         renderChecklist(data.checklist || {});
@@ -84,13 +84,14 @@ MyavanaNext.Today = (function() {
 
     // The goals she chose at signup, in her own words: "You're focused on
     // more moisture and hair growth."
-    function renderFocus(focus) {
+    function renderFocus(focus, goalTitles) {
         const el = container.querySelector('#today-focus');
         if (!el) return;
-        if (!focus.length) { el.hidden = true; return; }
-        const parts = focus.map(f => `<strong>${escapeHtml(f)}</strong>`);
+        const items = focus.length ? focus : goalTitles;
+        if (!items.length) { el.hidden = true; return; }
+        const parts = items.map(f => `<strong>${escapeHtml(f)}</strong>`);
         const list = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0];
-        el.innerHTML = `You're focused on ${list}.`;
+        el.innerHTML = focus.length ? `You're focused on ${list}.` : `You're working toward ${list}.`;
         el.hidden = false;
     }
 
@@ -199,7 +200,7 @@ MyavanaNext.Today = (function() {
                                 <span class="myavana-today-story-ring">
                                     ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="myavana-today-story-placeholder" aria-hidden="true">✦</span>'}
                                 </span>
-                                <span class="myavana-today-story-label">${escapeHtml(formatEntryDate(entry.date, true))}</span>
+                                <span class="myavana-today-story-label">${escapeHtml(formatEntryDate(entry.date, isWithinWeek(entry.date)))}</span>
                             </button>`;
                     }).join('')}
                 </div>
@@ -221,6 +222,11 @@ MyavanaNext.Today = (function() {
      * them into something a story strip can show in a couple of characters
      * (short = weekday only, e.g. "Wed") or a friendlier full label.
      */
+    function isWithinWeek(mysqlDate) {
+        const parsed = new Date(String(mysqlDate || '').replace(' ', 'T'));
+        return !isNaN(parsed.getTime()) && (Date.now() - parsed.getTime()) < 6 * 86400000;
+    }
+
     function formatEntryDate(mysqlDate, short = false) {
         if (!mysqlDate) return '';
         const parsed = new Date(String(mysqlDate).replace(' ', 'T'));
@@ -232,9 +238,9 @@ MyavanaNext.Today = (function() {
         const el = container.querySelector('#today-week-strip');
         if (!el) return;
         el.innerHTML = week.map(d => `
-            <div class="myavana-today-week-day">
+            <div class="myavana-today-week-day${d.isToday ? ' is-today' : ''}">
                 <span>${escapeHtml(d.label)}</span>
-                <span class="myavana-today-week-mark" style="background:${d.hasEntry ? 'var(--myavana-coral)' : (d.isToday ? 'var(--myavana-onyx)' : 'var(--myavana-white)')};border:1px solid ${d.hasEntry || d.isToday ? 'transparent' : 'var(--myavana-border)'};color:${d.hasEntry ? '#fff' : (d.isToday ? '#fff' : 'var(--myavana-muted)')};">${d.hasEntry ? '✓' : (d.isToday ? '•' : '')}</span>
+                <span class="myavana-today-week-mark${d.hasEntry ? ' has-entry' : ''}" aria-label="${d.hasEntry ? 'Logged' : 'No entry'}">${d.hasEntry ? '✓' : ''}</span>
             </div>
         `).join('');
     }
@@ -242,14 +248,16 @@ MyavanaNext.Today = (function() {
     function renderGoals(goals) {
         const el = container.querySelector('#today-goals-list');
         if (!el) return;
-        const valid = goals.filter(g => g.id || g.goal_key);
+        const valid = goals.filter(g => g.title || g.goal_title);
         if (!valid.length) { el.innerHTML = ''; return; }
-        el.innerHTML = valid.map(g => `
+        el.innerHTML = valid.map(g => {
+            const pct = Math.max(0, Math.min(100, Math.round(Number(g.progress) || 0)));
+            return `
             <div class="myavana-today-goal-row">
-                <div class="myavana-today-goal-top"><span>${escapeHtml(g.title)}</span><span>${escapeHtml(g.progress || 0)}%</span></div>
-                <div class="myavana-today-goal-bar"><div style="width:${Math.max(0, Math.min(100, g.progress || 0))}%;"></div></div>
-            </div>
-        `).join('');
+                <div class="myavana-today-goal-top"><span>${escapeHtml(g.title || g.goal_title)}</span><span>${pct}%</span></div>
+                <div class="myavana-today-goal-bar"><div style="width:${pct}%;"></div></div>
+            </div>`;
+        }).join('');
     }
 
     function renderUpcoming(goals) {
@@ -262,9 +270,19 @@ MyavanaNext.Today = (function() {
         list.innerHTML = goals.map(g => `
             <div class="myavana-today-upcoming-item">
                 <span class="myavana-today-upcoming-dot"></span>
-                <div><strong>${escapeHtml(g.title)}</strong><span>Target: ${escapeHtml(g.target_date)}</span></div>
+                <div><strong>${escapeHtml(g.title)}</strong><span>${escapeHtml(formatTarget(g.target_date))}</span></div>
             </div>
         `).join('');
+    }
+
+    function formatTarget(value) {
+        const date = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(date.getTime())) return '';
+        const days = Math.round((date - new Date(new Date().toDateString())) / 86400000);
+        const label = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
+        if (days === 0) return 'Target: today';
+        if (days <= 30) return `Target: ${label} · ${days} day${days === 1 ? '' : 's'} to go`;
+        return `Target: ${label}`;
     }
 
     function renderMemory(memory) {
@@ -296,6 +314,6 @@ MyavanaNext.Today = (function() {
         container.querySelector('#today-open-timeline')?.addEventListener('click', () => MyavanaNext.App.navigate('journey'));
     }
 
-    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value || ''; return node.innerHTML; }
+    function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML; }
     return { init, refresh };
 })();

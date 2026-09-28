@@ -12,7 +12,15 @@ if (!defined('ABSPATH')) {
 $currentUser = wp_get_current_user();
 $is_logged_in = is_user_logged_in();
 $avatarUrl = '';
-$displayName = $currentUser->display_name ?: $currentUser->user_login;
+// Prefer the member's first name; a display name that is just the login
+// handle reads like a username, not a person.
+$displayName = trim((string) get_user_meta($currentUser->ID, 'first_name', true));
+if ($displayName === '' && $currentUser->display_name !== $currentUser->user_login) {
+    $displayName = (string) $currentUser->display_name;
+}
+if ($displayName === '') {
+    $displayName = (string) $currentUser->user_login;
+}
 $currentUserId = get_current_user_id();
 if ($is_logged_in) {
     $custom_avatar = get_user_meta($currentUserId, 'myavana_custom_avatar_url', true);
