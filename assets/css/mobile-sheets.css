@@ -420,3 +420,126 @@
         animation: none !important;
     }
 }
+
+/* ==========================================================================
+   Phones: nothing hides behind the tab bar, and every sheet's last control
+   clears the home indicator.
+   ========================================================================== */
+@media (max-width: 991px) {
+    body:has(.myavana-next-mobile-nav) {
+        padding-bottom: var(--myavana-tabbar-h);
+    }
+
+    .offcanvas-hjn .offcanvas-content-hjn,
+    .myavana-goals-v2-page .myavana-gv2-drawer .drawer-scroll,
+    .myavana-goals-v2-page .myavana-gv2-drawer .drawer-foot,
+    .myavana-goals-v2-page .myavana-gv2-checkin .box,
+    .myavana-goals-v2-page .myavana-gv2-picker,
+    .myavana-modal-backdrop .myavana-modal,
+    #view-profile .myavana-profile-drawer .drawer-body,
+    .myavana-share-picker-foot,
+    .myavana-upm-content,
+    .myavana-recap-card {
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Goal detail sheet: the close button sits inside the top-right corner. */
+    .myavana-goals-v2-page .myavana-gv2-drawer .drawer-head {
+        position: relative;
+        padding-right: 68px !important;
+    }
+
+    .myavana-goals-v2-page .myavana-gv2-drawer .drawer-head .close {
+        position: absolute !important;
+        top: 18px !important;
+        right: 16px !important;
+        width: 40px !important;
+        height: 40px !important;
+        margin: 0 !important;
+        z-index: 2;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Home: the hero starts right under the header. */
+    body:has(#view-home.active) .myavana-next-main {
+        padding-top: 0;
+    }
+
+    #view-home .myavana-luxury-hero {
+        padding-top: 32px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #view-home .myavana-luxury-hero-title {
+        font-size: clamp(32px, 11vw, 56px) !important;
+        overflow-wrap: anywhere;
+    }
+
+    #view-home .myavana-luxury-hero-actions {
+        width: 100%;
+    }
+
+    #view-home .myavana-luxury-hero-actions > a,
+    #view-home .myavana-luxury-hero-actions > button {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* Small phones (320–400px): columns may shrink below their desktop minimums. */
+@media (max-width: 480px) {
+    #view-today .myavana-today-main,
+    #view-today .myavana-today-sidebar,
+    #view-journey .myavana-journey-main,
+    #view-journey .myavana-journey-sidebar,
+    #view-profile .myavana-profile-main,
+    #view-profile .myavana-profile-sidebar,
+    #view-profile .myavana-profile-header-main {
+        min-width: 0 !important;
+        max-width: 100%;
+    }
+
+    #view-journey .myavana-journey-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .myavana-goals-v2-page .status-tabs,
+    .myavana-goals-v2-page .left {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 400px) {
+    #view-today .myavana-today-week-strip { gap: 2px; }
+    #view-today .myavana-today-week-mark { width: 30px !important; height: 30px !important; }
+    #view-profile .myavana-section-heading { min-width: 0; gap: 8px; }
+    #view-profile .myavana-section-heading > div { min-width: 0; }
+    #view-profile .myavana-section-heading h2 { overflow-wrap: anywhere; }
+}
+@media (max-width: 400px) {
+    #view-today .myavana-today-week-day { min-width: 0; }
+}
+@media (max-width: 480px) {
+    #view-today .myavana-today-side-card { min-width: 0; max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+    #view-profile .myavana-profile-community-stats { gap: 8px !important; }
+    #view-profile .myavana-profile-community-stats > div { min-width: 0; }
+}
+@media (max-width: 480px) {
+    /* Flex/grid children default to min-width:auto and refuse to shrink below
+       their content; on small phones let them, and let long words wrap.
+       :where() keeps this at zero specificity so deliberate sizes still win. */
+    :where(.myavana-next-view) :where(div, section, article, aside, header, form, label, p, span, strong) {
+        min-width: 0;
+    }
+    :where(.myavana-next-view) :where(p, strong, h1, h2, h3, h4) {
+        overflow-wrap: anywhere;
+    }
+}
+@media (max-width: 400px) {
+    #view-today .myavana-today-help { flex-wrap: wrap; }
+    #view-profile .setting-item { flex-wrap: wrap; gap: 10px; }
+}

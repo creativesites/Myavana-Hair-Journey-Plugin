@@ -709,7 +709,11 @@
     }
 
     function bindEvents() {
-        root.addEventListener('click', (event) => {
+        // The drawer, check-in and picker render beside #myavanaGoalsV2Root,
+        // not inside it, so listen on the page container that holds them all
+        // (the drawer's close button and tabs never fired otherwise).
+        const eventRoot = root.closest('.myavana-goals-v2-page') || root;
+        eventRoot.addEventListener('click', (event) => {
             const target = event.target;
 
             const dismissAlert = target.closest('[data-gv2-dismiss-alert]');
