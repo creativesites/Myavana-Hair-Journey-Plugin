@@ -95,6 +95,7 @@ class TodayService {
             'focusSource' => $focus ? 'signup' : 'goals',
             'focusGoals' => $focus ? [] : $this->activeGoalTitles($goals),
             'rhythm' => $rhythm,
+            'weeklyPrompt' => WeeklyPromptService::current(),
             'firstWeek' => (new HabitService())->firstWeek($userId, $entries, $goals),
         ];
     }

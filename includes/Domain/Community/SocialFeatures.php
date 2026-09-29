@@ -707,6 +707,13 @@ class Myavana_Social_Features {
         if ($result) {
             $post_id = $wpdb->insert_id;
 
+            // The team can make this the week's Community prompt.
+            if (!empty($_POST['weekly_prompt']) && $privacy_level === 'public'
+                && class_exists('Myavana\\Next\\Application\\WeeklyPromptService')
+                && \Myavana\Next\Application\WeeklyPromptService::canSet()) {
+                \Myavana\Next\Application\WeeklyPromptService::set((int) $post_id);
+            }
+
             // Award points for creating post
             Myavana_Community_Integration::award_community_points($this->user_id, 'create_post');
 

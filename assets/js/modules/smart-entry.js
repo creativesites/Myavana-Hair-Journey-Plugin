@@ -47,7 +47,13 @@ MyavanaNext.SmartEntry = (function() {
         if (!modalBackdrop) return;
         state.photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
         state = defaultState();
-        if (options && typeof options === 'object' && options.mood) state.mood = options.mood;
+        if (options && typeof options === 'object') {
+            if (options.mood) state.mood = options.mood;
+            // Answering the team's weekly prompt: share to Community, titled.
+            if (options.visibility) state.visibility = options.visibility;
+            if (options.title) state.title = String(options.title).slice(0, 120);
+            if (options.type) state.type = options.type;
+        }
 
         renderTypeSelection();
         renderPhotoGrid();

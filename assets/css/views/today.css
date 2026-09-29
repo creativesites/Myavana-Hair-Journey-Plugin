@@ -348,3 +348,10 @@
     #view-today .myavana-today-firstweek-step { flex-wrap: wrap; }
     #view-today .myavana-today-firstweek-step .myavana-btn { margin-left: 40px; }
 }
+
+#view-today .myavana-today-prompt[hidden] { display: none; }
+#view-today .myavana-today-prompt { display: grid; gap: 8px; background: #222323; border-color: #222323; color: #fff; }
+#view-today .myavana-today-prompt .myavana-today-eyebrow { color: #e7a690; }
+#view-today .myavana-today-prompt h3 { margin: 0; color: #fff; font-size: 17px; line-height: 1.25; }
+#view-today .myavana-today-prompt p { margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 13px; }
+#view-today .myavana-today-prompt .myavana-btn { justify-self: start; margin-top: 6px; background: #e7a690 !important; border-color: #e7a690 !important; color: #222323 !important; }

@@ -272,6 +272,15 @@ window.MyavanaNextBoot = { stage: 'script-loaded', readyStateAtLoad: document.re
 // Boot once the DOM is parsed. If this script runs after DOMContentLoaded
 // has already fired (browser extensions can shift script timing), start now
 // rather than waiting for an event that will never come.
+// "Answer with an entry" on the team's weekly prompt (Community and Today):
+// a new entry already set to share to Community, titled after the prompt.
+document.addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-answer-prompt]');
+    if (!btn || !window.MyavanaNext || !MyavanaNext.SmartEntry) return;
+    event.preventDefault();
+    MyavanaNext.SmartEntry.open({ visibility: 'community', title: btn.getAttribute('data-answer-prompt') || '' });
+});
+
 (function bootWhenReady() {
     const boot = () => {
         if (!document.querySelector('.myavana-next-shell')) {

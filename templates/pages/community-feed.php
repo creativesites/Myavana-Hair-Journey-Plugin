@@ -479,6 +479,25 @@ function myavana_community_feed_shortcode($atts = []) {
 
         <!-- Feed Container -->
         <div class="myavana-feed-content">
+        <?php $weekly_prompt = \Myavana\Next\Application\WeeklyPromptService::current(); ?>
+        <?php if ($weekly_prompt) : ?>
+        <section class="myavana-weekly-prompt" aria-label="<?php esc_attr_e('This week\'s prompt', 'myavana-hair-journey-next'); ?>">
+            <?php if ($weekly_prompt['image']) : ?>
+                <img class="myavana-weekly-prompt-img" src="<?php echo esc_url($weekly_prompt['image']); ?>" alt="" loading="lazy" />
+            <?php endif; ?>
+            <div class="myavana-weekly-prompt-body">
+                <p class="myavana-weekly-prompt-eyebrow"><?php esc_html_e('This week\'s prompt', 'myavana-hair-journey-next'); ?> · <?php echo esc_html($weekly_prompt['author']); ?></p>
+                <h2><?php echo esc_html($weekly_prompt['title'] ?: wp_trim_words($weekly_prompt['content'], 10)); ?></h2>
+                <?php if ($weekly_prompt['title'] && $weekly_prompt['content']) : ?>
+                    <p><?php echo esc_html(wp_trim_words($weekly_prompt['content'], 32)); ?></p>
+                <?php endif; ?>
+                <button type="button" class="myavana-weekly-prompt-answer" data-answer-prompt="<?php echo esc_attr($weekly_prompt['title'] ?: wp_trim_words($weekly_prompt['content'], 8, '')); ?>">
+                    <?php esc_html_e('Answer with an entry', 'myavana-hair-journey-next'); ?>
+                </button>
+            </div>
+        </section>
+        <?php endif; ?>
+
 
             <!-- Loading State -->
             <div class="myavana-feed-loading" id="myavana-feed-loading" role="status" aria-live="polite">
@@ -656,6 +675,14 @@ function myavana_community_feed_shortcode($atts = []) {
                             </div>
                         </div>
                     </details>
+
+                    <?php if (\Myavana\Next\Application\WeeklyPromptService::canSet()) : ?>
+                    <label class="myavana-weekly-prompt-toggle">
+                        <input type="checkbox" name="weekly_prompt" value="1">
+                        <span><strong><?php esc_html_e('Make this the weekly prompt', 'myavana-hair-journey-next'); ?></strong>
+                        <?php esc_html_e('Shown above the feed and on members\' Today page for a week, with an "Answer with an entry" button. Team only.', 'myavana-hair-journey-next'); ?></span>
+                    </label>
+                    <?php endif; ?>
 
                     <div class="myavana-modal-footer">
                         <button type="button" class="myavana-btn-secondary" id="myavana-cancel-post">

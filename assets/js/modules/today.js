@@ -79,6 +79,7 @@ MyavanaNext.Today = (function() {
         renderWeek(data.week || []);
         renderRhythm(data.rhythm || null);
         renderFirstWeek(data.firstWeek || null);
+        renderPrompt(data.weeklyPrompt || null);
         renderGoals(data.goals || []);
         renderUpcoming(data.upcomingGoals || []);
         renderMemory(data.memory || null);
@@ -263,6 +264,18 @@ MyavanaNext.Today = (function() {
         }
         el.innerHTML = text;
         el.hidden = false;
+    }
+
+    // The MYAVANA team's weekly Community question.
+    function renderPrompt(prompt) {
+        const card = container.querySelector('#today-prompt-card');
+        if (!card) return;
+        if (!prompt) { card.hidden = true; return; }
+        const title = prompt.title || prompt.content || '';
+        container.querySelector('#today-prompt-title').textContent = title;
+        container.querySelector('#today-prompt-by').textContent = prompt.author ? `From ${prompt.author}` : '';
+        container.querySelector('#today-prompt-answer').setAttribute('data-answer-prompt', title.slice(0, 120));
+        card.hidden = false;
     }
 
     function renderFirstWeek(firstWeek) {
