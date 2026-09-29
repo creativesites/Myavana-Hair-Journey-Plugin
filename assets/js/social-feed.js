@@ -329,6 +329,9 @@
                     <div class="myavana-post-header-meta">
                         <span class="myavana-post-type-badge">${typeLabels[post.post_type] || 'General'}</span>
                         ${post.user_id == settings.userId ? `
+                            <button type="button" class="myavana-post-more-btn" aria-label="Post options" aria-expanded="false">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
+                            </button>
                             <div class="myavana-post-actions-menu">
                                 <button class="myavana-ci-pin-btn ${post.is_pinned ? 'pinned' : ''}" data-post-id="${post.id}" title="${post.is_pinned ? 'Unpin post' : 'Pin post'}">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_pinned ? 'var(--myavana-coral)' : 'none'}" stroke="currentColor" stroke-width="2">
@@ -4164,3 +4167,32 @@
     });
 
 })(jQuery);
+
+// Small screens: the owner's pin / edit / delete sit behind one "⋯" button.
+(function() {
+    'use strict';
+    function closeAll(except) {
+        document.querySelectorAll('.myavana-post-header-meta.is-open').forEach((m) => {
+            if (m === except) return;
+            m.classList.remove('is-open');
+            m.querySelector('.myavana-post-more-btn')?.setAttribute('aria-expanded', 'false');
+        });
+    }
+    document.addEventListener('click', (e) => {
+        const more = e.target.closest('.myavana-post-more-btn');
+        if (more) {
+            e.preventDefault();
+            const meta = more.closest('.myavana-post-header-meta');
+            closeAll(meta);
+            const open = meta.classList.toggle('is-open');
+            more.setAttribute('aria-expanded', String(open));
+            return;
+        }
+        if (e.target.closest('.myavana-post-actions-menu button')) {
+            setTimeout(() => closeAll(null), 0);
+            return;
+        }
+        closeAll(null);
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(null); });
+})();

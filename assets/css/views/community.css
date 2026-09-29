@@ -1713,3 +1713,81 @@ html.myavana-story-open, html.myavana-story-open body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .myavana-story-card, .myavana-story-media img, .myavana-story-media video { animation: none; }
 }
+
+/* Post header names stay whole: wrap only between words (never mid-name),
+   two lines at most, and a size that fits beside the owner's icons. */
+#view-community .myavana-post-user-info {
+    flex: 1 1 0;
+}
+#myavana-next-root #view-community .myavana-post-username {
+    margin: 0 0 3px;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: .02em;
+    overflow-wrap: break-word; /* only a word longer than the whole line breaks */
+    word-break: normal;
+    hyphens: none;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+.myavana-post-more-btn { display: none; }
+@media (max-width: 640px) {
+    #myavana-next-root #view-community .myavana-post-username { font-size: 14px; }
+    #view-community .myavana-post-header-meta { position: relative; }
+    #view-community .myavana-post-more-btn {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #4d4747;
+        cursor: pointer;
+    }
+    #view-community .myavana-post-more-btn:hover,
+    #view-community .is-open .myavana-post-more-btn { background: #fdf8f5; }
+    #view-community .myavana-post-header-meta .myavana-post-actions-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 20;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        min-width: 168px;
+        padding: 6px;
+        border: 1px solid #f1e7e1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 16px 40px rgba(34, 35, 35, .16);
+    }
+    #view-community .myavana-post-header-meta.is-open .myavana-post-actions-menu { display: flex; animation: myavanaMenuIn .18s ease-out; }
+    #view-community .myavana-post-actions-menu button {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 10px;
+        color: #222323;
+        font: 600 14px/1 Archivo, sans-serif;
+    }
+    #view-community .myavana-post-actions-menu button::after { content: attr(title); }
+    #view-community .myavana-post-actions-menu .myavana-post-delete-btn { color: #b3402c; }
+}
+@keyframes myavanaMenuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 480px) {
+    /* The card already has side padding; the header doesn't need its own. */
+    #view-community .myavana-post-card .myavana-post-header { padding-left: 0; padding-right: 0; gap: 10px; }
+    #view-community .myavana-post-card .myavana-post-avatar { width: 40px !important; height: 40px !important; }
+}
+@media (max-width: 360px) {
+    #myavana-next-root #view-community .myavana-post-username { font-size: 13px; letter-spacing: 0; }
+}

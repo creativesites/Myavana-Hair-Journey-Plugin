@@ -518,6 +518,8 @@ class Myavana_Social_Features {
         $entry_count_cache = [];
         foreach ($posts as &$post) {
             $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
+            // Her chosen name, never the login handle WordPress defaults to.
+            $post->display_name = \Myavana\Next\Core\MemberName::displayFor((int) $post->user_id) ?: ($post->display_name ?? '');
             $post->user_profile_url = '#'; // Could be customized
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->is_bookmarked = $this->is_post_bookmarked($post->id, $this->user_id);
@@ -935,6 +937,8 @@ class Myavana_Social_Features {
             ));
 
             $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 48);
+            // Her chosen name, never the login handle WordPress defaults to.
+            $comment->display_name = \Myavana\Next\Core\MemberName::displayFor((int) $comment->user_id) ?: ($comment->display_name ?? '');
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
 
             wp_send_json_success(array(
@@ -1115,6 +1119,8 @@ class Myavana_Social_Features {
         // Enhance comments with user data
         foreach ($comments as &$comment) {
             $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 40);
+            // Her chosen name, never the login handle WordPress defaults to.
+            $comment->display_name = \Myavana\Next\Core\MemberName::displayFor((int) $comment->user_id) ?: ($comment->display_name ?? '');
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
             $comment->post_id = $post_id;
 
@@ -1481,6 +1487,8 @@ class Myavana_Social_Features {
         // Enhance posts with additional data
         foreach ($trending_posts as &$post) {
             $post->user_avatar = $this->get_user_avatar_url($post->user_id, 64);
+            // Her chosen name, never the login handle WordPress defaults to.
+            $post->display_name = \Myavana\Next\Core\MemberName::displayFor((int) $post->user_id) ?: ($post->display_name ?? '');
             $post->is_liked = $this->is_post_liked($post->id, $this->user_id);
             $post->formatted_date = human_time_diff(strtotime($post->created_at)) . ' ago';
         }
@@ -1775,6 +1783,8 @@ class Myavana_Social_Features {
 
         foreach ($comments as &$comment) {
             $comment->user_avatar = $this->get_user_avatar_url($comment->user_id, 32);
+            // Her chosen name, never the login handle WordPress defaults to.
+            $comment->display_name = \Myavana\Next\Core\MemberName::displayFor((int) $comment->user_id) ?: ($comment->display_name ?? '');
             $comment->formatted_date = human_time_diff(strtotime($comment->created_at)) . ' ago';
         }
 
