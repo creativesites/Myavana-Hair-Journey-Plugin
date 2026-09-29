@@ -3249,73 +3249,46 @@
                     <div class="myavana-upm-journey">
                         <div class="myavana-upm-journey-stats">
                             <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Total Entries</span>
                                 <span class="myavana-upm-journey-value">${journeyStats.total_entries || 0}</span>
+                                <span class="myavana-upm-journey-label">Entries</span>
                             </div>
                             <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Journey Started</span>
-                                <span class="myavana-upm-journey-value">${escapeHtml(journeyStats.journey_start || 'Recently')}</span>
-                            </div>
-                            <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Entries (30 days)</span>
                                 <span class="myavana-upm-journey-value">${journeyStats.entries_last_30_days || 0}</span>
+                                <span class="myavana-upm-journey-label">Last 30 days</span>
                             </div>
                             <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Avg Health</span>
-                                <span class="myavana-upm-journey-value">${escapeHtml(avgHealthValue)}</span>
-                            </div>
-                            <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Goals</span>
-                                <span class="myavana-upm-journey-value">${journeyStats.goals_count || 0}</span>
-                            </div>
-                            <div class="myavana-upm-journey-stat">
-                                <span class="myavana-upm-journey-label">Routine Steps</span>
-                                <span class="myavana-upm-journey-value">${journeyStats.routine_steps_count || 0}</span>
+                                <span class="myavana-upm-journey-value">${escapeHtml(journeyStats.journey_start || 'Recently')}</span>
+                                <span class="myavana-upm-journey-label">Started</span>
                             </div>
                         </div>
 
                         <div class="myavana-upm-journey-preview-grid">
                             <section class="myavana-upm-journey-panel">
-                                <h4>Recent Entries</h4>
+                                <h4>Shared moments</h4>
                                 ${entryPreview.length ? `
                                     <ul class="myavana-upm-journey-list">
                                         ${entryPreview.map((entry) => `
                                             <li>
-                                                <span class="myavana-upm-journey-item-title">${escapeHtml(entry.title || 'Hair Entry')}</span>
-                                                <span class="myavana-upm-journey-item-meta">${escapeHtml(entry.date || '')}${entry.health_rating ? ` • Health ${escapeHtml(entry.health_rating)}/10` : ''}</span>
+                                                <span class="myavana-upm-journey-item-title">${escapeHtml(entry.title || 'Hair update')}</span>
+                                                <span class="myavana-upm-journey-item-meta">${escapeHtml(entry.date || '')}</span>
                                             </li>
                                         `).join('')}
                                     </ul>
-                                ` : '<div class="myavana-upm-empty-inline">No entries yet.</div>'}
+                                ` : '<div class="myavana-upm-empty-inline">Nothing shared from the journey yet.</div>'}
                             </section>
 
+                            ${isOwnProfile && goalsPreview.length ? `
                             <section class="myavana-upm-journey-panel">
-                                <h4>Active Goals</h4>
-                                ${goalsPreview.length ? `
-                                    <ul class="myavana-upm-journey-list">
-                                        ${goalsPreview.map((goal) => `
-                                            <li>
-                                                <span class="myavana-upm-journey-item-title">${escapeHtml(goal.title || 'Hair Goal')}</span>
-                                                <span class="myavana-upm-journey-item-meta">${escapeHtml(String(goal.progress || 0))}% complete${goal.target_date ? ` • Target ${escapeHtml(goal.target_date)}` : ''}</span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                ` : '<div class="myavana-upm-empty-inline">No goals shared yet.</div>'}
-                            </section>
-
-                            <section class="myavana-upm-journey-panel">
-                                <h4>Routine Snapshot</h4>
-                                ${routinePreview.length ? `
-                                    <ul class="myavana-upm-journey-list">
-                                        ${routinePreview.map((step) => `
-                                            <li>
-                                                <span class="myavana-upm-journey-item-title">${escapeHtml(step.name || 'Routine Step')}</span>
-                                                <span class="myavana-upm-journey-item-meta">${escapeHtml(step.frequency || 'daily')}</span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                ` : '<div class="myavana-upm-empty-inline">No routine steps yet.</div>'}
-                            </section>
+                                <h4>Your goals</h4>
+                                <ul class="myavana-upm-journey-list">
+                                    ${goalsPreview.map((goal) => `
+                                        <li>
+                                            <span class="myavana-upm-journey-item-title">${escapeHtml(goal.title || 'Hair goal')}</span>
+                                            <span class="myavana-upm-journey-item-meta">${escapeHtml(String(goal.progress || 0))}%</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </section>` : ''}
                         </div>
                     </div>
                 </div>
