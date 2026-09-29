@@ -617,6 +617,8 @@ class Myavana_Social_Features {
             if ($video_upload_result['success']) {
                 $video_url = $video_upload_result['url'];
                 $media_type = 'video';
+            } else {
+                wp_send_json_error($video_upload_result['error'] ?? 'We could not upload that video. Please try again.');
             }
         }
 
@@ -1843,10 +1845,12 @@ class Myavana_Social_Features {
             require_once(ABSPATH . 'wp-admin/includes/file.php');
         }
 
-        $max_size_bytes = 40 * 1024 * 1024; // 40MB
+        $max_size_bytes = \Myavana\Next\Domain\Journal\MediaService::maxVideoBytes();
         $file_size = isset($file['size']) ? (int) $file['size'] : 0;
-        if ($file_size > $max_size_bytes) {
-            return ['success' => false, 'error' => 'Video file is too large. Maximum size is 40MB.'];
+        $too_big = $file_size > $max_size_bytes
+            || in_array((int) ($file['error'] ?? 0), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true);
+        if ($too_big) {
+            return ['success' => false, 'error' => sprintf('That video is too large. Please keep it under %s.', size_format($max_size_bytes))];
         }
 
         $upload_overrides = [

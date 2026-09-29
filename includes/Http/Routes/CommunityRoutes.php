@@ -10,6 +10,7 @@ namespace Myavana\Next\Http\Routes;
 use Myavana\Next\Http\RestController;
 use Myavana\Next\Core\Permissions;
 use Myavana\Next\Domain\Community\CommunityRepository;
+use Myavana\Next\Domain\Community\StoryRepository;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -50,6 +51,37 @@ class CommunityRoutes extends RestController {
         register_rest_route(self::NAMESPACE, '/community/posts/(?P<id>\d+)/comments', [
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'addComment'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/community/stories', [
+            [
+                'methods' => \WP_REST_Server::READABLE,
+                'callback' => [$this, 'getStories'],
+                'permission_callback' => [Permissions::class, 'restUserCheck'],
+            ],
+            [
+                'methods' => \WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'createStory'],
+                'permission_callback' => [Permissions::class, 'restUserCheck'],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/community/stories/(?P<id>\d+)', [
+            'methods' => \WP_REST_Server::DELETABLE,
+            'callback' => [$this, 'deleteStory'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/community/stories/(?P<id>\d+)/view', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'viewStory'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/community/stories/(?P<id>\d+)/viewers', [
+            'methods' => \WP_REST_Server::READABLE,
+            'callback' => [$this, 'storyViewers'],
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
 
@@ -198,5 +230,36 @@ class CommunityRoutes extends RestController {
             'mediaType' => 'image',
             'message' => __('Photo uploaded successfully.', 'myavana-hair-journey-next'),
         ], 201);
+    }
+
+    public function getStories(\WP_REST_Request $request): \WP_REST_Response {
+        StoryRepository::maybeInstall();
+        return $this->respondSuccess(['groups' => (new StoryRepository())->activeGrouped($this->getUserId())]);
+    }
+
+    public function createStory(\WP_REST_Request $request): \WP_REST_Response {
+        StoryRepository::maybeInstall();
+        $data = $request->get_json_params() ?: $request->get_params();
+        $id = (new StoryRepository())->create($this->getUserId(), (array) $data);
+        if (is_wp_error($id)) {
+            return $this->respondError($id->get_error_message(), $id->get_error_code(), 400);
+        }
+        return $this->respondSuccess(['id' => $id], 201);
+    }
+
+    public function deleteStory(\WP_REST_Request $request): \WP_REST_Response {
+        if (!(new StoryRepository())->delete((int) $request['id'], $this->getUserId())) {
+            return $this->respondError(__('Story not found.', 'myavana-hair-journey-next'), 'not_found', 404);
+        }
+        return $this->respondSuccess(['deleted' => true]);
+    }
+
+    public function viewStory(\WP_REST_Request $request): \WP_REST_Response {
+        (new StoryRepository())->markViewed((int) $request['id'], $this->getUserId());
+        return $this->respondSuccess(['ok' => true]);
+    }
+
+    public function storyViewers(\WP_REST_Request $request): \WP_REST_Response {
+        return $this->respondSuccess(['viewers' => (new StoryRepository())->viewers((int) $request['id'], $this->getUserId())]);
     }
 }

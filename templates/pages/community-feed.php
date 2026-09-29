@@ -471,8 +471,17 @@ function myavana_community_feed_shortcode($atts = []) {
                 </svg>
                 Featured
             </button>
+            <?php if (is_user_logged_in()) : ?>
+            <button class="myavana-filter-btn" data-filter="stories">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9" stroke-dasharray="4 2.2"></circle>
+                    <circle cx="12" cy="12" r="4.5"></circle>
+                </svg>
+                Stories
+            </button>
+            <?php endif; ?>
             <button class="myavana-filter-btn" data-filter="media_image">Photos</button>
-            <button class="myavana-filter-btn" data-filter="media_video" hidden>Videos</button>
+            <button class="myavana-filter-btn" data-filter="media_video">Videos</button>
             <button class="myavana-filter-btn" data-filter="media_text" hidden>Text</button>
         </div>
         <?php endif; ?>

@@ -54,6 +54,14 @@ class Plugin {
         $this->loadAdminPortal();
         \Myavana\Next\Application\WeeklyNoteService::init();
 
+        // Stories: expired ones are cleared out daily.
+        add_action('myavana_stories_prune', [\Myavana\Next\Domain\Community\StoryRepository::class, 'prune']);
+        add_action('init', static function () {
+            if (!wp_next_scheduled('myavana_stories_prune')) {
+                wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'myavana_stories_prune');
+            }
+        });
+
         // Post type registration
         add_action('init', [$this, 'registerPostTypes']);
 

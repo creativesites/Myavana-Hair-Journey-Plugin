@@ -72,6 +72,16 @@ if (!class_exists('Myavana_Community_Integration')) {
                 }
             }
 
+            // A video entry shares its first clip; the poster is the picture.
+            $video_url = '';
+            $videos = get_post_meta($entry_id, 'entry_videos', true);
+            if (is_array($videos) && !empty($videos[0]['url'])) {
+                $video_url = (string) $videos[0]['url'];
+                if ($image_url === '' && !empty($videos[0]['poster'])) {
+                    $image_url = (string) $videos[0]['poster'];
+                }
+            }
+
             // The story alone: ratings and moods are private journal data.
             $content = wp_specialchars_decode((string) $entry->post_content, ENT_QUOTES);
 
@@ -82,12 +92,13 @@ if (!class_exists('Myavana_Community_Integration')) {
                     'title' => sanitize_text_field($entry->post_title),
                     'content' => sanitize_textarea_field($content),
                     'image_url' => esc_url_raw($image_url),
-                    'post_type' => 'progress',
+                    'video_url' => esc_url_raw($video_url),
+                    'post_type' => $video_url !== '' ? 'video' : 'progress',
                     'privacy_level' => in_array($privacy, ['public', 'followers', 'private'], true) ? $privacy : 'public',
                     'source_entry_id' => $entry_id,
                     'created_at' => current_time('mysql'),
                 ],
-                ['%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s']
+                ['%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s']
             );
             if (!$inserted) {
                 return new WP_Error('db_error', __('Could not create the community post.', 'myavana-hair-journey-next'));

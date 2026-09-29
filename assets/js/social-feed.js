@@ -244,15 +244,18 @@
         // Calculate total reactions - use likes_count if reactions are not available
         const totalReactions = post.likes_count || Object.values(reactions).reduce((sum, count) => sum + count, 0);
 
+        // Videos play muted and looping while on screen (tap for sound);
+        // a shared video entry's image is its poster.
         const videoHtml = post.video_url ? `
             <div class="myavana-post-video-wrapper">
-                <video class="myavana-post-video" controls preload="metadata" playsinline>
-                    <source src="${escapeHtml(post.video_url)}">
+                <video class="myavana-post-video" controls muted loop playsinline preload="metadata" data-autoplay
+                    ${post.image_url ? `poster="${escapeHtml(post.image_url)}"` : ''}>
+                    <source src="${escapeHtml(post.video_url)}${post.image_url ? '' : '#t=0.1'}">
                 </video>
             </div>
         ` : '';
 
-        const imageHtml = post.image_url ? `
+        const imageHtml = post.image_url && !post.video_url ? `
             <div class="myavana-post-image-wrapper">
                 <img src="${escapeHtml(post.image_url)}"
                      alt="${escapeHtml(postTitle)}"
@@ -430,11 +433,22 @@
         $('.myavana-filter-btn').on('click', function() {
             const filter = $(this).data('filter');
 
-            if (filter === currentFilter) return;
+            // Stories is its own view, not a feed filter.
+            if (filter === 'stories') {
+                $('.myavana-filter-btn').removeClass('active');
+                $(this).addClass('active');
+                if (window.MyavanaNext && MyavanaNext.Stories) MyavanaNext.Stories.showTab(true);
+                return;
+            }
+            const leavingStories = $('.myavana-feed-content').hasClass('is-stories-tab');
+            if (window.MyavanaNext && MyavanaNext.Stories) MyavanaNext.Stories.showTab(false);
+
+            if (filter === currentFilter && !leavingStories) return;
 
             // Update UI
             $('.myavana-filter-btn').removeClass('active');
             $(this).addClass('active');
+            if (filter === currentFilter) return;
 
             // Update state and reload
             currentFilter = filter;
@@ -1017,12 +1031,31 @@
                 formData.append('video', selectedVideoInput.files[0]);
             }
 
+            const $submitBtn = $form.find('[type="submit"]').first();
+            const submitLabel = $submitBtn.text();
+            $submitBtn.prop('disabled', true).text(hasVideoFile ? 'Uploading 0%' : 'Posting…');
+
             $.ajax({
                 url: settings.ajaxUrl,
                 method: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    if (hasVideoFile && xhr.upload) {
+                        xhr.upload.addEventListener('progress', function(ev) {
+                            if (ev.lengthComputable) {
+                                const pct = Math.round((ev.loaded / ev.total) * 100);
+                                $submitBtn.text(pct < 100 ? `Uploading ${pct}%` : 'Posting…');
+                            }
+                        });
+                    }
+                    return xhr;
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false).text(submitLabel);
+                },
                 success: function(response) {
                     if (response.success) {
                         // Close modal
@@ -1039,8 +1072,10 @@
                         showNotification(response.data || 'Failed to create post', 'error');
                     }
                 },
-                error: function() {
-                    showNotification('Network error. Please try again.', 'error');
+                error: function(xhr) {
+                    showNotification(xhr && xhr.status === 413
+                        ? 'That video is larger than the site accepts. Try a shorter clip.'
+                        : 'Network error. Please try again.', 'error');
                 }
             });
         });

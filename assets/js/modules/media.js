@@ -201,7 +201,53 @@ MyavanaNext.Media = (function() {
         openPlayer(trigger.getAttribute('data-play-video'), trigger.getAttribute('data-poster'));
     }, true);
 
+    // Feed videos marked data-autoplay play muted while mostly on screen.
+    // If she pauses one herself, scrolling won't restart it.
+    function autoToggle(v, play) {
+        v._myavanaAuto = true;
+        const done = () => { v._myavanaAuto = false; };
+        if (play) {
+            const p = v.play();
+            if (p && p.then) p.then(done, done); else done();
+        } else {
+            v.pause();
+            setTimeout(done, 0);
+        }
+    }
+
+    const inView = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            const v = entry.target;
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                if (v.paused && !v.dataset.userPaused) autoToggle(v, true);
+            } else if (!v.paused) {
+                autoToggle(v, false);
+            }
+        });
+    }, { threshold: [0, 0.6] }) : null;
+
+    function watchAutoplay(root) {
+        if (!inView || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        (root || document).querySelectorAll('video[data-autoplay]:not([data-watched])').forEach((v) => {
+            v.dataset.watched = '1';
+            v.muted = true;
+            v.addEventListener('pause', () => { if (!v._myavanaAuto) v.dataset.userPaused = '1'; });
+            v.addEventListener('play', () => { if (!v._myavanaAuto) delete v.dataset.userPaused; });
+            inView.observe(v);
+        });
+    }
+
+    if ('MutationObserver' in window) {
+        let queued = false;
+        new MutationObserver(() => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(() => { queued = false; watchAutoplay(document); });
+        }).observe(document.documentElement, { childList: true, subtree: true });
+    }
+
     return {
+        watchAutoplay,
         isVideoFile,
         isSupportedVideo,
         maxVideoBytes,
