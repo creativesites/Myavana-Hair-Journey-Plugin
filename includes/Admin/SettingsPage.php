@@ -36,8 +36,14 @@ class SettingsPage {
         register_setting('myavana_next_options_group', 'myavana_next_feature_flags');
         register_setting('myavana_next_options_group', 'myavana_next_google_client_id');
         register_setting('myavana_next_options_group', 'myavana_next_google_auth_enabled');
-        register_setting('myavana_next_options_group', 'myavana_next_hair_analysis_url');
+        register_setting('myavana_next_options_group', 'myavana_next_hair_analysis_url', [
+            'sanitize_callback' => static fn($v) => esc_url_raw(trim((string) $v)),
+        ]);
         register_setting('myavana_next_options_group', 'myavana_next_ai_provider');
+        register_setting('myavana_next_options_group', \Myavana\Next\Application\WeeklyNoteService::ENABLED_OPTION, [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($v) => !empty($v) ? 1 : 0,
+        ]);
     }
 
     public static function renderPage(): void {
@@ -49,7 +55,10 @@ class SettingsPage {
         $apiKey = get_option('myavana_gemini_api_key', '');
         $googleClientId = get_option('myavana_next_google_client_id', '');
         $googleAuthEnabled = get_option('myavana_next_google_auth_enabled', true);
-        $hairAnalysisUrl = get_option('myavana_next_hair_analysis_url', '#routine');
+        // Older releases stored an in-app hash ("#routine"), which the url
+        // field rejects, blocking every save on this page. Show the URL
+        // actually in use instead.
+        $hairAnalysisUrl = \Myavana\Next\Core\LaunchScope::hairAiUrl();
         $aiProvider = get_option('myavana_next_ai_provider', 'gemini');
 
         if ($apiKey === '' && !defined('MYAVANA_GEMINI_API_KEY')) {
@@ -109,11 +118,50 @@ class SettingsPage {
                 <?php endif; ?>
             </div>
 
+            <?php
+            $weeklyEnabled = \Myavana\Next\Application\WeeklyNoteService::isEnabled();
+            $weeklyNext = wp_next_scheduled(\Myavana\Next\Application\WeeklyNoteService::HOOK);
+            $weeklyDue = count(\Myavana\Next\Application\WeeklyNoteService::recipients(wp_date('o-W'), 500));
+            $weeklyTest = isset($_GET['myavana_weekly_test']) ? sanitize_key(wp_unslash($_GET['myavana_weekly_test'])) : '';
+            ?>
+            <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Weekly note (Sunday email)', 'myavana-hair-journey-next'); ?></h2>
+                <p style="max-width:720px;"><?php esc_html_e('One short email each Sunday at 9:00 to members who logged an entry in the last 30 days and have care reminders on: their latest photo, their weekly rhythm, and a "Log this week" button. Each email has a one-click unsubscribe. Sent with the site\'s current mail setup.', 'myavana-hair-journey-next'); ?></p>
+                <?php if ($weeklyTest === 'sent') : ?>
+                    <div class="notice notice-success inline"><p><?php esc_html_e('Test email sent to your address. Check your inbox (and spam) to see how it looks.', 'myavana-hair-journey-next'); ?></p></div>
+                <?php elseif ($weeklyTest === 'failed') : ?>
+                    <div class="notice notice-error inline"><p><?php esc_html_e('The test email could not be sent. Check the site\'s mail setup.', 'myavana-hair-journey-next'); ?></p></div>
+                <?php endif; ?>
+                <p>
+                    <strong><?php esc_html_e('Status:', 'myavana-hair-journey-next'); ?></strong>
+                    <?php echo $weeklyEnabled ? esc_html__('On', 'myavana-hair-journey-next') : esc_html__('Off (turn on below after checking a test)', 'myavana-hair-journey-next'); ?>
+                    &nbsp;·&nbsp;
+                    <strong><?php esc_html_e('Next send:', 'myavana-hair-journey-next'); ?></strong>
+                    <?php echo $weeklyNext ? esc_html(wp_date('D, M j, g:i a', $weeklyNext)) : '—'; ?>
+                    &nbsp;·&nbsp;
+                    <strong><?php esc_html_e('Members it would reach now:', 'myavana-hair-journey-next'); ?></strong>
+                    <?php echo esc_html((string) $weeklyDue); ?>
+                </p>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin:0;">
+                    <input type="hidden" name="action" value="myavana_weekly_note_test">
+                    <?php wp_nonce_field('myavana_weekly_note_test'); ?>
+                    <?php submit_button(__('Send me a test', 'myavana-hair-journey-next'), 'secondary', 'submit', false); ?>
+                </form>
+            </div>
+
             <form method="post" action="options.php">
                 <?php
                 settings_fields('myavana_next_options_group');
                 do_settings_sections('myavana_next_options_group');
                 ?>
+
+                <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
+                    <h2 style="margin-top:0;"><?php esc_html_e('Weekly note', 'myavana-hair-journey-next'); ?></h2>
+                    <label>
+                        <input type="checkbox" name="<?php echo esc_attr(\Myavana\Next\Application\WeeklyNoteService::ENABLED_OPTION); ?>" value="1" <?php checked(\Myavana\Next\Application\WeeklyNoteService::isEnabled()); ?>>
+                        <?php esc_html_e('Send the weekly note every Sunday', 'myavana-hair-journey-next'); ?>
+                    </label>
+                </div>
 
                 <div style="background:#fff; border:1px solid #ccd0d4; padding:20px; border-radius:8px; margin-bottom:20px;">
                     <h2><?php esc_html_e('MYAVANA Intelligence', 'myavana-hair-journey-next'); ?></h2>

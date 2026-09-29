@@ -52,6 +52,7 @@ class Plugin {
         // Load legacy community shortcode & AJAX handlers exactly as is
         $this->loadCommunityFeatures();
         $this->loadAdminPortal();
+        \Myavana\Next\Application\WeeklyNoteService::init();
 
         // Post type registration
         add_action('init', [$this, 'registerPostTypes']);
