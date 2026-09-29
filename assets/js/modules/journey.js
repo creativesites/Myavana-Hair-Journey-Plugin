@@ -133,7 +133,7 @@ MyavanaNext.Journey = (function() {
         const s = data.stats;
         el.innerHTML = [
             statCard(s.currentLength ? `${s.currentLength}"` : '—', 'Current length'),
-            statCard(`${s.careIndex !== undefined ? s.careIndex : s.healthScore}%`, 'Care consistency', true),
+            statCard(`${s.entriesThisMonth || 0}`, 'Entries this month', true),
             statCard(`${s.totalEntries}`, 'Journey entries'),
             statCard(`${s.photoCount}`, 'Photos logged'),
         ].join('');
@@ -255,6 +255,11 @@ MyavanaNext.Journey = (function() {
         </div>`;
     }
 
+    function formatLongDate(value) {
+        const d = new Date(String(value || '').replace(' ', 'T'));
+        return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
     function renderOriginNode() {
         const all = data.timeline.items;
         if (!all.length) return '';
@@ -309,7 +314,7 @@ MyavanaNext.Journey = (function() {
         editWrap.innerHTML = `
             <textarea class="myavana-textarea" rows="3">${escapeHtml(entry.notes || '')}</textarea>
             <div style="display:flex;gap:8px;">
-                <button type="button" class="myavana-btn myavana-btn-primary myavana-btn-sm" data-role="save">Save changes</button>
+                <button type="button" class="myavana-btn myavana-btn-primary myavana-btn-sm" data-role="save">Save</button>
                 <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-role="cancel">Cancel</button>
             </div>
         `;
@@ -534,7 +539,7 @@ MyavanaNext.Journey = (function() {
         const entry = findEntryById(photo.id);
         container.querySelector('#story-slide-bg').style.backgroundImage = `url('${photo.imageUrl}')`;
         container.querySelector('#story-kicker').textContent = typeLabel(photo.entryType);
-        container.querySelector('#story-date').textContent = photo.date;
+        container.querySelector('#story-date').textContent = formatLongDate(photo.date);
 
         const moodEl = container.querySelector('#story-mood');
         if (photo.mood && MOOD_LABELS[photo.mood]) {

@@ -151,7 +151,7 @@ $avatarUrl = !empty($customAvatar) ? $customAvatar : get_avatar_url($currentUser
             </section>
 
             <!-- Level & Rewards -->
-            <section class="myavana-card sidebar-card">
+            <section class="myavana-card sidebar-card"<?php echo \Myavana\Next\Core\LaunchScope::REWARDS_ENABLED ? '' : ' hidden'; ?>>
                 <div class="myavana-section-heading">
                     <h2 style="font-size:15px;"><?php esc_html_e('Level & Rewards', 'myavana-hair-journey-next'); ?></h2>
                 </div>

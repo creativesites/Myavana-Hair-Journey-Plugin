@@ -365,3 +365,27 @@ body .myavana-profile-drawer select {
         display: none;
     }
 }
+
+/* Small buttons stay small, whichever variant. */
+#myavana-next-root .myavana-btn-sm,
+#myavana-next-root .myavana-btn-primary.myavana-btn-sm {
+    min-height: 36px;
+    padding: 0 16px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+/* Typed text is ink in every field (some themes fade textareas). */
+#myavana-next-root .myavana-form-control,
+#myavana-next-root .myavana-input,
+#myavana-next-root .myavana-textarea {
+    color: #222323 !important;
+    -webkit-text-fill-color: #222323;
+    opacity: 1;
+}
+
+#myavana-next-root .myavana-form-control::placeholder,
+#myavana-next-root .myavana-input::placeholder,
+#myavana-next-root .myavana-textarea::placeholder {
+    -webkit-text-fill-color: #a8a2a0;
+}

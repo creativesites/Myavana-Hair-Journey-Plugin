@@ -739,7 +739,9 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                             <button class="tab is-active" type="button" data-tab="overview">Overview</button>
                             <button class="tab" type="button" data-tab="milestones">Milestones</button>
                             <button class="tab" type="button" data-tab="checkins">Check-ins</button>
+                            <?php if (\Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED) : ?>
                             <button class="tab" type="button" data-tab="routines">Routines</button>
+                            <?php endif; ?>
                         </div>
                         <button type="button" class="close" data-gv2-close-detail><?php echo $icon('x', 'is-close'); ?></button>
                     </div>
@@ -846,7 +848,7 @@ function myavana_goals_page_shortcode($atts = [], $content = null) {
                     </div>
 
                     <label class="field-label">Notes (optional)</label>
-                    <textarea id="myavanaGv2CheckinNote" placeholder="How did your routines go this week? Any observations..."></textarea>
+                    <textarea id="myavanaGv2CheckinNote" placeholder="What did you notice this week?"></textarea>
 
                     <div class="btn-row">
                         <button type="button" class="myavana-gv2-btn" id="myavanaGv2SaveCheckinBtn"><?php echo $icon('save', 'is-xs'); ?>Save Check-in</button>

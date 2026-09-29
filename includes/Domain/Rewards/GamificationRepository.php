@@ -58,6 +58,12 @@ class GamificationRepository {
             }
         }
 
+        // Stored streak counters only ever go up (nothing resets them when a
+        // day is missed), so Mya told a member who hadn't logged in weeks she
+        // was "on a 1-day streak". Derive it from her actual entries instead.
+        $stats['currentStreak'] = $this->entryStreak($userId);
+        $stats['longestStreak'] = max($stats['longestStreak'], $stats['currentStreak']);
+
         // Compute level from points
         $pts = $stats['totalPoints'];
         if ($pts >= 1000) {
@@ -83,6 +89,39 @@ class GamificationRepository {
         }
 
         return $stats;
+    }
+
+    /**
+     * Consecutive days with at least one journal entry, ending today or
+     * yesterday (a streak isn't broken until a whole day passes).
+     */
+    private function entryStreak(int $userId): int {
+        global $wpdb;
+        $days = $wpdb->get_col($wpdb->prepare(
+            "SELECT DISTINCT DATE(post_date) AS d FROM {$wpdb->posts}
+             WHERE post_author = %d AND post_type = 'hair_journey_entry' AND post_status = 'publish'
+               AND post_date >= %s
+             ORDER BY d DESC",
+            $userId,
+            gmdate('Y-m-d', strtotime(current_time('Y-m-d') . ' -400 days'))
+        ));
+        if (empty($days)) {
+            return 0;
+        }
+        $set = array_flip($days);
+        $cursor = strtotime(current_time('Y-m-d'));
+        if (!isset($set[date('Y-m-d', $cursor)])) {
+            $cursor -= DAY_IN_SECONDS;
+            if (!isset($set[date('Y-m-d', $cursor)])) {
+                return 0;
+            }
+        }
+        $streak = 0;
+        while (isset($set[date('Y-m-d', $cursor)])) {
+            $streak++;
+            $cursor -= DAY_IN_SECONDS;
+        }
+        return $streak;
     }
 
     /**

@@ -19,6 +19,8 @@ class LaunchScope {
     public const ONBOARDING_WIZARD_ENABLED = false;
     /** Members don't classify their own hair; HairID comes from MYAVANA HairAI. */
     public const SELF_REPORTED_HAIR_PROFILE = false;
+    /** Points/levels card. Off until the engagement plan's gate (30+ weekly loggers). */
+    public const REWARDS_ENABLED = false;
 
     private const HAIR_AI_URL = 'https://www.myavana.com/pages/consumer';
 

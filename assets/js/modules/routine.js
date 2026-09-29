@@ -46,7 +46,11 @@ MyavanaNext.Routine = (function() {
             btn.setAttribute('aria-selected', String(isActive));
         });
 
-        try {
+        // Only reflect the tab in the address bar while Goals is the view
+        // being shown; init runs on every page and must not add ?tab=goals
+        // to Today, Timeline or Community links.
+        const viewing = /^#(routine|goals)\b/.test(window.location.hash || '');
+        if (viewing) try {
             const url = new URL(window.location.href);
             if (active === 'goals') {
                 url.searchParams.set('tab', 'goals');

@@ -259,17 +259,19 @@
 
         if (els.detailTitle) els.detailTitle.textContent = goal.title || 'Goal';
         if (els.detailDescription) {
-            els.detailDescription.textContent = goal.description || 'No description added yet.';
+            els.detailDescription.textContent = goal.description || '';
+            els.detailDescription.hidden = !goal.description;
         }
 
         if (els.detailPct) els.detailPct.textContent = String(goal.progress || 0) + '%';
         if (els.detailProgLbl) {
-            const current = goal.current_display || '-';
-            const target = goal.target_display || '-';
-            const remaining = goal.weeks_remaining !== null && goal.weeks_remaining !== undefined
-                ? goal.weeks_remaining + ' weeks remaining'
-                : 'No target timeline set';
-            els.detailProgLbl.textContent = current + ' of ' + target + ' target · ' + remaining;
+            const hasTarget = goal.target_display && goal.target_display !== '-';
+            const weeks = goal.weeks_remaining;
+            let remaining = 'No target date';
+            if (weeks !== null && weeks !== undefined) {
+                remaining = weeks < 0 ? 'Target date has passed' : (weeks === 0 ? 'Due this week' : weeks + (weeks === 1 ? ' week' : ' weeks') + ' to go');
+            }
+            els.detailProgLbl.textContent = (hasTarget ? (goal.current_display || '-') + ' of ' + goal.target_display + ' · ' : '') + remaining;
         }
 
         if (els.detailStatus) {
@@ -294,6 +296,9 @@
         }
 
         if (els.detailValues) {
+            // Measurements mean something only once a target is set.
+            const valuesSec = els.detailValues.closest('.sec');
+            if (valuesSec) valuesSec.hidden = !(goal.target_display && goal.target_display !== '-');
             els.detailValues.innerHTML = [
                 '<div class="v"><div class="num">' + (goal.baseline_display || '-') + '</div><div class="l">Baseline</div></div>',
                 '<div class="v current"><div class="num">' + (goal.current_display || '-') + '</div><div class="l">Current</div></div>',
@@ -409,8 +414,13 @@
         }
 
         if (els.checkinMeasureUnit) {
-            const unit = goal.measure_unit || 'value';
+            const unit = goal.measure_unit || '';
             els.checkinMeasureUnit.textContent = unit;
+            // No unit and no target: there's nothing to measure against.
+            const measurable = !!unit || (goal.target_display && goal.target_display !== '-');
+            const row = els.checkinMeasureInput ? els.checkinMeasureInput.closest('.measure-row') : null;
+            if (row) row.hidden = !measurable;
+            if (row && row.previousElementSibling && row.previousElementSibling.classList.contains('field-label')) row.previousElementSibling.hidden = !measurable;
         }
 
         if (els.checkinNote) {

@@ -67,6 +67,12 @@ MyavanaNext.SignupWelcome = (function() {
         } catch (e) {
             // Closing is still right: the pop-up must never trap a member.
         }
+        // Reflect the name she just gave everywhere it's already on screen.
+        const chosenName = (overlay.querySelector('#mya-signup-name')?.value || '').trim();
+        if (chosenName) {
+            document.querySelectorAll('.myavana-next-avatar-name, #profile-name').forEach((el) => { el.textContent = chosenName; });
+        }
+        if (MyavanaNext.Today && typeof MyavanaNext.Today.refresh === 'function') MyavanaNext.Today.refresh();
         overlay.classList.remove('show');
         document.body.style.overflow = '';
         if (status === 'completed' && MyavanaNext.Today) MyavanaNext.Today.refresh();

@@ -70,3 +70,17 @@ body:has(#goalOffcanvas.is-open) .mya-trigger {
 .myavana-goals-v2-page .myavana-gv2-card-foot .left-streak { color: #6b6b6b !important; }
 .myavana-goals-v2-page .myavana-gv2-card-foot .checkin-btn { background: #fff !important; color: #222323 !important; border: 1px solid #eadfd8 !important; box-shadow: none !important; border-radius: 9999px; }
 .myavana-goals-v2-page .myavana-gv2-card-foot .checkin-btn:hover { border-color: #222323 !important; background: #222323 !important; color: #fff !important; }
+
+/* Goal overlays sit above the site header (z-index 100) and tab bar. */
+.myavana-goals-v2-page .myavana-gv2-overlay { z-index: 1190 !important; }
+.myavana-goals-v2-page .myavana-gv2-drawer { z-index: 1200 !important; }
+.myavana-goals-v2-page .myavana-gv2-picker-overlay { z-index: 1190 !important; }
+.myavana-goals-v2-page .myavana-gv2-picker { z-index: 1200 !important; }
+.myavana-goals-v2-page .myavana-gv2-checkin { z-index: 1250 !important; }
+.myavana-goals-v2-page [hidden] { display: none !important; }
+
+/* Primary actions in the drawer and check-in match the app. */
+.myavana-goals-v2-page .myavana-gv2-drawer .drawer-foot .myavana-gv2-btn:not(.ghost):not(.danger),
+.myavana-goals-v2-page #myavanaGv2SaveCheckinBtn { background: #222323 !important; color: #fff !important; border-color: #222323 !important; box-shadow: none !important; }
+.myavana-goals-v2-page .myavana-gv2-checkin .mood.is-selected,
+.myavana-goals-v2-page .myavana-gv2-checkin .mood.is-selected:hover { background: #222323 !important; color: #fff !important; border-color: #222323 !important; }

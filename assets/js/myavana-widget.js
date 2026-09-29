@@ -2508,7 +2508,7 @@
 
         for (var i = 0; i < candidates.length; i++) {
             var c = String(candidates[i] || '').toLowerCase();
-            if (ROUTES[c]) return c;
+            if (ROUTES[c]) return routinesOff() && c === 'routine' ? 'goals' : c;
             // Tolerate the older descriptive view names (today_hub, goals_overview…)
             for (var key in ROUTES) {
                 if (ROUTES.hasOwnProperty(key) && c.indexOf(key) !== -1) return key;
@@ -2516,9 +2516,15 @@
         }
 
         var hash = (window.location.hash || '').replace(/^#!?/, '').split('?')[0].toLowerCase();
-        if (ROUTES[hash]) return hash;
+        if (ROUTES[hash]) return routinesOff() && hash === 'routine' ? 'goals' : hash;
 
         return 'home';
+    }
+
+    // With Routines switched off, the #routine view is the Goals page.
+    function routinesOff() {
+        var d = window.myavanaNextData;
+        return !!d && !d.routinesEnabled;
     }
 
     var STARTERS = {
@@ -2554,7 +2560,7 @@
         ],
         home: [
             { text: "Today's humidity & frizz outlook", prompt: 'What is the hair weather forecast and humidity recommendation for my hair today?' },
-            { text: "Show today's routine checklist", prompt: "Show today's routine checklist" },
+            { text: 'What should I try on wash day?', prompt: 'Based on my Hair Journey, what should I try on my next wash day?' },
             { text: 'Does my regimen match my hair?', prompt: 'Does my current product regimen match my hair porosity and texture?' }
         ]
     };
@@ -2596,7 +2602,7 @@
             getMyaLogoHtml(56, 'glow'),
             '<h3 style="font-size:20px;font-weight:700;color:' + COLORS.onyx + ';margin:10px 0 6px;letter-spacing:-0.02em;">' + timeOfDay + ', ' + esc(greetingName) + '</h3>',
             '<p style="font-size:13px;color:' + COLORS.muted + ';line-height:1.55;max-width:320px;margin:0 auto 18px;">' + sub + '</p>',
-            '<div style="font-size:11px;font-weight:700;color:' + COLORS.blueberry + ';text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Suggested Next Steps</div>',
+            '<div style="font-size:11px;font-weight:700;color:' + COLORS.coralDark + ';text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px;">Try asking</div>',
             '</div>'
         ].join('');
 

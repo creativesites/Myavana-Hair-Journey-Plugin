@@ -93,6 +93,7 @@ class JourneyService {
                 'currentLength' => !empty($lengthHistory) ? end($lengthHistory)['length'] : null,
                 'healthScore' => $careIndex,
                 'careIndex' => $careIndex,
+                'entriesThisMonth' => $activeDays30,
                 'totalEntries' => $entriesData['total'],
                 'photoCount' => count($photoEntries),
             ],

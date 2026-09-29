@@ -408,13 +408,30 @@ $myaSignupGoals = [
         max-height: calc(100vh - 250px);
     }
 }
+
+/* Match the app: soft blush header, real wordmark, onyx primary, ink text. */
+.mya-signup-header { background: linear-gradient(160deg, #fce5d7 0%, #fdf8f5 100%); padding: 56px 28px 28px; }
+.mya-signup-logo { margin: 0 auto 14px; }
+.mya-signup-logo img { display: block; width: 132px; height: auto; margin: 0 auto; }
+.mya-signup-title { color: #222323; font-size: 22px; line-height: 1.15; }
+.mya-signup-subtitle { color: #6b6b6b; }
+.mya-signup-skip { top: 16px; right: 16px; background: transparent; color: #9b5a49; padding: 8px 10px; font: 600 12px/1 Archivo, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+.mya-signup-skip:hover { background: rgba(155, 90, 73, 0.08); }
+.mya-signup-field input[type="text"] { border: 1px solid #eadfd8; border-radius: 14px; color: #222323; -webkit-text-fill-color: #222323; background: #fff; margin: 0; }
+.mya-signup-field input:focus { box-shadow: 0 0 0 4px rgba(231, 166, 144, 0.2); }
+.mya-signup-next { background: #222323; border-radius: 9999px; padding: 0 28px; min-height: 48px; font: 700 12px/1 Archivo, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
+.mya-signup-next:hover { background: #363737; box-shadow: 0 10px 24px rgba(34, 35, 35, 0.16); }
+.mya-signup-chip { color: #222323; }
+.mya-signup-chip.selected, .mya-signup-chip.selected:hover { border-color: #222323; background: #222323; color: #fff; }
+.mya-signup-chip:focus { outline: none; }
+.mya-signup-chip:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(231, 166, 144, 0.35); }
 </style>
 
 <div class="mya-signup-overlay" id="myaSignupOverlay" role="dialog" aria-modal="true" aria-labelledby="myaSignupTitle">
     <div class="mya-signup-card">
         <div class="mya-signup-header">
             <button type="button" class="mya-signup-skip" id="myaSignupSkip"><?php esc_html_e('Skip for now', 'myavana-hair-journey-next'); ?></button>
-            <div class="mya-signup-logo">MYAVANA</div>
+            <div class="mya-signup-logo"><img src="<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="MYAVANA" /></div>
             <h2 class="mya-signup-title" id="myaSignupTitle"><?php esc_html_e('Your Hair Journey Starts Here', 'myavana-hair-journey-next'); ?></h2>
             <p class="mya-signup-subtitle"><?php esc_html_e('A quick setup to personalize your experience and prepare your first entry.', 'myavana-hair-journey-next'); ?></p>
         </div>
