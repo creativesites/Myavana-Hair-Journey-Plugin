@@ -87,7 +87,7 @@ class Assets {
         );
 
         // View Specific Styles
-        $views = ['today', 'journey', 'routine', 'community', 'profile', 'auth'];
+        $views = ['today', 'journey', 'routine', 'community', 'profile', 'auth', 'home-timeline'];
         foreach ($views as $view) {
             wp_enqueue_style(
                 "myavana-next-view-{$view}",
@@ -220,6 +220,7 @@ class Assets {
             'mod-signup-welcome' => 'assets/js/modules/signup-welcome.js',
             'mod-recap' => 'assets/js/modules/recap.js',
             'mod-stories' => 'assets/js/modules/stories.js',
+            'mod-home-timeline' => 'assets/js/modules/home-timeline.js',
             'app' => 'assets/js/app.js',
         ];
 

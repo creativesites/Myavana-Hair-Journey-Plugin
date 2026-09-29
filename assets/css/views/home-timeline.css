@@ -1,0 +1,185 @@
+/* ==================================================================
+   Home — "Every moment, strand by strand" (3D journey timeline)
+   ================================================================== */
+.myavana-strand {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(48px, 7vw, 96px) 0 clamp(40px, 6vw, 80px);
+    background:
+        radial-gradient(60% 50% at 12% 0%, rgba(252, 229, 215, .9), transparent 70%),
+        radial-gradient(50% 45% at 92% 20%, rgba(231, 166, 144, .22), transparent 70%),
+        linear-gradient(180deg, #fdf8f5 0%, #fbf3ee 100%);
+    color: #222323;
+    isolation: isolate;
+}
+.myavana-strand-inner { width: min(1320px, 100%); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); box-sizing: border-box; }
+.myavana-strand-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: clamp(8px, 2vw, 18px); }
+.myavana-strand-eyebrow { margin: 0 0 10px; color: #9b5a49; font: 700 11.5px/1.2 Archivo, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.myavana-strand-head h2 { margin: 0; font-size: clamp(34px, 5.4vw, 72px); line-height: .96; letter-spacing: -.01em; text-transform: uppercase; }
+.myavana-strand-head h2 em {
+    display: block;
+    font-style: italic;
+    background: linear-gradient(100deg, #9b5a49 0%, #e7a690 45%, #9b5a49 90%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: myavanaStrandShine 6s ease-in-out infinite;
+}
+@keyframes myavanaStrandShine { 0%, 100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+.myavana-strand-lede { max-width: 46ch; margin: 16px 0 0; color: #5f5857; font: 400 16px/1.6 Archivo, sans-serif; }
+.myavana-strand-controls { display: flex; align-items: center; gap: 10px; flex: none; }
+.myavana-strand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid #eadfd8;
+    border-radius: 999px;
+    background: #fff;
+    color: #222323;
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+.myavana-strand-btn:hover { transform: translateY(-2px); border-color: #e7a690; }
+.myavana-strand-btn:focus-visible { outline: 3px solid rgba(231, 166, 144, .6); outline-offset: 2px; }
+.myavana-strand-btn.is-play { padding: 0 20px; background: #222323; border-color: #222323; color: #fff; font: 700 12px/1 Archivo, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.myavana-strand-btn.is-play:hover { background: #9b5a49; border-color: #9b5a49; }
+.myavana-strand-btn .i-pause, .myavana-strand.is-playing .myavana-strand-btn .i-play { display: none; }
+.myavana-strand.is-playing .myavana-strand-btn .i-pause { display: block; }
+
+.myavana-strand-stage {
+    position: relative;
+    height: clamp(400px, 46vw, 580px);
+    margin: 0 calc(-1 * clamp(16px, 4vw, 40px));
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+.myavana-strand-stage:focus-visible { box-shadow: inset 0 0 0 3px rgba(231, 166, 144, .5); border-radius: 24px; }
+.myavana-strand.is-dragging .myavana-strand-stage { cursor: grabbing; }
+.myavana-strand-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; animation: myavanaStrandFade 1s ease both; }
+@keyframes myavanaStrandFade { from { opacity: 0; } to { opacity: 1; } }
+.myavana-strand-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.myavana-strand-loading span { width: 9px; height: 9px; border-radius: 50%; background: #e7a690; animation: myavanaStrandDot 1s ease-in-out infinite; }
+.myavana-strand-loading span:nth-child(2) { animation-delay: .15s; }
+.myavana-strand-loading span:nth-child(3) { animation-delay: .3s; }
+@keyframes myavanaStrandDot { 0%, 100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(-8px); opacity: 1; } }
+
+/* Focus panel */
+.myavana-strand-focus { min-height: 132px; margin: -8px auto 0; max-width: 680px; text-align: center; }
+.myavana-strand-focus-card[data-anim] { animation: myavanaStrandUp .45s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes myavanaStrandUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.myavana-strand-focus-kicker { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 0 0 8px; color: #6b6b6b; font: 500 13px/1.4 Archivo, sans-serif; }
+.myavana-strand-focus-kicker span { padding: 4px 10px; border-radius: 999px; background: #222323; color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.myavana-strand-focus-card h3 { margin: 0 0 6px; font-size: clamp(20px, 2.4vw, 28px); line-height: 1.15; }
+.myavana-strand-focus-text { margin: 0 auto 10px; max-width: 56ch; color: #5f5857; font: 400 14.5px/1.55 Archivo, sans-serif; }
+.myavana-strand-focus-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.myavana-strand-focus-meta > span { padding: 5px 11px; border: 1px solid #eadfd8; border-radius: 999px; background: rgba(255, 255, 255, .7); color: #4d4747; font: 600 12px/1.2 Archivo, sans-serif; }
+.myavana-strand-open { padding: 6px 4px; border: 0; background: none; color: #9b5a49; font: 700 12.5px/1.2 Archivo, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.myavana-strand-open span { display: inline-block; transition: transform .2s ease; }
+.myavana-strand-open:hover span { transform: translateX(4px); }
+.myavana-strand-focus-card.is-ghost .myavana-btn { margin-top: 4px; }
+
+/* Ruler */
+.myavana-strand-ruler { position: relative; margin-top: 18px; }
+.myavana-strand-readout {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+}
+.myavana-strand-readout-day { padding: 3px 9px; border-radius: 999px; background: #fce5d7; color: #9b5a49; font: 700 11px/1.3 Archivo, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.myavana-strand-readout-date { color: #222323; font: 800 15px/1.2 Archivo, sans-serif; letter-spacing: .02em; }
+.myavana-strand-readout-date.is-tick { animation: myavanaStrandTick .28s ease; }
+@keyframes myavanaStrandTick { from { opacity: .35; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+.myavana-strand-readout-time { color: #6b6b6b; font: 500 13px/1.2 Archivo, sans-serif; }
+.myavana-strand-viewport {
+    position: relative;
+    height: 92px;
+    overflow: hidden;
+    cursor: ew-resize;
+    touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.myavana-strand-track { position: absolute; top: 0; bottom: 0; left: 0; will-change: transform; }
+.myavana-strand-line { position: absolute; left: -2000px; right: -2000px; top: 34px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, #eadfd8, #e7a690 50%, #eadfd8); }
+.myavana-strand-tick { position: absolute; top: 28px; width: 1px; height: 6px; background: #d9c9c0; transform: translateX(-.5px); }
+.myavana-strand-tick.is-month { top: 20px; height: 22px; width: 2px; background: #222323; opacity: .75; }
+.myavana-strand-tick.is-quiet { top: 26px; height: 12px; width: 1px; opacity: .45; }
+.myavana-strand-break { z-index: 1; }
+.myavana-strand-tick b, .myavana-strand-tick i { position: absolute; left: 6px; white-space: nowrap; font-style: normal; }
+.myavana-strand-tick b { top: 26px; color: #222323; font: 800 11px/1 Archivo, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.myavana-strand-tick i { top: 40px; color: #9b5a49; font: 600 10.5px/1 Archivo, sans-serif; }
+.myavana-strand-break { position: absolute; top: 64px; transform: translateX(-50%); padding: 2px 8px; border-radius: 999px; background: #fff; border: 1px dashed #e7a690; color: #9b5a49; font: 600 10.5px/1.4 Archivo, sans-serif; white-space: nowrap; }
+.myavana-strand-marker { position: absolute; top: 35px; width: 28px; height: 28px; margin: -14px 0 0 -14px; padding: 0; border: 0; background: none; cursor: pointer; }
+.myavana-strand-marker-dot { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border: 2px solid #fdf8f5; border-radius: 50%; background: #222323; box-shadow: 0 0 0 1px #222323; transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .25s ease, box-shadow .25s ease; }
+.myavana-strand-marker.is-video .myavana-strand-marker-dot { background: #9b5a49; box-shadow: 0 0 0 1px #9b5a49; }
+.myavana-strand-marker.is-ghost .myavana-strand-marker-dot { background: #fff; border-style: dashed; border-color: #e7a690; box-shadow: none; }
+.myavana-strand-marker.is-active .myavana-strand-marker-dot { transform: scale(1.7); background: #e7a690; box-shadow: 0 0 0 4px rgba(231, 166, 144, .25), 0 0 18px rgba(231, 166, 144, .7); }
+.myavana-strand-marker:hover .myavana-strand-marker-dot { transform: scale(1.45); }
+.myavana-strand-marker-peek { position: absolute; left: 50%; bottom: 22px; width: 44px; height: 44px; margin-left: -22px; overflow: hidden; border: 2px solid #fff; border-radius: 12px; box-shadow: 0 8px 18px rgba(34, 35, 35, .2); opacity: 0; transform: translateY(6px) scale(.9); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+.myavana-strand-marker-peek img { width: 100%; height: 100%; object-fit: cover; }
+.myavana-strand-marker:hover .myavana-strand-marker-peek, .myavana-strand-marker:focus-visible .myavana-strand-marker-peek { opacity: 1; transform: none; }
+.myavana-strand-playhead { position: absolute; left: 50%; top: 8px; bottom: 8px; width: 2px; margin-left: -1px; border-radius: 2px; background: #e7a690; box-shadow: 0 0 12px rgba(231, 166, 144, .8); pointer-events: none; }
+.myavana-strand-playhead::before { content: ""; position: absolute; top: -6px; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #e7a690; }
+
+/* CSS 3D fallback */
+.myavana-strand-flow { position: absolute; inset: 0; perspective: 1100px; transform-style: preserve-3d; }
+.myavana-strand-flow-card {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: clamp(150px, 18vw, 220px);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 5px solid #fff;
+    border-radius: 20px;
+    background: linear-gradient(160deg, #fdf8f5, #fce5d7);
+    box-shadow: 0 24px 50px rgba(80, 40, 30, .18);
+    transition: transform .6s cubic-bezier(.2, .8, .2, 1), opacity .4s ease;
+    cursor: pointer;
+}
+.myavana-strand-flow-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.myavana-strand-flow-card.is-focus { box-shadow: 0 30px 70px rgba(155, 90, 73, .35); }
+.myavana-strand-flow-card.is-ghost { border: 3px dashed #e7a690; background: rgba(255, 255, 255, .7); }
+.myavana-strand-flow-plus { position: absolute; left: 50%; top: 45%; display: grid; place-items: center; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: #222323; color: #fff; font-size: 30px; }
+.myavana-strand-flow-text { display: block; padding: 20px; font: 800 18px/1.2 Archivo, sans-serif; }
+.myavana-strand-flow-play { position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(255, 255, 255, .92); color: #222323; }
+.myavana-strand-flow-date { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: #222323; color: #fff; font: 700 10.5px/1.4 Archivo, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+    .myavana-strand-flow-card { transition: none; }
+    .myavana-strand-head h2 em { animation: none; }
+}
+
+/* Lightbox */
+.myavana-strand-lightbox { position: fixed; inset: 0; z-index: 100200; display: grid; place-items: center; padding: 16px; background: rgba(34, 35, 35, .72); backdrop-filter: blur(8px); opacity: 0; transition: opacity .25s ease; }
+.myavana-strand-lightbox[hidden] { display: none; }
+.myavana-strand-lightbox.is-open { opacity: 1; }
+.myavana-strand-lightbox-card { position: relative; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); width: min(980px, 100%); max-height: calc(100dvh - 32px); margin: 0; overflow: hidden; border-radius: 24px; background: #fff; box-shadow: 0 40px 100px rgba(0, 0, 0, .35); animation: myavanaStrandUp .4s cubic-bezier(.2, .8, .2, 1); }
+.myavana-strand-lightbox-card img { width: 100%; height: 100%; max-height: calc(100dvh - 32px); object-fit: cover; background: #fce5d7; }
+.myavana-strand-lightbox-card figcaption { display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: clamp(24px, 4vw, 44px); overflow-y: auto; }
+.myavana-strand-lightbox-card figcaption .myavana-strand-focus-kicker { justify-content: flex-start; }
+.myavana-strand-lightbox-card h3 { margin: 0; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.1; }
+.myavana-strand-lightbox-card figcaption p { margin: 0 0 8px; color: #5f5857; font: 400 15px/1.6 Archivo, sans-serif; }
+.myavana-strand-lightbox-card .myavana-btn { align-self: flex-start; }
+.myavana-strand-lightbox-x { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #fff; color: #222323; box-shadow: 0 4px 14px rgba(0, 0, 0, .15); cursor: pointer; }
+
+@media (max-width: 767px) {
+    .myavana-strand-head { flex-direction: column; align-items: stretch; }
+    .myavana-strand-controls { justify-content: space-between; }
+    .myavana-strand-btn.is-play { flex: 1; }
+    .myavana-strand-stage { height: 420px; }
+    .myavana-strand-lede { font-size: 15px; }
+    .myavana-strand-lightbox { align-items: end; padding: 0; }
+    .myavana-strand-lightbox-card { grid-template-columns: 1fr; border-radius: 24px 24px 0 0; max-height: 92dvh; overflow-y: auto; }
+    .myavana-strand-lightbox-card img { max-height: 55dvh; }
+}

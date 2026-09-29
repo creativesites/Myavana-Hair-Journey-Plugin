@@ -450,6 +450,38 @@ function myavana_luxury_home_view() {
             </div>
         </section>
 
+        <?php
+        $strand_service = new \Myavana\Next\Application\HomeTimelineService();
+        $strand = $is_logged_in ? $strand_service->forUser(get_current_user_id()) : $strand_service->forVisitors();
+        if ($is_logged_in || !empty($strand['items'])) :
+            $strand_member = $strand['mode'] === 'member';
+        ?>
+        <section class="myavana-strand<?php echo $strand_member ? '' : ' is-community'; ?>" data-home-timeline aria-labelledby="myavana-strand-title">
+            <div class="myavana-strand-inner">
+                <header class="myavana-strand-head">
+                    <div>
+                        <p class="myavana-strand-eyebrow"><?php echo $strand_member ? esc_html__('Your hair journey', 'myavana-hair-journey-next') : esc_html__('Real journeys from the community', 'myavana-hair-journey-next'); ?></p>
+                        <h2 id="myavana-strand-title"><?php esc_html_e('Every moment,', 'myavana-hair-journey-next'); ?> <em><?php esc_html_e('strand by strand', 'myavana-hair-journey-next'); ?></em></h2>
+                        <p class="myavana-strand-lede"><?php echo $strand_member
+                            ? esc_html__('Your photos and videos on one living timeline. Drag, swipe or scrub the dates to travel through it.', 'myavana-hair-journey-next')
+                            : esc_html__('Photos and clips members shared this month. Drag, swipe or scrub the dates to travel through them.', 'myavana-hair-journey-next'); ?></p>
+                    </div>
+                    <div class="myavana-strand-controls" role="group" aria-label="<?php esc_attr_e('Timeline controls', 'myavana-hair-journey-next'); ?>">
+                        <button type="button" class="myavana-strand-btn" data-strand="prev" aria-label="<?php esc_attr_e('Earlier moment', 'myavana-hair-journey-next'); ?>"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+                        <button type="button" class="myavana-strand-btn is-play" data-strand="play" aria-label="<?php esc_attr_e('Play the journey', 'myavana-hair-journey-next'); ?>"><svg class="i-play" width="16" height="16" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor"/></svg><svg class="i-pause" width="16" height="16" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg><span><?php esc_html_e('Play', 'myavana-hair-journey-next'); ?></span></button>
+                        <button type="button" class="myavana-strand-btn" data-strand="next" aria-label="<?php esc_attr_e('Later moment', 'myavana-hair-journey-next'); ?>"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+                    </div>
+                </header>
+                <div class="myavana-strand-stage" data-strand-stage tabindex="0" aria-roledescription="<?php esc_attr_e('interactive timeline', 'myavana-hair-journey-next'); ?>" aria-label="<?php esc_attr_e('Journey timeline. Use the arrow keys to move through moments and Enter to open one.', 'myavana-hair-journey-next'); ?>">
+                    <div class="myavana-strand-loading" aria-hidden="true"><span></span><span></span><span></span></div>
+                </div>
+                <div class="myavana-strand-focus" data-strand-focus aria-live="polite"></div>
+                <div class="myavana-strand-ruler" data-strand-ruler></div>
+            </div>
+            <script type="application/json" data-strand-data><?php echo wp_json_encode($strand, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
+        </section>
+        <?php endif; ?>
+
         <?php if ($is_logged_in): ?>
             <section class="myavana-luxury-member-hub" id="member-hub">
                 <div class="myavana-luxury-member-hub-container">
