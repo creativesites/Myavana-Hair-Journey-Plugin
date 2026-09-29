@@ -543,3 +543,7 @@
     #view-today .myavana-today-help { flex-wrap: wrap; }
     #view-profile .setting-item { flex-wrap: wrap; gap: 10px; }
 }
+@media (max-width: 400px) {
+    #view-profile .settings-form .setting-select { width: 100%; min-width: 0; }
+    #view-profile .myavana-card { overflow-x: clip; }
+}
