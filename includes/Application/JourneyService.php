@@ -56,6 +56,7 @@ class JourneyService {
                     'date' => $entry['date'],
                     'title' => $entry['title'],
                     'imageUrl' => $entry['featuredImage'] ?: ($entry['photos'][0] ?? ''),
+                    'video' => $entry['videos'][0] ?? null,
                     'mood' => $entry['mood'],
                     'entryType' => $entry['entryType'],
                     'caption' => $entry['notes'],

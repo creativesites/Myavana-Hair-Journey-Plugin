@@ -235,9 +235,13 @@ MyavanaNext.Journey = (function() {
                     // Older entries used WordPress's post-thumbnail mechanism
                     // instead of the entry_photos meta array — fall back to
                     // it so those entries still show their photo here.
-                    const cardPhotos = (entry.photos || []).length ? entry.photos : (entry.featuredImage ? [entry.featuredImage] : []);
-                    return cardPhotos.length ? `
-                <div class="myavana-timeline-card-photos">
+                    // A video-only entry's featuredImage is its poster; the
+                    // video tile already shows it.
+                    const videos = entry.videos || [];
+                    const cardPhotos = (entry.photos || []).length ? entry.photos : (entry.featuredImage && !videos.length ? [entry.featuredImage] : []);
+                    return (cardPhotos.length || videos.length) ? `
+                <div class="myavana-timeline-card-photos${videos.length ? ' has-video' : ''}">
+                    ${videos.map((v) => MyavanaNext.Media.videoTile(v)).join('')}
                     ${cardPhotos.map((p) => `<img src="${escapeHtml(p)}" alt="" loading="lazy" />`).join('')}
                 </div>` : '';
                 })()}
@@ -261,6 +265,11 @@ MyavanaNext.Journey = (function() {
                 </div>
             </div>
         </div>`;
+    }
+
+    function shortDate(value) {
+        const d = new Date(String(value || '').replace(' ', 'T'));
+        return Number.isNaN(d.getTime()) ? String(value || '') : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     function formatLongDate(value) {
@@ -518,7 +527,7 @@ MyavanaNext.Journey = (function() {
         el.innerHTML = photos.map((p, i) => `
             <div class="${i === storyIndex ? 'active' : ''}" data-idx="${i}">
                 <img src="${escapeHtml(p.imageUrl)}" alt="" loading="lazy" />
-                <span>${escapeHtml(p.date)}</span>
+                <span>${escapeHtml(shortDate(p.date))}</span>
             </div>
         `).join('');
         el.querySelectorAll('[data-idx]').forEach((thumb) => {
@@ -546,6 +555,23 @@ MyavanaNext.Journey = (function() {
 
         const entry = findEntryById(photo.id);
         container.querySelector('#story-slide-bg').style.backgroundImage = `url('${photo.imageUrl}')`;
+        const slide = container.querySelector('#story-slide-single');
+        let play = slide.querySelector('.myavana-story-play');
+        if (photo.video && photo.video.url) {
+            if (!play) {
+                play = document.createElement('button');
+                play.type = 'button';
+                play.className = 'myavana-story-play';
+                play.setAttribute('aria-label', 'Play video');
+                play.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor"/></svg>';
+                slide.appendChild(play);
+            }
+            play.setAttribute('data-play-video', photo.video.url);
+            play.setAttribute('data-poster', photo.video.poster || photo.imageUrl || '');
+            play.hidden = false;
+        } else if (play) {
+            play.hidden = true;
+        }
         container.querySelector('#story-kicker').textContent = typeLabel(photo.entryType);
         container.querySelector('#story-date').textContent = formatLongDate(photo.date);
 
@@ -586,7 +612,7 @@ MyavanaNext.Journey = (function() {
         grid.innerHTML = [compareA, compareB].map((p, i) => p ? `
             <div class="myavana-journey-story-compare-pane">
                 <img src="${escapeHtml(p.imageUrl)}" alt="" />
-                <strong>${escapeHtml(p.date)}</strong>
+                <strong>${escapeHtml(shortDate(p.date))}</strong>
                 <span>${i === 0 ? 'A' : 'B'} · ${escapeHtml(typeLabel(p.entryType))}</span>
             </div>` : '<div class="myavana-journey-story-compare-pane"></div>'
         ).join('');

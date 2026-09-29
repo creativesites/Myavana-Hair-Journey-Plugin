@@ -250,6 +250,15 @@ class JournalRepository {
         } elseif (!empty($data['featuredImage'])) {
             update_post_meta($postId, 'entry_photos', [esc_url_raw($data['featuredImage'])]);
         }
+
+        if (isset($data['videos'])) {
+            $videos = MediaService::sanitizeVideos($data['videos']);
+            if ($videos) {
+                update_post_meta($postId, 'entry_videos', $videos);
+            } else {
+                delete_post_meta($postId, 'entry_videos');
+            }
+        }
     }
 
     /**
@@ -390,6 +399,22 @@ class JournalRepository {
             }
         } elseif (!empty($entity->featuredImage)) {
             $entity->photos = [$entity->featuredImage];
+        }
+
+        // Video entries: the poster frame stands in wherever a picture is
+        // expected (cards, recap, email) when the entry has no photo.
+        $videos = get_post_meta($post->ID, 'entry_videos', true);
+        if (is_array($videos) && $videos) {
+            $entity->videos = array_values(array_filter(array_map(static function ($v) {
+                return is_array($v) && !empty($v['url']) ? [
+                    'url' => esc_url_raw((string) $v['url']),
+                    'poster' => esc_url_raw((string) ($v['poster'] ?? '')),
+                    'duration' => (int) ($v['duration'] ?? 0),
+                ] : null;
+            }, $videos)));
+            if (empty($entity->featuredImage) && !empty($entity->videos[0]['poster'])) {
+                $entity->featuredImage = $entity->videos[0]['poster'];
+            }
         }
 
         return $entity;

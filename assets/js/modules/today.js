@@ -192,7 +192,9 @@ MyavanaNext.Today = (function() {
 
         target.innerHTML = `
             <article class="myavana-latest-entry">
-                ${latestImage ? `<img src="${escapeHtml(latestImage)}" alt="" />` : '<div class="myavana-latest-entry-placeholder" aria-hidden="true">✦</div>'}
+                ${(latest.videos || []).length && MyavanaNext.Media
+                    ? MyavanaNext.Media.videoTile(latest.videos[0], 'myavana-latest-entry-video')
+                    : (latestImage ? `<img src="${escapeHtml(latestImage)}" alt="" />` : '<div class="myavana-latest-entry-placeholder" aria-hidden="true">✦</div>')}
                 <div><span>${escapeHtml(formatEntryDate(latest.date))}</span><strong>${escapeHtml(latest.title || 'Hair update')}</strong>${latest.notes ? `<p>${escapeHtml(latest.notes)}</p>` : ''}</div>
             </article>
             ${rest.length ? `

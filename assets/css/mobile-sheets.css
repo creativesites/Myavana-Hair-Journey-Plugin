@@ -547,3 +547,24 @@
     #view-profile .settings-form .setting-select { width: 100%; min-width: 0; }
     #view-profile .myavana-card { overflow-x: clip; }
 }
+
+/* Phones: main column and sidebar stack. (Relaxing their min-widths above
+   must not let them squeeze side by side.) */
+@media (max-width: 767px) {
+    #view-today .myavana-today-layout,
+    #view-journey .myavana-journey-layout,
+    #view-profile .myavana-profile-layout {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+    }
+    #view-today .myavana-today-main,
+    #view-today .myavana-today-sidebar,
+    #view-journey .myavana-journey-main,
+    #view-journey .myavana-journey-sidebar,
+    #view-profile .myavana-profile-main,
+    #view-profile .myavana-profile-sidebar {
+        flex: none;
+        width: 100%;
+    }
+}

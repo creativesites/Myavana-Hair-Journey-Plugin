@@ -54,17 +54,17 @@ if (!defined('ABSPATH')) {
 
                 <div class="myavana-form-group">
                     <div class="myavana-entry-field-header">
-                        <label class="myavana-label" style="margin:0;"><?php esc_html_e('Photos', 'myavana-hair-journey-next'); ?></label>
+                        <label class="myavana-label" style="margin:0;"><?php esc_html_e('Photos & video', 'myavana-hair-journey-next'); ?></label>
                         <span class="myavana-entry-photo-count" id="entry-photo-count"></span>
                     </div>
                     <div class="myavana-entry-photo-grid" id="entry-photo-grid">
                         <button type="button" class="myavana-entry-photo-add" id="entry-photo-add">
                             <span class="myavana-entry-photo-add-icon" aria-hidden="true">+</span>
-                            <span class="myavana-entry-photo-add-label"><?php esc_html_e('Add photo', 'myavana-hair-journey-next'); ?></span>
+                            <span class="myavana-entry-photo-add-label"><?php esc_html_e('Photo or video', 'myavana-hair-journey-next'); ?></span>
                         </button>
                     </div>
-                    <input type="file" id="smart-entry-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple style="display:none;" />
-                    <p class="myavana-entry-hint"><?php esc_html_e('JPEG, PNG, WEBP, or HEIC — up to 15MB each, up to 6 photos.', 'myavana-hair-journey-next'); ?></p>
+                    <input type="file" id="smart-entry-file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm,.mov,.mp4,.m4v,.webm" multiple style="display:none;" />
+                    <p class="myavana-entry-hint"><?php esc_html_e('Up to 6 photos (15MB each) and 2 videos. A short clip of your curls in motion says a lot.', 'myavana-hair-journey-next'); ?></p>
                 </div>
             </div>
 

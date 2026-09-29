@@ -181,7 +181,9 @@ class JournalRoutes extends RestController {
         }
 
         $service = new MediaService();
-        $upload = $service->uploadImage($files['file'], $userId);
+        $upload = MediaService::isVideo($files['file'])
+            ? $service->uploadVideo($files['file'], $userId)
+            : $service->uploadImage($files['file'], $userId);
 
         if (is_wp_error($upload)) {
             return $this->respondError($upload->get_error_message(), $upload->get_error_code(), 400);

@@ -222,7 +222,7 @@
     .myavana-today-feel-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .myavana-latest-entry { flex-direction: column; }
     .myavana-latest-entry img, .myavana-latest-entry-placeholder { max-width: none; min-height: 180px; width: 100%; }
-    .myavana-latest-entry > div { padding: 0 16px 18px; }
+    .myavana-latest-entry > div { align-self: stretch; padding: 0 16px 18px; }
     .myavana-today-section-head { flex-direction: column; gap: 6px; }
 }
 

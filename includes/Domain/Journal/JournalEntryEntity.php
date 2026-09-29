@@ -22,6 +22,7 @@ class JournalEntryEntity {
     public string $scalpState = 'Balanced';
     public array $productsUsed = [];
     public array $photos = [];
+    public array $videos = []; // [{url, poster, duration}]
     public string $featuredImage = '';
     public string $notes = '';
     public string $aiAnalysis = '';
@@ -49,6 +50,7 @@ class JournalEntryEntity {
             'scalpState' => $this->scalpState,
             'productsUsed' => $this->productsUsed,
             'photos' => $this->photos,
+            'videos' => $this->videos,
             'featuredImage' => $this->featuredImage,
             'notes' => $this->notes,
             'aiAnalysis' => $this->aiAnalysis,

@@ -45,7 +45,7 @@ MyavanaNext.SmartEntry = (function() {
 
     function open(options) {
         if (!modalBackdrop) return;
-        state.photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+        state.photos.forEach((p) => p.previewUrl && URL.revokeObjectURL(p.previewUrl));
         state = defaultState();
         if (options && typeof options === 'object') {
             if (options.mood) state.mood = options.mood;
@@ -313,8 +313,91 @@ MyavanaNext.SmartEntry = (function() {
      * connection, a rejected file, or any server-side hiccup meant nothing
      * ever appeared at all with no indication why.
      */
+    const MAX_VIDEOS = 2;
+
+    /** A video tile shows its poster at once; the file uploads with progress. */
+    async function addVideo(file) {
+        const Media = MyavanaNext.Media;
+        if (state.photos.filter((p) => p.kind === 'video').length >= MAX_VIDEOS) {
+            MyavanaNext.API.showToast(`You can add up to ${MAX_VIDEOS} videos per entry.`, 'error');
+            return;
+        }
+        if (!Media.isSupportedVideo(file)) {
+            MyavanaNext.API.showToast(`"${file.name}" isn't a video we can play. Please use MP4 or MOV.`, 'error');
+            return;
+        }
+        if (file.size > Media.maxVideoBytes()) {
+            MyavanaNext.API.showToast(`"${file.name}" is over the ${Media.formatBytes(Media.maxVideoBytes())} limit. Try a shorter clip.`, 'error');
+            return;
+        }
+
+        const item = {
+            localId: 'p' + (++photoSeq),
+            kind: 'video',
+            previewUrl: '',
+            status: 'uploading',
+            progress: 0,
+            url: null,
+            poster: '',
+            duration: 0,
+            attachmentId: null,
+            error: '',
+            file,
+        };
+        state.photos.push(item);
+        renderPhotoGrid();
+
+        const still = await Media.posterFromFile(file);
+        item.duration = still.duration || 0;
+        if (still.blob) {
+            item.previewUrl = URL.createObjectURL(still.blob);
+            item.posterFile = new File([still.blob], 'poster.jpg', { type: 'image/jpeg' });
+        }
+        renderPhotoGrid();
+        runVideoUpload(item);
+    }
+
+    async function runVideoUpload(item) {
+        const Media = MyavanaNext.Media;
+        try {
+            if (item.posterFile && !item.poster) {
+                const poster = await MyavanaNext.API.upload(item.posterFile).catch(() => null);
+                if (poster && poster.url) item.poster = poster.url;
+            }
+            let lastPaint = 0;
+            const result = await Media.uploadWithProgress(item.file, (fraction) => {
+                item.progress = fraction;
+                const now = Date.now();
+                if (now - lastPaint > 250) { lastPaint = now; paintProgress(item); }
+            });
+            if (!result || !result.url) throw new Error("Upload didn't return a video URL.");
+            const current = state.photos.find((p) => p.localId === item.localId);
+            if (!current) return;
+            current.status = 'uploaded';
+            current.url = result.url;
+            current.attachmentId = result.attachmentId;
+        } catch (err) {
+            console.error('[SmartEntry] Video upload failed', err);
+            const current = state.photos.find((p) => p.localId === item.localId);
+            if (!current) return;
+            current.status = 'failed';
+            current.error = err.message || 'Upload failed';
+        } finally {
+            renderPhotoGrid();
+        }
+    }
+
+    function paintProgress(item) {
+        const el = modalBackdrop.querySelector(`[data-progress-for="${item.localId}"]`);
+        if (el) el.textContent = `${Math.round(item.progress * 100)}%`;
+    }
+
     function addPhoto(file) {
-        if (state.photos.length >= MAX_PHOTOS) {
+        if (MyavanaNext.Media && MyavanaNext.Media.isVideoFile(file)) {
+            addVideo(file);
+            return;
+        }
+        if (state.photos.filter((p) => p.kind !== 'video').length >= MAX_PHOTOS) {
             MyavanaNext.API.showToast(`You can add up to ${MAX_PHOTOS} photos per entry.`, 'error');
             return;
         }
@@ -372,14 +455,15 @@ MyavanaNext.SmartEntry = (function() {
         if (!photo) return;
         photo.status = 'uploading';
         photo.error = '';
+        photo.progress = 0;
         renderPhotoGrid();
-        runUpload(photo);
+        if (photo.kind === 'video') runVideoUpload(photo); else runUpload(photo);
     }
 
     function removePhoto(localId) {
         const idx = state.photos.findIndex((p) => p.localId === localId);
         if (idx === -1) return;
-        URL.revokeObjectURL(state.photos[idx].previewUrl);
+        if (state.photos[idx].previewUrl) URL.revokeObjectURL(state.photos[idx].previewUrl);
         state.photos.splice(idx, 1);
         renderPhotoGrid();
     }
@@ -389,12 +473,21 @@ MyavanaNext.SmartEntry = (function() {
         const countLabel = modalBackdrop.querySelector('#entry-photo-count');
         if (!grid) return;
 
-        if (countLabel) countLabel.textContent = state.photos.length ? `${state.photos.length}/${MAX_PHOTOS}` : '';
+        const photoCount = state.photos.filter((p) => p.kind !== 'video').length;
+        const videoCount = state.photos.length - photoCount;
+        if (countLabel) {
+            const bits = [];
+            if (photoCount) bits.push(`${photoCount}/${MAX_PHOTOS} photos`);
+            if (videoCount) bits.push(`${videoCount}/${MAX_VIDEOS} videos`);
+            countLabel.textContent = bits.join(' · ');
+        }
 
         const thumbs = state.photos.map((p) => `
-            <div class="myavana-entry-photo-thumb is-${p.status}">
-                <img src="${escapeHtml(p.previewUrl)}" alt="" />
-                ${p.status === 'uploading' ? '<div class="myavana-entry-photo-spinner" aria-label="Uploading"></div>' : ''}
+            <div class="myavana-entry-photo-thumb is-${p.status}${p.kind === 'video' ? ' is-video' : ''}">
+                ${p.previewUrl ? `<img src="${escapeHtml(p.previewUrl)}" alt="" />` : '<span class="myavana-entry-video-blank" aria-hidden="true"></span>'}
+                ${p.kind === 'video' ? `<span class="myavana-entry-video-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="10" height="10"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor"/></svg>${p.duration ? MyavanaNext.Media.formatDuration(p.duration) : 'Video'}</span>` : ''}
+                ${p.status === 'uploading' && p.kind === 'video' ? `<div class="myavana-entry-photo-spinner" aria-label="Uploading"></div><span class="myavana-entry-video-progress" data-progress-for="${p.localId}">${Math.round((p.progress || 0) * 100)}%</span>` : ''}
+                ${p.status === 'uploading' && p.kind !== 'video' ? '<div class="myavana-entry-photo-spinner" aria-label="Uploading"></div>' : ''}
                 ${p.status === 'failed' ? `
                     <div class="myavana-entry-photo-error">
                         <span>${escapeHtml(p.error || "Couldn't upload")}</span>
@@ -404,10 +497,10 @@ MyavanaNext.SmartEntry = (function() {
             </div>
         `).join('');
 
-        const addTile = state.photos.length < MAX_PHOTOS ? `
+        const addTile = (photoCount < MAX_PHOTOS || videoCount < MAX_VIDEOS) ? `
             <button type="button" class="myavana-entry-photo-add" id="entry-photo-add">
                 <span class="myavana-entry-photo-add-icon" aria-hidden="true">+</span>
-                <span class="myavana-entry-photo-add-label">${state.photos.length ? 'Add more' : 'Add photo'}</span>
+                <span class="myavana-entry-photo-add-label">${state.photos.length ? 'Add more' : 'Photo or video'}</span>
             </button>` : '';
 
         grid.innerHTML = thumbs + addTile;
@@ -429,11 +522,15 @@ MyavanaNext.SmartEntry = (function() {
         if (state.type === 'length_check' && state.hairLength) {
             rows.push(['Length', `${state.hairLength}" (${state.hairLengthPoint || 'overall'})`]);
         }
-        const uploadedCount = state.photos.filter((p) => p.status === 'uploaded').length;
-        const pendingCount = state.photos.length - uploadedCount;
-        rows.push(['Photos', state.photos.length
-            ? `${uploadedCount} ready${pendingCount ? `, ${pendingCount} still uploading/failed` : ''}`
-            : 'None']);
+        const images = state.photos.filter((p) => p.kind !== 'video');
+        const clips = state.photos.filter((p) => p.kind === 'video');
+        const summarize = (list) => {
+            const ready = list.filter((p) => p.status === 'uploaded').length;
+            const pending = list.length - ready;
+            return `${ready} ready${pending ? `, ${pending} still uploading/failed` : ''}`;
+        };
+        rows.push(['Photos', images.length ? summarize(images) : 'None']);
+        if (clips.length) rows.push(['Videos', summarize(clips)]);
         if (state.goalId) {
             const goal = state.goals.find((g) => g.id === state.goalId);
             if (goal) rows.push(['Goal', goal.title]);
@@ -472,13 +569,17 @@ MyavanaNext.SmartEntry = (function() {
         // saving (the member may have already retried and given up); an
         // in-progress one does, briefly, since it's about to succeed.
         if (state.photos.some((p) => p.status === 'uploading')) {
-            MyavanaNext.API.showToast('Still uploading your photos — one moment…', 'info');
+            const video = state.photos.find((p) => p.status === 'uploading' && p.kind === 'video');
+            MyavanaNext.API.showToast(video
+                ? `Your video is still uploading (${Math.round((video.progress || 0) * 100)}%). It'll be ready in a moment.`
+                : 'Still uploading your photos — one moment…', 'info');
             return;
         }
 
         const submitBtn = modalBackdrop.querySelector('#entry-submit-btn');
-        const uploadedPhotos = state.photos.filter((p) => p.status === 'uploaded');
-        const failedCount = state.photos.length - uploadedPhotos.length;
+        const uploadedPhotos = state.photos.filter((p) => p.status === 'uploaded' && p.kind !== 'video');
+        const uploadedVideos = state.photos.filter((p) => p.status === 'uploaded' && p.kind === 'video');
+        const failedCount = state.photos.length - uploadedPhotos.length - uploadedVideos.length;
 
         const payload = {
             entryType: state.type,
@@ -489,6 +590,7 @@ MyavanaNext.SmartEntry = (function() {
             notes: state.notes,
             productsUsed: state.products.split(',').map((s) => s.trim()).filter(Boolean),
             photos: uploadedPhotos.map((p) => ({ url: p.url, attachmentId: p.attachmentId })),
+            videos: uploadedVideos.map((v) => ({ url: v.url, poster: v.poster, duration: v.duration, attachmentId: v.attachmentId })),
             visibility: state.visibility,
         };
 
@@ -508,7 +610,7 @@ MyavanaNext.SmartEntry = (function() {
 
             MyavanaNext.API.showToast(result.message || 'Entry saved ✨', 'success');
             if (failedCount > 0) {
-                MyavanaNext.API.showToast(`${failedCount} photo${failedCount > 1 ? 's' : ''} couldn't be uploaded and ${failedCount > 1 ? "weren't" : "wasn't"} included.`, 'error');
+                MyavanaNext.API.showToast(`${failedCount} file${failedCount > 1 ? 's' : ''} couldn't be uploaded and ${failedCount > 1 ? "weren't" : "wasn't"} included.`, 'error');
             }
             if (result.updatedGoal) {
                 MyavanaNext.API.showToast(`${result.updatedGoal.title}: ${result.updatedGoal.progress}% progress`, 'info');
