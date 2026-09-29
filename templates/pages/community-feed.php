@@ -612,7 +612,6 @@ function myavana_community_feed_shortcode($atts = []) {
                                    id="myavana-post-image"
                                    name="post_image"
                                    accept="image/*"
-                                   capture="environment"
                                    style="display: none;">
                             <div class="myavana-upload-prompt">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--myavana-coral)" stroke-width="2">
@@ -620,7 +619,7 @@ function myavana_community_feed_shortcode($atts = []) {
                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                     <polyline points="21 15 16 10 5 21"></polyline>
                                 </svg>
-                                <p class="myavana-body">Upload a photo or use camera</p>
+                                <p class="myavana-body">Choose from your photos or take one</p>
                             </div>
                             <div class="myavana-upload-preview" id="myavana-upload-preview" style="display: none;"></div>
                         </div>
@@ -638,14 +637,13 @@ function myavana_community_feed_shortcode($atts = []) {
                                    id="myavana-post-video"
                                    name="post_video"
                                    accept="video/*"
-                                   capture="environment"
                                    style="display: none;">
                             <div class="myavana-upload-prompt">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--myavana-coral)" stroke-width="2">
                                     <polygon points="23 7 16 12 23 17 23 7"></polygon>
                                     <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                                 </svg>
-                                <p class="myavana-body">Upload or record a short video</p>
+                                <p class="myavana-body">Choose a video or record one</p>
                             </div>
                             <div class="myavana-upload-preview" id="myavana-video-upload-preview" style="display: none;"></div>
                         </div>
