@@ -96,6 +96,7 @@ class TodayService {
             'focusGoals' => $focus ? [] : $this->activeGoalTitles($goals),
             'rhythm' => $rhythm,
             'weeklyPrompt' => WeeklyPromptService::current(),
+            'recapOffer' => (new RecapService())->offerForToday($userId),
             'firstWeek' => (new HabitService())->firstWeek($userId, $entries, $goals),
         ];
     }

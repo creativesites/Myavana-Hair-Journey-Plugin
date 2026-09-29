@@ -138,6 +138,14 @@ $initial = function_exists('mb_substr') ? mb_strtoupper(mb_substr($displayName, 
                 <div id="today-goals-list" class="myavana-today-goals-list"></div>
             </section>
 
+            <section class="myavana-today-side-card myavana-today-recap" id="today-recap-card" hidden>
+                <p class="myavana-today-eyebrow"><?php esc_html_e('Monthly recap', 'myavana-hair-journey-next'); ?></p>
+                <h3 id="today-recap-title"></h3>
+                <div class="myavana-today-recap-strip" id="today-recap-strip"></div>
+                <p id="today-recap-summary"></p>
+                <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" id="today-recap-open"><?php esc_html_e('See your recap', 'myavana-hair-journey-next'); ?></button>
+            </section>
+
             <section class="myavana-today-side-card myavana-today-prompt" id="today-prompt-card" hidden>
                 <p class="myavana-today-eyebrow"><?php esc_html_e('This week in Community', 'myavana-hair-journey-next'); ?></p>
                 <h3 id="today-prompt-title"></h3>

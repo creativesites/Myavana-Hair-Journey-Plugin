@@ -80,6 +80,7 @@ MyavanaNext.Today = (function() {
         renderRhythm(data.rhythm || null);
         renderFirstWeek(data.firstWeek || null);
         renderPrompt(data.weeklyPrompt || null);
+        renderRecapOffer(data.recapOffer || null);
         renderGoals(data.goals || []);
         renderUpcoming(data.upcomingGoals || []);
         renderMemory(data.memory || null);
@@ -264,6 +265,19 @@ MyavanaNext.Today = (function() {
         }
         el.innerHTML = text;
         el.hidden = false;
+    }
+
+    // Early in a new month: last month's story, one tap away.
+    function renderRecapOffer(recap) {
+        const card = container.querySelector('#today-recap-card');
+        if (!card) return;
+        if (!recap) { card.hidden = true; return; }
+        container.querySelector('#today-recap-title').textContent = `Your ${recap.label} in hair`;
+        container.querySelector('#today-recap-summary').textContent = recap.summary;
+        container.querySelector('#today-recap-strip').innerHTML = (recap.photos || []).slice(0, 4)
+            .map((p) => `<img src="${escapeHtml(p.url)}" alt="" loading="lazy" />`).join('');
+        container.querySelector('#today-recap-open').setAttribute('data-recap-month', recap.month);
+        card.hidden = false;
     }
 
     // The MYAVANA team's weekly Community question.

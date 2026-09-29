@@ -21,6 +21,18 @@ if (!defined('ABSPATH')) {
 
 class JournalRoutes extends RestController {
     public function registerRoutes(): void {
+        register_rest_route(self::NAMESPACE, '/journal/recap', [
+            'methods' => \WP_REST_Server::READABLE,
+            'callback' => [$this, 'getRecap'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/journal/recap/share', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'shareRecap'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/journal/workspace', [
             'methods' => \WP_REST_Server::READABLE,
             'callback' => [$this, 'getWorkspaceData'],
@@ -187,5 +199,27 @@ class JournalRoutes extends RestController {
             'photos' => $photos,
             'total' => count($photos),
         ]);
+    }
+
+    public function getRecap(\WP_REST_Request $request): \WP_REST_Response {
+        $month = sanitize_text_field((string) $request->get_param('month'));
+        $recap = (new \Myavana\Next\Application\RecapService())->forMonth($this->getUserId(), $month);
+        if (!$recap) {
+            return $this->respondError(__('There is nothing logged for that month yet.', 'myavana-hair-journey-next'), 'empty_month', 404);
+        }
+        return $this->respondSuccess($recap);
+    }
+
+    public function shareRecap(\WP_REST_Request $request): \WP_REST_Response {
+        $data = $request->get_json_params() ?: $request->get_params();
+        $result = (new \Myavana\Next\Application\RecapService())->share(
+            $this->getUserId(),
+            sanitize_text_field((string) ($data['month'] ?? '')),
+            (string) ($data['caption'] ?? '')
+        );
+        if (is_wp_error($result)) {
+            return $this->respondError($result->get_error_message(), $result->get_error_code(), 400);
+        }
+        return $this->respondSuccess(['postId' => $result], 201);
     }
 }

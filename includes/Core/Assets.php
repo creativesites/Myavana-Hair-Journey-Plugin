@@ -217,6 +217,7 @@ class Assets {
             'mod-auth' => 'assets/js/modules/auth.js',
             'mod-onboarding' => 'assets/js/modules/onboarding.js',
             'mod-signup-welcome' => 'assets/js/modules/signup-welcome.js',
+            'mod-recap' => 'assets/js/modules/recap.js',
             'app' => 'assets/js/app.js',
         ];
 

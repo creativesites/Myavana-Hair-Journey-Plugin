@@ -165,6 +165,7 @@ class JourneyService {
         }
 
         return array_values(array_map(function ($group) {
+            $group['monthKey'] = date('Y-m', strtotime('1 ' . $group['month']));
             $group['summary'] = sprintf(
                 /* translators: %d: number of entries logged that month */
                 _n('%d entry', '%d entries', $group['count'], 'myavana-hair-journey-next'),

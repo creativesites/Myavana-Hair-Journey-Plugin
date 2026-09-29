@@ -184,7 +184,7 @@ MyavanaNext.Journey = (function() {
 
         rail.innerHTML = groups.map((group) => `
             <div class="myavana-timeline-month">
-                <div class="myavana-timeline-month-head"><strong>${escapeHtml(group.month)}</strong><span>${escapeHtml(group.summary)}</span></div>
+                <div class="myavana-timeline-month-head"><strong>${escapeHtml(group.month)}</strong><span>${escapeHtml(group.summary)}</span>${group.monthKey && group.monthKey < new Date().toISOString().slice(0, 7) ? `<button type="button" class="myavana-timeline-recap-link" data-recap-month="${escapeHtml(group.monthKey)}">Month recap</button>` : ''}</div>
                 ${group.entries.map(renderEntryCard).join('')}
             </div>
         `).join('') + renderOriginNode();
