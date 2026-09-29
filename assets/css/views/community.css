@@ -1282,3 +1282,214 @@
 .myavana-weekly-prompt-toggle { display: flex; gap: 12px; align-items: flex-start; margin: 4px 0 16px; padding: 14px 16px; border: 1px solid #eadfd8; border-radius: 16px; background: #fdf8f5; cursor: pointer; font: 400 13px/1.5 Archivo, sans-serif; color: #6b6b6b; }
 .myavana-weekly-prompt-toggle input { margin-top: 3px; accent-color: #222323; }
 .myavana-weekly-prompt-toggle strong { display: block; color: #222323; font-size: 14px; }
+
+/* --------------------------------------------------------------------------
+   Comments: a cream thread with white bubbles and one pill composer.
+   -------------------------------------------------------------------------- */
+#view-community .myavana-post-comments {
+    margin: 12px -4px 0;
+    padding: 16px;
+    border-radius: 20px;
+    background: #fdf8f5 !important;
+    border: 1px solid #f1e7e1;
+}
+
+#view-community .myavana-comments-list {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 14px;
+    background: transparent !important;
+}
+
+#view-community .myavana-comments-empty,
+#view-community .myavana-comments-error {
+    padding: 8px 4px 4px;
+    background: transparent !important;
+    color: #6b6b6b;
+    font: 400 14px/1.5 Archivo, sans-serif;
+    text-align: left;
+}
+
+#view-community .myavana-comment {
+    display: flex;
+    gap: 10px;
+    background: transparent !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+#view-community .myavana-comment-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+#view-community .myavana-comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+#view-community .myavana-comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 32px;
+}
+
+#view-community .myavana-comment-author {
+    color: #222323;
+    font: 700 13px/1.2 Archivo, sans-serif;
+}
+
+#view-community .myavana-comment-time {
+    color: #8a807d;
+    font: 400 12px/1.2 Archivo, sans-serif;
+}
+
+#view-community .myavana-comment-text {
+    margin: 0 0 0 40px;
+    padding: 10px 14px;
+    border-radius: 4px 16px 16px 16px;
+    background: #fff;
+    border: 1px solid #f1e7e1;
+    color: #222323;
+    font: 400 14px/1.5 Archivo, sans-serif;
+    overflow-wrap: anywhere;
+}
+
+#view-community .myavana-comment-media {
+    margin: 8px 0 0 40px;
+}
+
+#view-community .myavana-comment-media img {
+    max-width: 220px;
+    border-radius: 14px;
+}
+
+#view-community .myavana-comment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 6px 0 0 52px;
+}
+
+#view-community .myavana-comment-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: none !important;
+    color: #6b6b6b;
+    font: 600 12px/1 Archivo, sans-serif;
+    cursor: pointer;
+}
+
+#view-community .myavana-comment-actions button:hover,
+#view-community .myavana-comment-like-btn.liked {
+    color: #9b5a49;
+}
+
+#view-community .myavana-comment-reply {
+    margin-left: 40px;
+}
+
+/* Composer: avatar + one pill field with photo and send inside it. */
+#view-community .myavana-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: transparent !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+#view-community .myavana-composer-avatar {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#view-community .myavana-composer-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#view-community .myavana-composer-field {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    min-height: 44px;
+    padding: 4px 4px 4px 16px;
+    border: 1px solid #eadfd8 !important;
+    border-radius: 24px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#view-community .myavana-composer-field:focus-within {
+    border-color: #e7a690 !important;
+    box-shadow: 0 0 0 4px rgba(231, 166, 144, 0.18) !important;
+}
+
+#view-community .myavana-composer-textarea {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 34px;
+    max-height: 140px;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    resize: none;
+    color: #222323 !important;
+    -webkit-text-fill-color: #222323;
+    font: 400 14px/1.4 Archivo, sans-serif !important;
+}
+
+#view-community .myavana-composer-textarea::placeholder {
+    color: #a8a2a0;
+    -webkit-text-fill-color: #a8a2a0;
+}
+
+#view-community .myavana-composer-attach,
+#view-community .myavana-composer-send {
+    flex: 0 0 36px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 50%;
+    background: transparent !important;
+    color: #6b6b6b;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+#view-community .myavana-composer-attach input { display: none; }
+#view-community .myavana-composer-attach:hover { background: #fdf8f5 !important; color: #9b5a49; }
+
+#view-community .myavana-composer-send { color: #c9bfbb; }
+#view-community .myavana-composer-send:disabled { cursor: default; }
+#view-community .myavana-composer-send.is-active,
+#view-community .myavana-composer-send:not(:disabled) {
+    background: #222323 !important;
+    color: #fff;
+}
+
+#view-community .myavana-composer-cancel {
+    margin-top: 8px;
+}
