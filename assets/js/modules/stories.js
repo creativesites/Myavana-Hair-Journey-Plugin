@@ -176,7 +176,7 @@ MyavanaNext.Stories = (function() {
     function onClick(e) {
         if (e.target.closest('[data-story-add]')) {
             e.preventDefault();
-            pickMedia();
+            AddSheet.open();
             return;
         }
         const card = e.target.closest('[data-story-group]');
@@ -399,7 +399,8 @@ MyavanaNext.Stories = (function() {
             paused = false;
             const frame = () => {
                 if (paused || el.hidden) return;
-                const d = v.duration || 0;
+                const it = groups[gi] && groups[gi].items[ii];
+                const d = (Number.isFinite(v.duration) && v.duration) || (it && it.duration) || 0;
                 const b = bar();
                 if (b && d) b.firstElementChild.style.transform = `scaleX(${Math.min(1, v.currentTime / d)})`;
                 raf = requestAnimationFrame(frame);
@@ -518,6 +519,285 @@ MyavanaNext.Stories = (function() {
 
     // ------------------------------------------------------------ Composer
 
+    // ------------------------------------------------------------ Add: camera or library
+
+    const AddSheet = (function() {
+        let el = null;
+        function build() {
+            el = document.createElement('div');
+            el.className = 'myavana-story-sheet';
+            el.hidden = true;
+            el.setAttribute('role', 'dialog');
+            el.setAttribute('aria-modal', 'true');
+            el.setAttribute('aria-label', 'Add to your story');
+            el.innerHTML = `
+                <div class="myavana-story-sheet-backdrop" data-ss="close"></div>
+                <div class="myavana-story-sheet-card">
+                    <p class="myavana-story-sheet-title">Add to your story</p>
+                    <button type="button" class="myavana-story-sheet-opt" data-ss="camera">
+                        <span class="myavana-story-sheet-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+                        <span><strong>Camera</strong><small>Take a photo or record a clip now</small></span>
+                    </button>
+                    <button type="button" class="myavana-story-sheet-opt" data-ss="library">
+                        <span class="myavana-story-sheet-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
+                        <span><strong>Photo or video</strong><small>Choose from your library</small></span>
+                    </button>
+                    <button type="button" class="myavana-story-sheet-cancel" data-ss="close">Cancel</button>
+                </div>`;
+            document.body.appendChild(el);
+            el.addEventListener('click', (e) => {
+                const a = e.target.closest('[data-ss]');
+                if (!a) return;
+                const act = a.getAttribute('data-ss');
+                close();
+                if (act === 'camera') Camera.open();
+                if (act === 'library') pickMedia();
+            });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el && !el.hidden) close(); });
+        }
+        function open() {
+            if (!el) build();
+            el.hidden = false;
+            requestAnimationFrame(() => el.classList.add('is-open'));
+            el.querySelector('[data-ss="camera"]').focus({ preventScroll: true });
+        }
+        function close() {
+            if (!el) return;
+            el.classList.remove('is-open');
+            el.hidden = true;
+        }
+        return { open };
+    })();
+
+    /**
+     * A live camera for stories: photo or video (up to 60s), front/back.
+     * Falls back to the phone's own camera where live capture isn't
+     * available (older browsers, insecure pages, or permission refused).
+     */
+    const Camera = (function() {
+        const MAX_SECONDS = 60;
+        let el = null;
+        let stream = null;
+        let facing = 'user';
+        let mode = 'photo';
+        let recorder = null;
+        let chunks = [];
+        let recStart = 0;
+        let recRaf = 0;
+        let nativeInput = null;
+
+        const supported = () => !!(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+        function nativeFallback() {
+            if (!nativeInput) {
+                nativeInput = document.createElement('input');
+                nativeInput.type = 'file';
+                nativeInput.accept = 'image/*,video/*';
+                nativeInput.setAttribute('capture', 'environment');
+                nativeInput.hidden = true;
+                document.body.appendChild(nativeInput);
+                nativeInput.addEventListener('change', () => {
+                    const f = nativeInput.files && nativeInput.files[0];
+                    nativeInput.value = '';
+                    if (f) Composer.open(f);
+                });
+            }
+            nativeInput.click();
+        }
+
+        function build() {
+            el = document.createElement('div');
+            el.className = 'myavana-story-camera';
+            el.hidden = true;
+            el.setAttribute('role', 'dialog');
+            el.setAttribute('aria-modal', 'true');
+            el.setAttribute('aria-label', 'Camera');
+            el.innerHTML = `
+                <video class="myavana-story-camera-feed" playsinline muted autoplay></video>
+                <div class="myavana-story-camera-flash" aria-hidden="true"></div>
+                <header class="myavana-story-camera-top">
+                    <button type="button" class="myavana-story-camera-icon" data-cam="close" aria-label="Close camera">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                    <span class="myavana-story-camera-timer" aria-live="polite"></span>
+                    <button type="button" class="myavana-story-camera-icon" data-cam="flip" aria-label="Switch camera">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+                    </button>
+                </header>
+                <p class="myavana-story-camera-msg" hidden></p>
+                <footer class="myavana-story-camera-bottom">
+                    <div class="myavana-story-camera-modes" role="tablist" aria-label="Camera mode">
+                        <button type="button" role="tab" data-cam-mode="photo" aria-selected="true" class="is-active">Photo</button>
+                        <button type="button" role="tab" data-cam-mode="video" aria-selected="false">Video</button>
+                    </div>
+                    <div class="myavana-story-camera-row">
+                        <button type="button" class="myavana-story-camera-lib" data-cam="library" aria-label="Choose from library">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                        </button>
+                        <button type="button" class="myavana-story-camera-shutter" data-cam="shutter" aria-label="Take photo">
+                            <svg class="myavana-story-camera-ring" viewBox="0 0 88 88" aria-hidden="true"><circle cx="44" cy="44" r="40"/></svg>
+                            <span></span>
+                        </button>
+                        <span class="myavana-story-camera-spacer"></span>
+                    </div>
+                </footer>`;
+            document.body.appendChild(el);
+            el.addEventListener('click', (e) => {
+                const m = e.target.closest('[data-cam-mode]');
+                if (m) { setMode(m.getAttribute('data-cam-mode')); return; }
+                const a = e.target.closest('[data-cam]');
+                if (!a) return;
+                const act = a.getAttribute('data-cam');
+                if (act === 'close') close();
+                if (act === 'flip') { facing = facing === 'user' ? 'environment' : 'user'; start(); }
+                if (act === 'library') { close(); pickMedia(); }
+                if (act === 'shutter') shutter();
+            });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el && !el.hidden) close(); });
+        }
+
+        async function open() {
+            if (!supported()) { nativeFallback(); return; }
+            if (!el) build();
+            el.hidden = false;
+            requestAnimationFrame(() => el.classList.add('is-open'));
+            document.documentElement.classList.add('myavana-story-open');
+            setMode('photo');
+            const ok = await start();
+            if (!ok) {
+                close();
+                toast('We couldn\'t open your camera. Check the browser\'s camera permission, or choose from your library.', 'error');
+                nativeFallback();
+            }
+        }
+
+        async function start() {
+            stopStream();
+            const video = { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 } };
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video, audio: true });
+            } catch (err) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
+                } catch (err2) {
+                    return false;
+                }
+            }
+            const feed = el.querySelector('.myavana-story-camera-feed');
+            feed.srcObject = stream;
+            feed.classList.toggle('is-mirrored', facing === 'user');
+            feed.play().catch(() => {});
+            // Hide "flip" when there's only one camera.
+            try {
+                const cams = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+                el.querySelector('[data-cam="flip"]').hidden = cams.length < 2;
+            } catch (e) { /* leave it */ }
+            return true;
+        }
+
+        function stopStream() {
+            if (stream) stream.getTracks().forEach((t) => t.stop());
+            stream = null;
+        }
+
+        function close() {
+            if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); }
+            recorder = null;
+            cancelAnimationFrame(recRaf);
+            stopStream();
+            if (!el) return;
+            el.classList.remove('is-open', 'is-recording');
+            el.hidden = true;
+            el.querySelector('.myavana-story-camera-timer').textContent = '';
+            document.documentElement.classList.remove('myavana-story-open');
+        }
+
+        function setMode(m) {
+            if (recorder && recorder.state === 'recording') return;
+            mode = m;
+            el.classList.toggle('is-video', m === 'video');
+            el.querySelectorAll('[data-cam-mode]').forEach((b) => {
+                const on = b.getAttribute('data-cam-mode') === m;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-selected', String(on));
+            });
+            el.querySelector('[data-cam="shutter"]').setAttribute('aria-label', m === 'video' ? 'Start recording' : 'Take photo');
+        }
+
+        function shutter() {
+            if (!stream) return;
+            if (mode === 'photo') return takePhoto();
+            if (recorder && recorder.state === 'recording') recorder.stop(); else record();
+        }
+
+        function takePhoto() {
+            const feed = el.querySelector('.myavana-story-camera-feed');
+            const w = feed.videoWidth;
+            const h = feed.videoHeight;
+            if (!w || !h) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(feed, 0, 0, w, h);
+            el.classList.remove('is-flash');
+            void el.offsetWidth;
+            el.classList.add('is-flash');
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                close();
+                Composer.open(new File([blob], `story-${Date.now()}.jpg`, { type: 'image/jpeg' }));
+            }, 'image/jpeg', 0.9);
+        }
+
+        function pickMime() {
+            const options = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+            return options.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+        }
+
+        function record() {
+            if (!window.MediaRecorder) {
+                toast('Recording isn\'t available in this browser. Choose a clip from your library instead.', 'error');
+                return;
+            }
+            const mime = pickMime();
+            chunks = [];
+            try {
+                recorder = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 2500000 } : undefined);
+            } catch (err) {
+                toast('Recording isn\'t available in this browser. Choose a clip from your library instead.', 'error');
+                return;
+            }
+            recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+            recorder.onstop = () => {
+                cancelAnimationFrame(recRaf);
+                const type = (recorder && recorder.mimeType ? recorder.mimeType : mime || 'video/webm').split(';')[0];
+                const blob = new Blob(chunks, { type });
+                close();
+                if (blob.size < 1000) return;
+                const ext = type.includes('mp4') ? 'mp4' : 'webm';
+                const file = new File([blob], `story-${Date.now()}.${ext}`, { type });
+                file.recordedSeconds = Math.round((performance.now() - recStart) / 1000);
+                Composer.open(file);
+            };
+            recorder.start(250);
+            recStart = performance.now();
+            el.classList.add('is-recording');
+            el.querySelector('[data-cam="shutter"]').setAttribute('aria-label', 'Stop recording');
+            const ring = el.querySelector('.myavana-story-camera-ring circle');
+            const timer = el.querySelector('.myavana-story-camera-timer');
+            const tick = () => {
+                const secs = (performance.now() - recStart) / 1000;
+                ring.style.strokeDashoffset = String(251.3 * (1 - Math.min(1, secs / MAX_SECONDS)));
+                timer.textContent = `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`;
+                if (secs >= MAX_SECONDS) { recorder.stop(); return; }
+                recRaf = requestAnimationFrame(tick);
+            };
+            recRaf = requestAnimationFrame(tick);
+        }
+
+        return { open };
+    })();
+
     let picker = null;
 
     function pickMedia() {
@@ -577,7 +857,7 @@ MyavanaNext.Stories = (function() {
                 if (!a || busy) return;
                 const act = a.getAttribute('data-sc');
                 if (act === 'close') close();
-                if (act === 'swap') { close(); pickMedia(); }
+                if (act === 'swap') { close(); AddSheet.open(); }
                 if (act === 'share') share(a);
             });
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el && !el.hidden && !busy) close(); });
@@ -613,7 +893,7 @@ MyavanaNext.Stories = (function() {
 
             if (isVideo) {
                 const still = await Media.posterFromFile(f);
-                duration = still.duration || 0;
+                duration = (Number.isFinite(still.duration) && still.duration) || f.recordedSeconds || 0;
                 posterBlob = still.blob;
                 if (duration > MAX_VIDEO_SECONDS) {
                     toast(`Stories can be up to ${MAX_VIDEO_SECONDS} seconds. Longer clips fit better as a journey entry.`, 'error');
