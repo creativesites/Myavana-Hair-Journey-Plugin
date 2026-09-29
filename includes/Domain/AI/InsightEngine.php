@@ -94,17 +94,19 @@ class InsightEngine {
             ];
         }
 
+        // Hair care is weekly: speak in weeks in a row, not daily streaks.
+        $weeks = (int) ($context['weeks_in_a_row'] ?? 0);
         return [
-            'title' => $streak > 1 ? __('Consistency is paying off', 'myavana-hair-journey-next') : __('Your story is taking shape', 'myavana-hair-journey-next'),
-            'summary' => $streak > 1
-                ? sprintf(__('Day %d of your journey, with a %d-day streak going.', 'myavana-hair-journey-next'), $dayCount, $streak)
-                : sprintf(__('Day %d of your journey — every entry you add makes your story clearer.', 'myavana-hair-journey-next'), $dayCount),
-            'recommendation' => __('Keep logging entries — the more your journey has, the more specific your guidance gets.', 'myavana-hair-journey-next'),
+            'title' => $weeks > 1 ? __('Consistency is paying off', 'myavana-hair-journey-next') : __('Your story is taking shape', 'myavana-hair-journey-next'),
+            'summary' => $weeks > 1
+                ? sprintf(__('You have logged %d weeks in a row. That rhythm is what makes changes visible.', 'myavana-hair-journey-next'), $weeks)
+                : sprintf(__('Day %d of your journey. Every entry you add makes your story clearer.', 'myavana-hair-journey-next'), $dayCount),
+            'recommendation' => __('One entry a week is enough. The more your journey has, the more specific your guidance gets.', 'myavana-hair-journey-next'),
             'confidence' => 'low',
-            'supporting_signals' => [
-                sprintf(__('%d-day current streak', 'myavana-hair-journey-next'), $streak),
+            'supporting_signals' => array_values(array_filter([
+                $weeks > 1 ? sprintf(__('%d weeks in a row with an entry', 'myavana-hair-journey-next'), $weeks) : '',
                 sprintf(__('Day %d on your hair journey', 'myavana-hair-journey-next'), $dayCount),
-            ],
+            ])),
         ];
     }
 }

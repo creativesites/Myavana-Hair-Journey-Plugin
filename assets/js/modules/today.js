@@ -77,6 +77,8 @@ MyavanaNext.Today = (function() {
         renderProducts(data.routineProducts || []);
         renderRecentEntries(data.recentEntries && data.recentEntries.length ? data.recentEntries : (data.latestEntry ? [data.latestEntry] : []));
         renderWeek(data.week || []);
+        renderRhythm(data.rhythm || null);
+        renderFirstWeek(data.firstWeek || null);
         renderGoals(data.goals || []);
         renderUpcoming(data.upcomingGoals || []);
         renderMemory(data.memory || null);
@@ -245,6 +247,48 @@ MyavanaNext.Today = (function() {
         `).join('');
     }
 
+    // Hair care is weekly, so the rhythm counts weeks, not days.
+    function renderRhythm(rhythm) {
+        const el = container.querySelector('#today-rhythm');
+        if (!el) return;
+        if (!rhythm) { el.hidden = true; return; }
+        const weeks = rhythm.weeksInARow || 0;
+        let text;
+        if (weeks >= 2) {
+            text = `<strong>${weeks} weeks in a row.</strong> ${rhythm.loggedThisWeek ? 'This week is logged.' : 'Log this week to keep it going.'}`;
+        } else if (rhythm.loggedThisWeek) {
+            text = '<strong>This week is logged.</strong> Log again next week to start a rhythm.';
+        } else {
+            text = 'One entry a week is all it takes to see your hair change over time.';
+        }
+        el.innerHTML = text;
+        el.hidden = false;
+    }
+
+    function renderFirstWeek(firstWeek) {
+        const card = container.querySelector('#today-first-week');
+        if (!card) return;
+        if (!firstWeek || !firstWeek.steps) { card.hidden = true; return; }
+        container.querySelector('#today-first-week-count').textContent = `${firstWeek.done} of ${firstWeek.total}`;
+        const list = container.querySelector('#today-first-week-steps');
+        list.innerHTML = firstWeek.steps.map((s) => `
+            <li class="myavana-today-firstweek-step${s.done ? ' is-done' : ''}">
+                <span class="mark" aria-hidden="true">${s.done ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}</span>
+                <span class="text"><strong>${escapeHtml(s.label)}</strong><span>${escapeHtml(s.hint)}</span></span>
+                ${s.done ? '<span class="state">Done</span>' : s.availableFrom ? `<span class="state">From ${escapeHtml(s.availableFrom)}</span>` : `<button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-first-step="${escapeHtml(s.action)}">${s.action === 'goal' ? 'Set a goal' : 'Log'}</button>`}
+            </li>`).join('');
+        list.querySelectorAll('[data-first-step]').forEach((btn) => btn.addEventListener('click', () => {
+            if (btn.dataset.firstStep === 'goal') {
+                MyavanaNext.App.navigate('routine');
+                if (MyavanaNext.Routine) MyavanaNext.Routine.selectTab('goals');
+                window.setTimeout(() => document.querySelector('[data-gv2-open-picker]')?.click(), 400);
+            } else if (MyavanaNext.SmartEntry) {
+                MyavanaNext.SmartEntry.open();
+            }
+        }));
+        card.hidden = false;
+    }
+
     function renderGoals(goals) {
         const el = container.querySelector('#today-goals-list');
         if (!el) return;
@@ -312,6 +356,10 @@ MyavanaNext.Today = (function() {
             if (MyavanaNext.SmartEntry) MyavanaNext.SmartEntry.open({ mood: btn.dataset.feel });
         }));
         container.querySelector('#today-open-timeline')?.addEventListener('click', () => MyavanaNext.App.navigate('journey'));
+        container.querySelector('#today-first-week-dismiss')?.addEventListener('click', async () => {
+            container.querySelector('#today-first-week').hidden = true;
+            try { await MyavanaNext.API.post('profile/first-week/dismiss', {}); } catch (e) { /* hidden for this visit either way */ }
+        });
     }
 
     function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }

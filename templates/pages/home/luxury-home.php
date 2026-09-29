@@ -169,6 +169,7 @@ function myavana_luxury_home_view() {
             'entries' => $entries_count ?: 0,
             'days_active' => $days_active ?: 0,
             'streak' => $entry_streak,
+            'weeks_in_a_row' => (int) ((new \Myavana\Next\Domain\Rewards\GamificationRepository())->getStats($current_user->ID)['weeksInARow'] ?? 0),
             'is_new_user' => $is_new_user,
             'show_onboarding' => $show_onboarding,
             'onboarding_completed' => ($onboarding_completed === 'completed') ? true : false,
@@ -388,9 +389,9 @@ function myavana_luxury_home_view() {
                                 <span class="myavana-luxury-stat-label">Entries</span>
                             </div>
                             <div class="myavana-luxury-stat">
-                                <?php if ((int) $user_stats['streak'] > 1) : ?>
-                                <span class="myavana-luxury-stat-number"><?php echo (int) $user_stats['streak']; ?></span>
-                                <span class="myavana-luxury-stat-label">Day Streak</span>
+                                <?php if ((int) $user_stats['weeks_in_a_row'] > 1) : ?>
+                                <span class="myavana-luxury-stat-number"><?php echo (int) $user_stats['weeks_in_a_row']; ?></span>
+                                <span class="myavana-luxury-stat-label">Weeks in a Row</span>
                                 <?php else : ?>
                                 <span class="myavana-luxury-stat-number"><?php echo (int) $user_stats['entries_this_month']; ?></span>
                                 <span class="myavana-luxury-stat-label">This Month</span>

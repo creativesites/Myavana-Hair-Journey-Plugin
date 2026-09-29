@@ -47,6 +47,12 @@ class ProfileRoutes extends RestController {
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/profile/first-week/dismiss', [
+            'methods' => 'POST',
+            'callback' => [$this, 'dismissFirstWeek'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/profile/onboarding', [
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'completeOnboarding'],
@@ -353,5 +359,11 @@ class ProfileRoutes extends RestController {
         ];
 
         return $this->respondSuccess($export);
+    }
+
+    /** She can hide the first-week steps; they don't come back. */
+    public function dismissFirstWeek(\WP_REST_Request $request): \WP_REST_Response {
+        update_user_meta($this->getUserId(), \Myavana\Next\Application\HabitService::FIRST_WEEK_DISMISSED_META, current_time('mysql'));
+        return $this->respondSuccess(['dismissed' => true]);
     }
 }

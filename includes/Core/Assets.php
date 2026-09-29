@@ -287,6 +287,7 @@ class Assets {
             'flags' => FeatureFlags::getAll(),
             'showOnboardingWizard' => $showOnboardingWizard,
             'routinesEnabled' => LaunchScope::ROUTINES_ENABLED,
+            'rewardsEnabled' => LaunchScope::REWARDS_ENABLED,
             'showSignupWelcome' => !$showOnboardingWizard && LaunchScope::shouldShowSignupWelcome($currentUserId),
             'hairAiUrl' => LaunchScope::hairAiUrl(),
             'pluginUrl' => MYAVANA_NEXT_URL,

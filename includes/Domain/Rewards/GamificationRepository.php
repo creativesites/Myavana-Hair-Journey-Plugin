@@ -62,6 +62,7 @@ class GamificationRepository {
         // day is missed), so Mya told a member who hadn't logged in weeks she
         // was "on a 1-day streak". Derive it from her actual entries instead.
         $stats['currentStreak'] = $this->entryStreak($userId);
+        $stats['weeksInARow'] = $this->weeksInARow($userId);
         $stats['longestStreak'] = max($stats['longestStreak'], $stats['currentStreak']);
 
         // Compute level from points
@@ -89,6 +90,20 @@ class GamificationRepository {
         }
 
         return $stats;
+    }
+
+    /** Weeks in a row with an entry (the rhythm members see). */
+    private function weeksInARow(int $userId): int {
+        global $wpdb;
+        $dates = $wpdb->get_col($wpdb->prepare(
+            "SELECT post_date FROM {$wpdb->posts}
+             WHERE post_author = %d AND post_type = 'hair_journey_entry' AND post_status = 'publish'
+               AND post_date >= %s",
+            $userId,
+            gmdate('Y-m-d', strtotime(current_time('Y-m-d') . ' -400 days'))
+        ));
+        $entries = array_map(static fn($d) => ['date' => $d], $dates);
+        return (new \Myavana\Next\Application\HabitService())->weeklyRhythm($entries)['weeksInARow'];
     }
 
     /**

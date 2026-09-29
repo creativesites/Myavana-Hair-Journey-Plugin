@@ -71,6 +71,10 @@ class TodayService {
             $streakDays,
             $dayCount
         );
+        $rhythm = (new HabitService())->weeklyRhythm($entries);
+        if (is_array($insightContext)) {
+            $insightContext['weeks_in_a_row'] = $rhythm['weeksInARow'];
+        }
 
         return [
             'greeting' => $this->getGreeting($this->preferredName($userId, $profile->displayName)),
@@ -90,6 +94,8 @@ class TodayService {
             'focus' => $focus = $this->getGoalFocus($userId),
             'focusSource' => $focus ? 'signup' : 'goals',
             'focusGoals' => $focus ? [] : $this->activeGoalTitles($goals),
+            'rhythm' => $rhythm,
+            'firstWeek' => (new HabitService())->firstWeek($userId, $entries, $goals),
         ];
     }
 

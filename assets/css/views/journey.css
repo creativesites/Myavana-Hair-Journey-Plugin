@@ -123,3 +123,8 @@
     .myavana-journey-stats { grid-template-columns: repeat(2, 1fr); }
     .myavana-journey-story-compare-grid { grid-template-columns: 1fr; }
 }
+
+/* Moments: a small rose label above the card, not a badge wall. */
+.myavana-timeline-card.has-moment { box-shadow: 0 0 0 1px #f0cfc2, 0 10px 30px rgba(155, 90, 73, 0.08); }
+.myavana-timeline-moment { width: fit-content; justify-self: start; align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; margin: 0 8px 12px 0; padding: 6px 12px 6px 8px; border-radius: 9999px; background: #fce5d7; color: #9b5a49; font: 700 11px/1 Archivo, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
+.myavana-timeline-moment-mark { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #9b5a49 0 3px, transparent 3.5px), #fff; box-shadow: 0 0 0 1px #e7a690; }

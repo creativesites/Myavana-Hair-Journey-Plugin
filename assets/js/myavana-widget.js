@@ -1615,8 +1615,8 @@
         var band = el('div', 'mya-section');
         var cells = [];
         cells.push({ num: data.totalEntries != null ? data.totalEntries : entries.length, lbl: 'Entries' });
-        if (typeof stats.currentStreak === 'number') {
-            cells.push({ num: stats.currentStreak, lbl: 'Day Streak' });
+        if (typeof stats.weeksInARow === 'number' && stats.weeksInARow > 1) {
+            cells.push({ num: stats.weeksInARow, lbl: 'Weeks in a row' });
         }
         if (data.lengthGain != null) {
             cells.push({ num: (data.lengthGain > 0 ? '+' : '') + data.lengthGain, unit: 'in', lbl: 'Length Gain' });
@@ -2302,10 +2302,10 @@
 
         // --- Momentum: streak, entries, level. Only what the host reported. ---
         var band = [];
-        if (typeof stats.currentStreak === 'number') band.push({ num: stats.currentStreak, lbl: 'Day Streak' });
+        if (typeof stats.weeksInARow === 'number' && stats.weeksInARow > 1) band.push({ num: stats.weeksInARow, lbl: 'Weeks in a row' });
         band.push({ num: data.totalEntries != null ? data.totalEntries : (data.entries || []).length, lbl: 'Entries' });
         if (data.lengthGain != null) band.push({ num: (data.lengthGain > 0 ? '+' : '') + data.lengthGain, unit: 'in', lbl: 'Length Gain' });
-        else if (typeof stats.longestStreak === 'number') band.push({ num: stats.longestStreak, lbl: 'Best Streak' });
+        else if (data.dayCount) band.push({ num: data.dayCount, lbl: 'Days In' });
 
         var bandEl = el('div', '');
         bandEl.innerHTML = '<div class="mya-band">' + band.slice(0, 3).map(function (c, idx) {
@@ -2316,7 +2316,9 @@
         content.appendChild(bandEl);
 
         // --- Level progress, when the platform runs gamification ---
-        if (stats.level && stats.nextLevelPoints) {
+        // Points and levels are off for this launch (LaunchScope::REWARDS_ENABLED).
+        var rewardsOn = !window.myavanaNextData || !!window.myavanaNextData.rewardsEnabled;
+        if (rewardsOn && stats.level && stats.nextLevelPoints) {
             var pts = stats.totalPoints || 0;
             var lvlPct = Math.max(0, Math.min(100, Math.round((pts / stats.nextLevelPoints) * 100)));
             var lvl = el('div', 'mya-goal mya-rise');
@@ -2531,7 +2533,7 @@
         today: [
             { text: "What's on my plate today?", prompt: "What should I focus on for my hair today?" },
             { text: 'Log a 10-second scalp check-in', prompt: 'I want to log a quick scalp check-in for today' },
-            { text: 'How is my streak looking?', prompt: 'How is my hair care consistency streak looking this week?' }
+            { text: 'How consistent have I been?', prompt: 'How consistent have I been with logging my hair journey these past few weeks?' }
         ],
         journey: [
             { text: 'What has changed since I started?', prompt: 'Looking at my journey entries, what has actually changed since I started?' },
@@ -2582,11 +2584,12 @@
         var timeOfDay = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
         // The streak line only appears when the platform actually reported one.
-        var streak = state.journeyData && state.journeyData.stats
-            ? state.journeyData.stats.currentStreak : null;
-        var sub = (typeof streak === 'number' && streak > 0)
-            ? "You're on a <strong style=\"color:" + COLORS.onyx + ';">' + streak + '-day consistency streak.</strong> Let\'s keep it going.'
-            : 'Ask me anything about your hair — I read from your Hair Journey as we talk.';
+        // Hair care is weekly, so Mya speaks in weeks, and only when it's real.
+        var weeks = state.journeyData && state.journeyData.stats
+            ? state.journeyData.stats.weeksInARow : null;
+        var sub = (typeof weeks === 'number' && weeks > 1)
+            ? "You've logged <strong style=\"color:" + COLORS.onyx + ';">' + weeks + ' weeks in a row.</strong> Let\'s keep it going.'
+            : 'Ask me anything about your hair. I read from your Hair Journey as we talk.';
 
         // Banner: host can override (the WP plugin serves a local copy); falls
         // back to the public MYAVANA asset, and hides itself entirely if

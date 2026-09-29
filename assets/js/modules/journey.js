@@ -192,6 +192,13 @@ MyavanaNext.Journey = (function() {
         bindCardActions(rail);
     }
 
+    // Quiet markers for things that really happened (first photo, one month
+    // in, goal reached). "Where it started" has its own node at the end.
+    function momentsFor(entry) {
+        const all = (data && data.moments && data.moments[entry.id]) || [];
+        return all.filter((m) => m.key !== 'first_entry');
+    }
+
     function renderEntryCard(entry) {
         const tags = [];
         if (entry.mood && MOOD_LABELS[entry.mood]) tags.push(MOOD_LABELS[entry.mood]);
@@ -204,7 +211,8 @@ MyavanaNext.Journey = (function() {
         <div class="myavana-timeline-entry">
             <div class="myavana-timeline-node"></div>
             ${entry.showGap ? `<div class="myavana-timeline-gap">${escapeHtml(entry.gap)}</div>` : ''}
-            <div class="myavana-timeline-card" data-entry-id="${entry.id}">
+            <div class="myavana-timeline-card${momentsFor(entry).length ? ' has-moment' : ''}" data-entry-id="${entry.id}">
+                ${momentsFor(entry).map((m) => `<div class="myavana-timeline-moment" data-moment="${escapeHtml(m.key)}"><span class="myavana-timeline-moment-mark" aria-hidden="true"></span>${escapeHtml(m.label)}</div>`).join('')}
                 <div class="myavana-timeline-card-head">
                     <div class="myavana-timeline-card-kicker">
                         <strong>${escapeHtml(typeLabel(entry.entryType))}</strong>

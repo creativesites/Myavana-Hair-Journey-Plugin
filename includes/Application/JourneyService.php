@@ -89,6 +89,7 @@ class JourneyService {
             'routines' => \Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED ? array_slice($this->routineRepo->getRoutines($userId), 0, 4) : [],
             'routinesEnabled' => \Myavana\Next\Core\LaunchScope::ROUTINES_ENABLED,
             'dayCount' => $this->dayCount($entries),
+            'moments' => (new HabitService())->moments($entries, $this->goalRepo->getGoals($userId))['byEntry'],
             'stats' => [
                 'currentLength' => !empty($lengthHistory) ? end($lengthHistory)['length'] : null,
                 'healthScore' => $careIndex,

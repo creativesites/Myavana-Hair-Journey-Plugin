@@ -43,6 +43,18 @@ $initial = function_exists('mb_substr') ? mb_strtoupper(mb_substr($displayName, 
     <div class="myavana-today-layout">
         <div class="myavana-today-main">
 
+            <section class="myavana-today-firstweek" id="today-first-week" aria-labelledby="today-first-week-title" hidden>
+                <div class="myavana-today-firstweek-head">
+                    <div>
+                        <p class="myavana-today-eyebrow"><?php esc_html_e('Your first weeks', 'myavana-hair-journey-next'); ?></p>
+                        <h2 id="today-first-week-title"><?php esc_html_e('Three small steps to start your story', 'myavana-hair-journey-next'); ?></h2>
+                    </div>
+                    <span class="myavana-today-firstweek-count" id="today-first-week-count"></span>
+                </div>
+                <ol class="myavana-today-firstweek-steps" id="today-first-week-steps"></ol>
+                <button type="button" class="myavana-today-firstweek-dismiss" id="today-first-week-dismiss"><?php esc_html_e('Hide this', 'myavana-hair-journey-next'); ?></button>
+            </section>
+
             <section class="myavana-today-feel" aria-labelledby="today-feel-title">
                 <h2 id="today-feel-title"><?php esc_html_e('How does your hair feel today?', 'myavana-hair-journey-next'); ?></h2>
                 <div class="myavana-today-feel-options">
@@ -122,6 +134,7 @@ $initial = function_exists('mb_substr') ? mb_strtoupper(mb_substr($displayName, 
             <section class="myavana-today-side-card">
                 <p class="myavana-today-eyebrow"><?php esc_html_e('Your week', 'myavana-hair-journey-next'); ?></p>
                 <div class="myavana-today-week-strip" id="today-week-strip"></div>
+                <p class="myavana-today-rhythm" id="today-rhythm" hidden></p>
                 <div id="today-goals-list" class="myavana-today-goals-list"></div>
             </section>
 
