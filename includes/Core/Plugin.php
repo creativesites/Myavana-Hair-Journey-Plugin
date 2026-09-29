@@ -51,6 +51,7 @@ class Plugin {
     public function init(): void {
         // Load legacy community shortcode & AJAX handlers exactly as is
         $this->loadCommunityFeatures();
+        $this->loadAdminPortal();
 
         // Post type registration
         add_action('init', [$this, 'registerPostTypes']);
@@ -91,6 +92,25 @@ class Plugin {
     /**
      * Load ported community social features and shortcodes
      */
+    /**
+     * The team's front-end admin portal (/admin-portal/, shortcode
+     * [myavana_admin_portal]). Skipped if the original plugin is active and
+     * already defines it.
+     */
+    private function loadAdminPortal(): void {
+        if (class_exists('Myavana_Admin_Portal')) {
+            return;
+        }
+        $dir = MYAVANA_NEXT_PATH . 'includes/Admin/admin-portal/';
+        require_once $dir . 'class-myavana-admin-portal-permissions.php';
+        require_once $dir . 'class-myavana-admin-portal-audit-log.php';
+        if (!class_exists('Myavana_Analytics_Model')) {
+            require_once $dir . 'class-myavana-analytics-model.php';
+        }
+        require_once $dir . 'class-myavana-admin-portal.php';
+        new \Myavana_Admin_Portal();
+    }
+
     private function loadCommunityFeatures(): void {
         require_once MYAVANA_NEXT_PATH . 'includes/Domain/Community/CommunityIntegration.php';
         require_once MYAVANA_NEXT_PATH . 'includes/Domain/Community/CommunityDatabase.php';

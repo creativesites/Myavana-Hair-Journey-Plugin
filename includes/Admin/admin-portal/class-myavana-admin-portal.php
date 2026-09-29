@@ -18,6 +18,7 @@ class Myavana_Admin_Portal
         add_action('template_redirect', [$this, 'guard_portal_access'], 0);
         add_action('init', [$this, 'enforce_user_suspension']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        add_filter('template_include', [$this, 'use_portal_canvas'], 99);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('admin_menu', [$this, 'register_launch_link'], 90);
         add_filter('heartbeat_received', [$this, 'heartbeat_check_reports'], 10, 2);
@@ -41,6 +42,16 @@ class Myavana_Admin_Portal
         }
 
         self::activate();
+    }
+
+    public function use_portal_canvas($template)
+    {
+        if (is_admin() || !$this->is_portal_request()) {
+            return $template;
+        }
+        $plugin_dir = defined('MYAVANA_NEXT_PATH') ? MYAVANA_NEXT_PATH : plugin_dir_path(dirname(__DIR__, 2));
+        $canvas = $plugin_dir . 'templates/admin-portal-canvas.php';
+        return file_exists($canvas) ? $canvas : $template;
     }
 
     public function register_shortcode()
@@ -76,7 +87,9 @@ class Myavana_Admin_Portal
             $sections[] = ['id' => 'operations', 'label' => 'Operations'];
             $sections[] = ['id' => 'journey', 'label' => 'Journey'];
             $sections[] = ['id' => 'community', 'label' => 'Community'];
-            $sections[] = ['id' => 'gamification', 'label' => 'Gamification'];
+            if (self::gamification_available()) {
+                $sections[] = ['id' => 'gamification', 'label' => 'Gamification'];
+            }
         }
         if (Myavana_Admin_Portal_Permissions::current_user_can_manage_users()) {
             $sections[] = ['id' => 'users', 'label' => 'Users'];
@@ -962,8 +975,24 @@ class Myavana_Admin_Portal
         ], 'Report updated.');
     }
 
+    /**
+     * The points/challenges admin needs the original plugin's gamification
+     * module, which this plugin deliberately doesn't carry (see the
+     * engagement plan). Without it the tab is hidden and these routes say so.
+     */
+    public static function gamification_available()
+    {
+        return class_exists('Myavana_Gamification')
+            && function_exists('myavana_get_gamification_admin_data')
+            && function_exists('myavana_sanitize_gamification_reward_settings')
+            && function_exists('myavana_sanitize_gamification_challenges');
+    }
+
     public function get_gamification_summary(WP_REST_Request $request)
     {
+        if (!self::gamification_available()) {
+            return $this->error_response('Gamification is not enabled on this site.', 501);
+        }
         $date_to = $this->sanitize_date($request->get_param('date_to'), wp_date('Y-m-d'));
         $date_from = $this->sanitize_date($request->get_param('date_from'), wp_date('Y-m-d', strtotime('-29 days')));
         $role = sanitize_key($request->get_param('role') ?: 'all');
@@ -986,6 +1015,9 @@ class Myavana_Admin_Portal
 
     public function update_gamification_config(WP_REST_Request $request)
     {
+        if (!self::gamification_available()) {
+            return $this->error_response('Gamification is not enabled on this site.', 501);
+        }
         $payload = $request->get_json_params();
         if (!is_array($payload)) {
             $payload = [];
@@ -1223,14 +1255,21 @@ class Myavana_Admin_Portal
 
     public function register_launch_link()
     {
-        add_submenu_page(
-            'myavana-intelligence-dashboard',
-            'Admin Portal',
-            'Admin Portal',
+        // The original parent menu belonged to the old plugin; give the team
+        // a top-level entry that opens the portal.
+        $hook = add_menu_page(
+            'MYAVANA Admin Portal',
+            'MYAVANA Portal',
             Myavana_Admin_Portal_Permissions::ACCESS_CAP,
             'myavana-admin-portal-launch',
-            [$this, 'render_launch_redirect']
+            [$this, 'render_launch_redirect'],
+            'dashicons-heart',
+            3
         );
+        // Redirect before the admin screen starts printing.
+        if ($hook) {
+            add_action('load-' . $hook, [$this, 'render_launch_redirect']);
+        }
     }
 
     public function render_launch_redirect()
