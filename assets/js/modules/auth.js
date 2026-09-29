@@ -95,6 +95,16 @@ MyavanaNext.Auth = (function() {
             panel.classList.toggle('active', isActive);
         });
 
+        const heading = document.querySelector('[data-auth-heading]');
+        if (heading) {
+            heading.textContent = {
+                signin: 'Welcome back',
+                signup: 'Start your hair journey',
+                forgot: 'Reset your password',
+                reset: 'Choose a new password',
+            }[mode] || 'Welcome back';
+        }
+
         clearMessage();
     }
 

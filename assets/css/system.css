@@ -359,12 +359,7 @@ body .myavana-profile-drawer select {
     margin-bottom: 0;
 }
 
-@media (max-width: 767px) {
-    /* The header already carries the logo on phones. */
-    #myavana-next-root .myavana-auth-logo {
-        display: none;
-    }
-}
+
 
 /* Small buttons stay small, whichever variant. */
 #myavana-next-root .myavana-btn-sm,

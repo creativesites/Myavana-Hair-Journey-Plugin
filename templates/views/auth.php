@@ -19,10 +19,22 @@ $hasResetLink = !empty($resetLogin) && !empty($resetKey);
 ?>
 <section class="myavana-next-view myavana-auth-view" id="view-auth" aria-label="<?php esc_attr_e('Sign in or create an account', 'myavana-hair-journey-next'); ?>" style="display:none;" data-initial-mode="<?php echo $hasResetLink ? 'reset' : 'signin'; ?>">
     <div class="myavana-auth-wrap">
-        <div class="myavana-card myavana-auth-card">
-            <div class="myavana-auth-intro">
+        <div class="myavana-auth-split">
+        <aside class="myavana-auth-visual" style="--auth-bg:url('<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/auth-bg.jpg'); ?>')">
+            <div class="myavana-auth-visual-inner">
                 <img src="<?php echo esc_url(MYAVANA_NEXT_URL . 'assets/images/myavana-primary-logo.png'); ?>" alt="MYAVANA" class="myavana-auth-logo" />
-                <h1><?php esc_html_e('Your hair story starts here', 'myavana-hair-journey-next'); ?></h1>
+                <h1><?php esc_html_e('Your hair journey starts here', 'myavana-hair-journey-next'); ?></h1>
+                <ul class="myavana-auth-features">
+                    <li><?php esc_html_e('Track your progress with photos and videos', 'myavana-hair-journey-next'); ?></li>
+                    <li><?php esc_html_e('Set hair goals and see what actually works', 'myavana-hair-journey-next'); ?></li>
+                    <li><?php esc_html_e('Ask Mya, your personal hair assistant', 'myavana-hair-journey-next'); ?></li>
+                    <li><?php esc_html_e('Share with a supportive hair community', 'myavana-hair-journey-next'); ?></li>
+                </ul>
+            </div>
+        </aside>
+        <div class="myavana-auth-card">
+            <div class="myavana-auth-intro">
+                <h2 class="myavana-auth-heading" data-auth-heading><?php esc_html_e('Welcome back', 'myavana-hair-journey-next'); ?></h2>
                 <p><?php esc_html_e('Log what you try, see what works, and keep the moments you\'re proud of.', 'myavana-hair-journey-next'); ?></p>
             </div>
             <div class="myavana-auth-toggle" role="tablist" id="myavana-auth-main-toggle" <?php echo $hasResetLink ? 'style="display:none;"' : ''; ?>>
@@ -152,6 +164,7 @@ $hasResetLink = !empty($resetLogin) && !empty($resetKey);
                     <?php esc_html_e('Reset Password', 'myavana-hair-journey-next'); ?>
                 </button>
             </form>
+        </div>
         </div>
     </div>
 </section>
