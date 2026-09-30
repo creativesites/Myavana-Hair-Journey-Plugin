@@ -1491,16 +1491,34 @@
         e.preventDefault();
         const postId = $(this).data('post-id');
         const $postCard = $(this).closest('.myavana-post-card');
-        const title = $postCard.find('.myavana-post-title').text();
-        const content = $postCard.find('.myavana-post-text').text();
+        const title = $postCard.find('.myavana-post-title').first().text().trim();
+        const content = $postCard.find('.myavana-post-text').first().text().trim();
+        const $video = $postCard.find('.myavana-post-video').first();
+        const image = $postCard.find('.myavana-post-image').first().attr('src') || $video.attr('poster') || '';
+        const video = $video.length ? String($video.find('source').attr('src') || $video.attr('src') || '').replace(/#t=[\d.]+$/, '') : '';
 
-        openShareModal(postId, title, content);
+        openShareModal(postId, title, content, image, video);
     });
 
     /**
-     * Open share modal
+     * Share a post: the site-wide share sheet (brand icons, preview links).
      */
-    function openShareModal(postId, title, description) {
+    function openShareModal(postId, title, description, image, video) {
+        if (window.MyavanaNext && MyavanaNext.Share) {
+            MyavanaNext.Share.post({
+                id: postId,
+                title: title || 'A hair journey on MYAVANA',
+                text: description || '',
+                image: image || '',
+                video: video || '',
+                onShare: (platform) => trackShare(postId, platform),
+            });
+            return;
+        }
+        legacyShareModal(postId, title, description);
+    }
+
+    function legacyShareModal(postId, title, description) {
         const shareUrl = window.location.origin + window.location.pathname + '?post=' + postId;
 
         // Try native Web Share API first (mobile browsers)

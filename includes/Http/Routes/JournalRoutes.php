@@ -76,6 +76,18 @@ class JournalRoutes extends RestController {
             'permission_callback' => [Permissions::class, 'restUserCheck'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/share/link', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'shareLink'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/journal/entries/(?P<id>\d+)/community', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'shareEntryToCommunity'],
+            'permission_callback' => [Permissions::class, 'restUserCheck'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/journal/upload', [
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'uploadMedia'],
@@ -223,5 +235,44 @@ class JournalRoutes extends RestController {
             return $this->respondError($result->get_error_message(), $result->get_error_code(), 400);
         }
         return $this->respondSuccess(['postId' => $result], 201);
+    }
+
+    /** A public link for sharing an entry, a recap or a Community post outside MYAVANA. */
+    public function shareLink(\WP_REST_Request $request): \WP_REST_Response {
+        $data = $request->get_json_params() ?: $request->get_params();
+        $type = sanitize_key((string) ($data['type'] ?? ''));
+        $service = new \Myavana\Next\Application\ShareService();
+        if ($type === 'entry') {
+            $url = $service->entryLink($this->getUserId(), (int) ($data['id'] ?? 0), isset($data['caption']) ? (string) $data['caption'] : null);
+        } elseif ($type === 'recap') {
+            $url = $service->recapLink($this->getUserId(), sanitize_text_field((string) ($data['month'] ?? '')));
+        } elseif ($type === 'post') {
+            $url = $service->postLink((int) ($data['id'] ?? 0));
+        } else {
+            $url = new \WP_Error('invalid_type', __('Nothing to share.', 'myavana-hair-journey-next'));
+        }
+        if (is_wp_error($url)) {
+            return $this->respondError($url->get_error_message(), $url->get_error_code(), 400);
+        }
+        return $this->respondSuccess(['url' => $url]);
+    }
+
+    /** Post one of her entries to the Community feed. */
+    public function shareEntryToCommunity(\WP_REST_Request $request): \WP_REST_Response {
+        $entryId = (int) $request['id'];
+        if (!(new JournalRepository())->getById($entryId, $this->getUserId())) {
+            return $this->respondError(__('Entry not found.', 'myavana-hair-journey-next'), 'not_found', 404);
+        }
+        if (!class_exists('Myavana_Community_Integration')) {
+            return $this->respondError(__('Community is not available right now.', 'myavana-hair-journey-next'), 'community_unavailable', 503);
+        }
+        if (!\Myavana_Community_Integration::is_entry_shareable($entryId)) {
+            return $this->respondSuccess(['alreadyShared' => true]);
+        }
+        $result = \Myavana_Community_Integration::share_entry($entryId, 'public');
+        if (is_wp_error($result)) {
+            return $this->respondError($result->get_error_message(), $result->get_error_code(), 400);
+        }
+        return $this->respondSuccess(['postId' => (int) $result], 201);
     }
 }

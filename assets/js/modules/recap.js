@@ -37,6 +37,7 @@ MyavanaNext.Recap = (function() {
         root.addEventListener('click', (e) => {
             if (e.target.closest('[data-recap-close]')) close();
             if (e.target.closest('[data-recap-share]')) share(e.target.closest('[data-recap-share]'));
+            if (e.target.closest('[data-recap-share-out]')) shareOut();
         });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) close(); });
         return root;
@@ -64,7 +65,7 @@ MyavanaNext.Recap = (function() {
             ${strip}
             ${goals}
             <div class="myavana-recap-actions">
-                <button type="button" class="myavana-btn myavana-btn-primary" data-recap-share>Share to Community</button>
+                <button type="button" class="myavana-btn myavana-btn-primary" data-recap-share-out>Share</button>
                 <button type="button" class="myavana-btn myavana-btn-outline" data-recap-close>Close</button>
             </div>`;
     }
@@ -96,6 +97,20 @@ MyavanaNext.Recap = (function() {
             btn.textContent = 'Share to Community';
             MyavanaNext.API.showToast(err.message || 'We could not share your recap. Please try again.', 'error');
         }
+    }
+
+    /** The site-wide share sheet: Community plus Instagram, WhatsApp, Facebook and more. */
+    function shareOut() {
+        if (!current || !MyavanaNext.Share) return;
+        const month = current.month;
+        MyavanaNext.Share.open({
+            heading: 'Share your recap',
+            title: `My ${current.label} in hair`,
+            text: current.summary || '',
+            image: (current.last && current.last.url) || (current.first && current.first.url) || '',
+            getUrl: () => MyavanaNext.API.post('share/link', { type: 'recap', month }).then((d) => d.url),
+            community: () => MyavanaNext.API.post('journal/recap/share', { month }),
+        });
     }
 
     function close() {

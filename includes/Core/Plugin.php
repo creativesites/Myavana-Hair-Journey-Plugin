@@ -54,6 +54,7 @@ class Plugin {
         $this->loadAdminPortal();
         \Myavana\Next\Application\WeeklyNoteService::init();
         \Myavana\Next\Application\HomeTimelineService::init();
+        \Myavana\Next\Application\ShareService::init();
 
         // Stories: expired ones are cleared out daily.
         add_action('myavana_stories_prune', [\Myavana\Next\Domain\Community\StoryRepository::class, 'prune']);

@@ -464,8 +464,8 @@ MyavanaNext.Journey = (function() {
         container.querySelector('#story-view-entry')?.addEventListener('click', () => {
             const photo = storyPhotos()[storyIndex];
             if (!photo) return;
-            const entry = findEntryById(photo.id);
-            if (entry) openShareModal(entry, false);
+            focusEntry(photo.id);
+            window.setTimeout(applyPendingFocus, 80);
         });
         container.querySelector('#story-share')?.addEventListener('click', () => {
             const photo = storyPhotos()[storyIndex];
@@ -623,6 +623,10 @@ MyavanaNext.Journey = (function() {
     // =========================
 
     function openShareModal(entry) {
+        if (MyavanaNext.Share) {
+            MyavanaNext.Share.entry(entry);
+            return;
+        }
         shareContext = entry;
         const modal = container.querySelector('#journey-share-modal');
         if (!modal) return;

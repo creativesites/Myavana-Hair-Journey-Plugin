@@ -232,9 +232,27 @@ MyavanaNext.HomeTimeline = (function() {
                 <div class="myavana-strand-focus-meta">
                     ${bits.map((b) => `<span>${esc(b)}</span>`).join('')}
                     <button type="button" class="myavana-strand-open" data-strand-open="${idx}">${it.video ? 'Play video' : (mode === 'member' ? 'Open' : 'See in Community')} <span aria-hidden="true">→</span></button>
+                    <button type="button" class="myavana-strand-open is-share" data-strand-share="${idx}">Share <span aria-hidden="true">↗</span></button>
                 </div>
             </div>`;
         if (silent) focusEl.querySelector('[data-anim]')?.removeAttribute('data-anim');
+    }
+
+    function share(idx) {
+        const it = items[idx];
+        if (!it || it.ghost || !MyavanaNext.Share) return;
+        stopPlay();
+        if (mode !== 'member') {
+            MyavanaNext.Share.post({ id: it.id, title: it.title, text: it.text, image: it.image, video: it.video });
+            return;
+        }
+        MyavanaNext.Share.entry({
+            id: it.id,
+            title: it.title,
+            notes: it.text,
+            photos: it.image ? [it.image] : [],
+            videos: it.video ? [{ url: it.video, poster: it.image }] : [],
+        });
     }
 
     function open(idx) {
@@ -267,6 +285,8 @@ MyavanaNext.HomeTimeline = (function() {
                 if (act === 'next') goTo(Math.round(target) + 1, true);
                 if (act === 'play') playing ? stopPlay() : startPlay();
             }
+            const shareBtn = e.target.closest('[data-strand-share]');
+            if (shareBtn) { share(parseInt(shareBtn.getAttribute('data-strand-share'), 10)); return; }
             const openBtn = e.target.closest('[data-strand-open]');
             if (openBtn) open(parseInt(openBtn.getAttribute('data-strand-open'), 10));
         });
@@ -595,7 +615,9 @@ MyavanaNext.HomeTimeline = (function() {
 
     const Lightbox = (function() {
         let el = null;
+        let current = null;
         function openBox(it) {
+            current = it;
             if (!el) {
                 el = document.createElement('div');
                 el.className = 'myavana-strand-lightbox';
@@ -605,6 +627,7 @@ MyavanaNext.HomeTimeline = (function() {
                 el.addEventListener('click', (e) => {
                     if (e.target === el || e.target.closest('[data-lb-close]')) closeBox();
                     if (e.target.closest('[data-lb-journey]')) { closeBox(); window.location.hash = '#journey'; }
+                    if (e.target.closest('[data-lb-share]') && current) share(items.indexOf(current));
                 });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el && !el.hidden) closeBox(); });
                 document.body.appendChild(el);
@@ -617,7 +640,10 @@ MyavanaNext.HomeTimeline = (function() {
                         <p class="myavana-strand-focus-kicker"><span>${esc(it.kind || 'Moment')}</span>${esc(fmtDate(it.time, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }))}</p>
                         <h3>${esc(it.title || 'Hair update')}</h3>
                         ${it.text ? `<p>${esc(it.text)}</p>` : ''}
-                        <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-lb-journey>See it on your timeline</button>
+                        <div class="myavana-strand-lightbox-actions">
+                            <button type="button" class="myavana-btn myavana-btn-primary myavana-btn-sm" data-lb-share>Share</button>
+                            <button type="button" class="myavana-btn myavana-btn-outline myavana-btn-sm" data-lb-journey>See it on your timeline</button>
+                        </div>
                     </figcaption>
                     <button type="button" class="myavana-strand-lightbox-x" data-lb-close aria-label="Close">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>

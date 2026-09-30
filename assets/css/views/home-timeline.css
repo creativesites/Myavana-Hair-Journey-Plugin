@@ -183,3 +183,6 @@
     .myavana-strand-lightbox-card { grid-template-columns: 1fr; border-radius: 24px 24px 0 0; max-height: 92dvh; overflow-y: auto; }
     .myavana-strand-lightbox-card img { max-height: 55dvh; }
 }
+
+.myavana-strand-open.is-share { color: #222323; }
+.myavana-strand-lightbox-actions { display: flex; flex-wrap: wrap; gap: 10px; }
