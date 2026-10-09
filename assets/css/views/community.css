@@ -1845,3 +1845,8 @@ html.myavana-story-open, html.myavana-story-open body { overflow: hidden; }
 .myavana-story-camera-ring circle { fill: none; stroke: #e7a690; stroke-width: 5; stroke-dasharray: 251.3; stroke-dashoffset: 251.3; }
 .myavana-story-camera.is-recording .myavana-story-camera-ring { opacity: 1; }
 .myavana-story-camera-shutter:active span { transform: scale(.92); }
+
+/* Visitor CTA card: readable label and line on the cream card. */
+.myavana-guest-cta-card .myavana-preheader { color: #9b5a49; }
+.myavana-guest-cta-card .myavana-body { color: #5f5857; }
+body .myavana-guest-cta-card p.myavana-body { color: #5f5857 !important; opacity: 1; }

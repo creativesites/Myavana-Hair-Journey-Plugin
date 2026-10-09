@@ -69,7 +69,7 @@ function myavana_community_feed_shortcode($atts = []) {
                         <div class="myavana-guest-cta-card">
                             <span class="myavana-preheader">MYAVANA COMMUNITY</span>
                             <h1 class="myavana-guest-cta-title">A place for every stage of your hair journey.</h1>
-                            <p class="myavana-body">Real progress, routines, and wins from people on the same path as you.</p>
+                            <p class="myavana-body">Real progress, wash days and wins from people on the same path as you.</p>
                             <a href="#auth" data-open-auth="signup" class="myavana-btn myavana-btn-primary myavana-guest-cta-btn">Create your free account</a>
                             <a href="#auth" data-open-auth="signin" class="myavana-guest-cta-signin">Already have an account? Sign in</a>
                         </div>

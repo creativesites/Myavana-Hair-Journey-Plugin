@@ -568,3 +568,57 @@
         width: 100%;
     }
 }
+
+/* Home hero: the community headline is twice as long as the old one;
+   size it so it reads in four lines, not seven. */
+#view-home .myavana-luxury-hero-title.is-community {
+    font-size: clamp(38px, 4.3vw, 62px);
+    line-height: .95;
+    max-width: 14ch;
+    text-wrap: balance;
+}
+#view-home .myavana-luxury-hero-title.is-community .gradient-text { display: inline; }
+@media (max-width: 767px) {
+    #view-home .myavana-luxury-hero-title.is-community {
+        font-size: clamp(30px, 9.2vw, 44px) !important;
+        max-width: none;
+    }
+}
+
+/* Home: the hero starts right under the header (no grey band), and the
+   buttons get breathing room below the paragraph. */
+.myavana-next-main:has(> .myavana-next-container > #view-home.active) { padding-top: 0; }
+#view-home .myavana-luxury-hero-description { margin-bottom: 32px; }
+@media (max-width: 767px) {
+    #view-home .myavana-luxury-hero-description { margin-bottom: 24px; }
+}
+
+/* Home reveal-on-scroll: content is visible unless the reveal script is running. */
+.myavana-luxury-homepage:not(.reveal-ready) .myavana-luxury-step,
+.myavana-luxury-homepage:not(.reveal-ready) .myavana-luxury-feature-card,
+.myavana-luxury-homepage:not(.reveal-ready) .myavana-luxury-stat {
+    opacity: 1;
+    transform: none;
+}
+
+/* Home section titles: the app-wide ".myavana-next h2" size and the
+   margin reset were overriding these, leaving them small and off-centre. */
+#view-home .myavana-luxury-section-title {
+    font-size: clamp(30px, 4.4vw, 56px);
+    line-height: .95;
+    margin-left: auto;
+    margin-right: auto;
+}
+#view-home .myavana-luxury-section-header > p { margin-left: auto; margin-right: auto; }
+#view-home .myavana-luxury-final-cta-title {
+    font-size: clamp(30px, 4.2vw, 54px);
+    line-height: .95;
+    margin-left: auto;
+    margin-right: auto;
+}
+#view-home .myavana-luxury-final-cta-description { color: rgba(255, 255, 255, .78); margin-left: auto; margin-right: auto; }
+/* On the dark closing section the main button is white, not onyx on onyx. */
+#view-home .myavana-luxury-final-cta .myavana-luxury-btn-primary { background: #fff; color: #222323; border-color: #fff; }
+#view-home .myavana-luxury-final-cta .myavana-luxury-btn-primary:hover { background: #fce5d7; border-color: #fce5d7; color: #222323; }
+#view-home .myavana-luxury-final-cta .myavana-luxury-btn-primary,
+#view-home .myavana-luxury-final-cta .myavana-luxury-btn-primary * { color: #222323 !important; stroke: currentColor; }

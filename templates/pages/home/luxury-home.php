@@ -267,8 +267,8 @@ function myavana_luxury_home_view() {
                         <div class="myavana-luxury-hero-badge">
                             Personalized Hair Care
                         </div>
-                        <h1 class="myavana-luxury-hero-title">
-                            Transform Your<br>
+                        <h1 class="myavana-luxury-hero-title is-community">
+                            A Place For Every Stage Of Your
                             <span class="gradient-text">Hair Journey</span>
                         </h1>
                         <h2 class="myavana-luxury-hero-subtitle">
@@ -661,21 +661,22 @@ function myavana_luxury_home_view() {
 
                         <div class="myavana-luxury-feature-card">
                             <div class="myavana-luxury-feature-icon">
-                                <i data-lucide="stethoscope" aria-hidden="true"></i>
+                                <i data-lucide="target" aria-hidden="true"></i>
                             </div>
-                            <h3 class="myavana-luxury-feature-title">Personalized Routines</h3>
+                            <h3 class="myavana-luxury-feature-title">Hair Goals</h3>
                             <p class="myavana-luxury-feature-description">
-                                Receive custom hair care routines tailored to your specific hair type, goals,
-                                and lifestyle preferences.
+                                Set goals for length, moisture or hair health, link your entries to them,
+                                and see your progress toward each one.
                             </p>
                             <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
-                                Get Routine <i data-lucide="arrow-right" aria-hidden="true"></i>
+                                Set a Goal <i data-lucide="arrow-right" aria-hidden="true"></i>
                             </a>
                         </div>
 
                         <div class="myavana-luxury-feature-card">
                             <div class="myavana-luxury-feature-icon">
-                                                            </div>
+                                <i data-lucide="users" aria-hidden="true"></i>
+                            </div>
                             <h3 class="myavana-luxury-feature-title">Community Support</h3>
                             <p class="myavana-luxury-feature-description">
                                 Connect with thousands of women on similar journeys. Share experiences,
@@ -692,8 +693,8 @@ function myavana_luxury_home_view() {
                             </div>
                             <h3 class="myavana-luxury-feature-title">Progress Analytics</h3>
                             <p class="myavana-luxury-feature-description">
-                                Detailed insights and analytics to track your hair health improvements,
-                                routine effectiveness, and goal achievement.
+                                See your weeks in a row, length checks, monthly recaps and goal progress
+                                in one place, so you can tell what's working.
                             </p>
                             <a href="#auth" class="myavana-luxury-feature-link" data-open-auth="signup">
                                 View Analytics <i data-lucide="arrow-right" aria-hidden="true"></i>
@@ -746,11 +747,12 @@ function myavana_luxury_home_view() {
                         <div class="myavana-luxury-step">
                             <div class="myavana-luxury-step-number">2</div>
                             <div class="myavana-luxury-step-icon">
-                                                            </div>
+                                <i data-lucide="camera" aria-hidden="true"></i>
+                            </div>
                             <h3 class="myavana-luxury-step-title">Take Your First Photo</h3>
                             <p class="myavana-luxury-step-description">
-                                Upload a photo of your hair for instant AI analysis. Get detailed insights
-                                about your hair health and personalized recommendations.
+                                Add a photo or a short video of your hair today. It becomes the first
+                                moment on your hair journey timeline.
                             </p>
                         </div>
 
@@ -761,8 +763,8 @@ function myavana_luxury_home_view() {
                             </div>
                             <h3 class="myavana-luxury-step-title">Track & Transform</h3>
                             <p class="myavana-luxury-step-description">
-                                Follow your personalized routine, document your progress, and watch
-                                your hair transform over time with detailed analytics.
+                                Log wash days and milestones, work toward your goals, and watch
+                                your hair change over time, moment by moment.
                             </p>
                         </div>
                     </div>
@@ -976,7 +978,9 @@ function myavana_luxury_home_view() {
             });
         }, observerOptions);
 
-        // Observe elements for animation
+        // Observe elements for animation. Cards stay visible until this runs,
+        // so a slow or failed script never leaves sections empty.
+        document.querySelector('.myavana-luxury-homepage')?.classList.add('reveal-ready');
         document.querySelectorAll('.myavana-luxury-feature-card, .myavana-luxury-step, .myavana-luxury-stat').forEach(el => {
             observer.observe(el);
         });
